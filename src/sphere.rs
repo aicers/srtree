@@ -73,3 +73,10 @@ pub fn test_sphere_doesnot_intersect_sphere() {
     let sphere2 = Sphere::new([15,15], 4);
     assert_eq!(sphere1.intersects(sphere2), false);
 }
+
+#[test]
+pub fn test_sphere_intersects_its_clone() {
+    let sphere1 = Sphere::new([0,0], 10);
+    let sphere2 = Sphere::new([0,0], 10);
+    assert!(sphere1.intersects(sphere2));
+}

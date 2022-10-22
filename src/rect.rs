@@ -80,6 +80,13 @@ pub fn test_rect_doesnot_intersect_rect(){
 }
 
 #[test]
+pub fn test_rect_intersects_its_clone(){
+    let rec1 = Rect::new([0,0], [10,10]);
+    let rec2 = Rect::new([0,0],[10,10]);
+    assert!(rec1.intersects(rec2));
+}
+
+#[test]
 pub fn test_rect_area() {
     let rec1 = Rect::new([0,0], [10,10]);
     let expected = 100;
