@@ -6,14 +6,19 @@ use std::ops::Sub;
 use std::ops::SubAssign;
 
 #[derive(Debug)]
-pub struct Sphere<const dimension: usize, T> {
+pub struct Sphere<T, const dimension: usize> {
     center: [T; dimension],
     radius: T
 }
 
-impl<const dimension: usize, T> Sphere<dimension, T> where T: Copy + Add<Output = T> + AddAssign + Sub<Output = T> + SubAssign + Mul<Output = T> + MulAssign + Ord + Default {
-    pub fn new(center: [T; dimension], radius: T) -> Sphere<dimension, T>{
+impl<const dimension: usize, T> Sphere<T, dimension> where T: Copy + Add<Output = T> + AddAssign + Sub<Output = T> + SubAssign + Mul<Output = T> + MulAssign + Ord + Default {
+    pub fn new(center: [T; dimension], radius: T) -> Sphere<T, dimension>{
         Sphere { center, radius }
+    }
+
+    pub fn from_points(points: &Vec<[T; dimension]>) -> Sphere<T, dimension>{
+        // todo
+        Sphere { center: [T::default(); dimension], radius: T::default() }
     }
 
     pub fn diameter(&self) -> T {
@@ -29,7 +34,7 @@ impl<const dimension: usize, T> Sphere<dimension, T> where T: Copy + Add<Output 
         true
     }
 
-    pub fn intersects(&self, sphere: Sphere<dimension, T>) -> bool {
+    pub fn intersects(&self, sphere: Sphere<T, dimension>) -> bool {
         for i in 0..dimension {
             if sphere.center[i] + sphere.radius < self.center[i] - self.radius || self.center[i] + self.radius < sphere.center[i] - sphere.radius {
                 return false;

@@ -6,19 +6,24 @@ use std::ops::Sub;
 use std::ops::SubAssign;
 
 #[derive(Debug)]
-pub struct Rect<const dimension: usize, T> {
+pub struct Rect<T, const dimension: usize> {
     low: [T; dimension],
     high: [T; dimension]
 }
 
-impl <const dimension: usize, T> Rect<dimension, T> where T: Copy + Add<Output = T> + AddAssign + Sub<Output = T> + SubAssign + Mul<Output = T> + MulAssign + Ord + Default {
+impl <const dimension: usize, T> Rect<T, dimension> where T: Copy + Add<Output = T> + AddAssign + Sub<Output = T> + SubAssign + Mul<Output = T> + MulAssign + Ord + Default {
 
-    pub fn new(low: [T; dimension], high: [T; dimension]) -> Rect<dimension, T>{
+    pub fn new(low: [T; dimension], high: [T; dimension]) -> Rect<T, dimension>{
         Rect { low, high }
     }
 
-    pub fn from_point(point: [T; dimension]) -> Rect<dimension, T> {
+    pub fn from_point(point: [T; dimension]) -> Rect<T, dimension> {
         Rect::new(point, point)
+    }
+
+    pub fn from_points(points: &Vec<[T; dimension]>) -> Rect<T, dimension> {
+        // todo
+        Rect::from_point([T::default(); dimension])
     }
 
     pub fn area(&self) -> T {
@@ -41,7 +46,7 @@ impl <const dimension: usize, T> Rect<dimension, T> where T: Copy + Add<Output =
         true
     }
 
-    pub fn intersects(&self, rect: Rect<dimension, T>) -> bool {
+    pub fn intersects(&self, rect: Rect<T, dimension>) -> bool {
         for i in 0..dimension {
             if rect.high[i] < self.low[i] || self.high[i] < rect.low[i] {
                 return false;
