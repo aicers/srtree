@@ -1,4 +1,3 @@
-mod point;
 mod polytope;
 mod rect;
 mod sphere;
