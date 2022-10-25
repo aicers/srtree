@@ -21,6 +21,7 @@ where
     }
 
     pub fn from_points(points: &Vec<[T; dimension]>) -> Sphere<T, dimension> {
+        // todo
         Sphere::new([T::zero(); dimension], T::zero())
     }
 
@@ -28,13 +29,18 @@ where
         self.radius + self.radius
     }
 
-    pub fn contains(&self, point: [T; dimension]) -> bool {
+    pub fn distance2(&self, point: [T; dimension]) -> T {
+        // 1. Calculate distance from center to point
+        let mut distance = T::zero();
         for i in 0..dimension {
-            if point[i] < self.center[i] - self.radius || self.center[i] + self.radius < point[i] {
-                return false;
-            }
+            distance += (self.center[i] - point[i]).powi(2);
         }
-        true
+        // 2. Return 0 if the distance is less radius, otherwise distance - radius.
+        T::zero().max(distance.sqrt() - self.radius)
+    }
+
+    pub fn contains(&self, point: [T; dimension]) -> bool {
+        self.distance2(point) <= T::zero()
     }
 
     pub fn intersects(&self, sphere: Sphere<T, dimension>) -> bool {
@@ -61,6 +67,20 @@ mod tests {
     }
 
     #[test]
+    pub fn test_distance_to_inside_point(){
+        let sphere = Sphere::new([0., 0.], 10.);
+        let point = [0.,5.];
+        assert_eq!(sphere.distance2(point), 0.);
+    }
+
+    #[test]
+    pub fn test_distance_to_outside_point(){
+        let sphere = Sphere::new([0., 0.], 10.);
+        let point = [0.,15.];
+        assert_eq!(sphere.distance2(point), 5.);
+    }
+
+    #[test]
     pub fn test_sphere_contains_point() {
         let sphere = Sphere::new([0., 0.], 50.);
         let point = [10., 10.];
@@ -70,8 +90,10 @@ mod tests {
     #[test]
     pub fn test_sphere_doesnot_contain_point() {
         let sphere = Sphere::new([0., 0.], 5.);
-        let point = [10., 10.];
-        assert_eq!(sphere.contains(point), false);
+        let point1 = [10., 10.];
+        let point2 = [5.,5.];
+        assert_eq!(sphere.contains(point1), false);
+        assert_eq!(sphere.contains(point2), false);
     }
 
     #[test]
