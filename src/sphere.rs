@@ -1,3 +1,4 @@
+use crate::distance::Euclidean;
 use num_traits::Float;
 use num_traits::FromPrimitive;
 use num_traits::Zero;
@@ -20,26 +21,46 @@ where
         Sphere { center, radius }
     }
 
+    pub fn from_point(point: [T; dimension]) -> Sphere<T, dimension> {
+        Sphere::new(point, T::zero())
+    }
+
     pub fn from_points(points: &Vec<[T; dimension]>) -> Sphere<T, dimension> {
-        // todo
-        Sphere::new([T::zero(); dimension], T::zero())
+        // 1. Calculate the center: the average of all points in all dimensions
+        let mut center = [T::zero(); dimension];
+        let mut count = T::zero(); // since center[i] of type T can't be divided by points.len() of type usize
+        
+        points.iter().for_each(|point| {
+            for i in 0..dimension {
+                center[i] += point[i];
+            }
+            count += T::one();
+        });
+        for i in 0..dimension  {
+            center[i] /= count;
+        }
+
+        let mut sphere = Sphere::new(center, T::zero());
+        let mut radius = T::zero();
+        points.iter().for_each(|point|{
+            radius = radius.max(sphere.distance2(point));
+        });
+        sphere.radius = radius;
+        sphere
     }
 
     pub fn diameter(&self) -> T {
         self.radius + self.radius
     }
 
-    pub fn distance2(&self, point: [T; dimension]) -> T {
+    pub fn distance2(&self, point: &[T; dimension]) -> T {
         // 1. Calculate distance from center to point
-        let mut distance = T::zero();
-        for i in 0..dimension {
-            distance += (self.center[i] - point[i]).powi(2);
-        }
+        let distance = Euclidean::distance(&self.center, point);
         // 2. Return 0 if the distance is less radius, otherwise distance - radius.
-        T::zero().max(distance.sqrt() - self.radius)
+        T::zero().max(distance - self.radius)
     }
 
-    pub fn contains(&self, point: [T; dimension]) -> bool {
+    pub fn contains(&self, point: &[T; dimension]) -> bool {
         self.distance2(point) <= T::zero()
     }
 
@@ -70,21 +91,21 @@ mod tests {
     pub fn test_distance_to_inside_point(){
         let sphere = Sphere::new([0., 0.], 10.);
         let point = [0.,5.];
-        assert_eq!(sphere.distance2(point), 0.);
+        assert_eq!(sphere.distance2(&point), 0.);
     }
 
     #[test]
     pub fn test_distance_to_outside_point(){
         let sphere = Sphere::new([0., 0.], 10.);
         let point = [0.,15.];
-        assert_eq!(sphere.distance2(point), 5.);
+        assert_eq!(sphere.distance2(&point), 5.);
     }
 
     #[test]
     pub fn test_sphere_contains_point() {
         let sphere = Sphere::new([0., 0.], 50.);
         let point = [10., 10.];
-        assert!(sphere.contains(point));
+        assert!(sphere.contains(&point));
     }
 
     #[test]
@@ -92,8 +113,8 @@ mod tests {
         let sphere = Sphere::new([0., 0.], 5.);
         let point1 = [10., 10.];
         let point2 = [5.,5.];
-        assert_eq!(sphere.contains(point1), false);
-        assert_eq!(sphere.contains(point2), false);
+        assert_eq!(sphere.contains(&point1), false);
+        assert_eq!(sphere.contains(&point2), false);
     }
 
     #[test]
@@ -134,5 +155,6 @@ mod tests {
         let sphere = Sphere::from_points(&points);
         assert_eq!(sphere.center[0], 150.);
         assert_eq!(sphere.center[1], 200.);
+        assert!(sphere.radius < 112. && sphere.radius > 111.); // 111.80339887498948
     }
 }

@@ -49,7 +49,7 @@ where
         area
     }
 
-    pub fn contains(&self, point: [T; dimension]) -> bool {
+    pub fn contains(&self, point: &[T; dimension]) -> bool {
         for i in 0..dimension {
             if point[i] < self.low[i] || self.high[i] < point[i] {
                 return false;
@@ -58,7 +58,7 @@ where
         true
     }
 
-    pub fn intersects(&self, rect: Rect<T, dimension>) -> bool {
+    pub fn intersects(&self, rect: &Rect<T, dimension>) -> bool {
         for i in 0..dimension {
             if rect.high[i] < self.low[i] || self.high[i] < rect.low[i] {
                 return false;
@@ -90,42 +90,42 @@ mod tests {
     pub fn test_rect_contains_point() {
         let rec = Rect::new([0., 0.], [10., 10.]);
         let point = [5., 5.];
-        assert!(rec.contains(point));
+        assert!(rec.contains(&point));
     }
 
     #[test]
     pub fn test_rect_doesnot_contain_point() {
         let rec = Rect::new([0., 0.], [10., 10.]);
         let point = [5., 15.];
-        assert_eq!(rec.contains(point), false)
+        assert_eq!(rec.contains(&point), false)
     }
 
     #[test]
     pub fn test_rect_intersects_rect() {
         let rec1 = Rect::new([0., 0.], [10., 10.]);
         let rec2 = Rect::new([8., 8.], [15., 15.]);
-        assert!(rec1.intersects(rec2));
+        assert!(rec1.intersects(&rec2));
     }
 
     #[test]
     pub fn test_rect_doesnot_intersect_rect() {
         let rec1 = Rect::new([0., 0.], [10., 10.]);
         let rec2 = Rect::new([20., 20.], [30., 30.]);
-        assert_eq!(rec1.intersects(rec2), false);
+        assert_eq!(rec1.intersects(&rec2), false);
     }
 
     #[test]
     pub fn test_rect_intersects_its_clone() {
         let rec1 = Rect::new([0., 0.], [10., 10.]);
         let rec2 = Rect::new([0., 0.], [10., 10.]);
-        assert!(rec1.intersects(rec2));
+        assert!(rec1.intersects(&rec2));
     }
 
     #[test]
     pub fn test_rect_intersects_smaller_rect() {
         let rec1 = Rect::new([0., 0.], [10., 10.]);
         let rec2 = Rect::new([2., 2.], [8., 8.]);
-        assert!(rec1.intersects(rec2));
+        assert!(rec1.intersects(&rec2));
     }
 
     #[test]
