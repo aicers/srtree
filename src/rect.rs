@@ -1,3 +1,4 @@
+use crate::distance::Euclidean;
 use num_traits::Float;
 use num_traits::FromPrimitive;
 use num_traits::Zero;
@@ -38,7 +39,7 @@ where
         Rect { low, high }
     }
 
-    pub fn area(&self) -> T {
+    pub fn volume(&self) -> T {
         if dimension == 0 {
             return T::zero();
         }
@@ -66,6 +67,23 @@ where
         }
         true
     }
+
+    pub fn farthest_distance2(&self, point: &[T; dimension]) -> T {
+        let mut distance = T::zero();
+
+        let mut farthest_vertex = [T::zero(); dimension];
+        for i in 0..dimension {
+            let h = (self.high[i] - point[i]).abs();
+            let l = (self.low[i] - point[i]).abs();
+            if h > l {
+                farthest_vertex[i] = self.high[i];
+            }else{
+                farthest_vertex[i] = self.low[i];
+            }
+        }
+        distance = Euclidean::distance(&farthest_vertex, point);
+        distance
+    }
 }
 
 #[cfg(test)]
@@ -76,14 +94,14 @@ mod tests {
     pub fn test_rect_area() {
         let rec1 = Rect::new([0., 0.], [10., 10.]);
         let expected = 100.;
-        assert_eq!(expected, rec1.area());
+        assert_eq!(expected, rec1.volume());
     }
 
     #[test]
     pub fn test_rect_area_from_point() {
         let rec1 = Rect::from_point([0., 0.]);
         let expected = 0.;
-        assert_eq!(expected, rec1.area());
+        assert_eq!(expected, rec1.volume());
     }
 
     #[test]
@@ -136,5 +154,13 @@ mod tests {
         assert_eq!(rec.high[0], 15.);
         assert_eq!(rec.low[1], 0.);
         assert_eq!(rec.high[1], 10.);
+    }
+
+    #[test]
+    pub fn test_rect_farthest_distance_to_point(){
+        let points = vec![[0.,0.],[10.,10.]];
+        let rec = Rect::from_points(&points);
+        let point = [10.,10.];
+        assert_eq!(rec.farthest_distance2(&point), 200.0.sqrt());
     }
 }

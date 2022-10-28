@@ -9,8 +9,8 @@ use std::ops::SubAssign;
 
 #[derive(Debug)]
 pub struct Sphere<T, const dimension: usize> {
-    center: [T; dimension],
-    radius: T,
+    pub center: [T; dimension],
+    pub radius: T,
 }
 
 impl<T, const dimension: usize> Sphere<T, dimension>
