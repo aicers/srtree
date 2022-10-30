@@ -1,3 +1,4 @@
+use crate::distance;
 use crate::distance::Euclidean;
 use num_traits::Float;
 use num_traits::FromPrimitive;
@@ -64,15 +65,9 @@ where
         self.distance2(point) <= T::zero()
     }
 
-    pub fn intersects(&self, sphere: Sphere<T, dimension>) -> bool {
-        for i in 0..dimension {
-            if sphere.center[i] + sphere.radius < self.center[i] - self.radius
-                || self.center[i] + self.radius < sphere.center[i] - sphere.radius
-            {
-                return false;
-            }
-        }
-        true
+    pub fn intersects(&self, sphere: &Sphere<T, dimension>) -> bool {
+        let distance = Euclidean::distance(&self.center, &sphere.center);
+        distance - (self.radius + sphere.radius) <= T::zero()
     }
 }
 
@@ -120,29 +115,30 @@ mod tests {
     #[test]
     pub fn test_sphere_intersects_sphere() {
         let sphere1 = Sphere::new([0., 0.], 10.);
-        let sphere2 = Sphere::new([15., 15.], 10.);
-        assert!(sphere1.intersects(sphere2));
+        let sphere2 = Sphere::new([15., 15.], 15.);
+        assert!(sphere1.intersects(&sphere2));
     }
 
     #[test]
     pub fn test_sphere_doesnot_intersect_sphere() {
-        let sphere1 = Sphere::new([0., 0.], 10.);
-        let sphere2 = Sphere::new([15., 15.], 4.);
-        assert_eq!(sphere1.intersects(sphere2), false);
+        let sphere1 = Sphere::new([450., 150.], 50.);
+        let sphere2 = Sphere::new([530., 220.], 50.);
+        assert_eq!(sphere1.intersects(&sphere2), false);
     }
+
 
     #[test]
     pub fn test_sphere_intersects_its_clone() {
         let sphere1 = Sphere::new([0., 0.], 10.);
         let sphere2 = Sphere::new([0., 0.], 10.);
-        assert!(sphere1.intersects(sphere2));
+        assert!(sphere1.intersects(&sphere2));
     }
 
     #[test]
     pub fn test_sphere_intersects_smaller_sphere() {
         let sphere1 = Sphere::new([0., 0.], 10.);
         let sphere2 = Sphere::new([10., 10.], 100.);
-        assert!(sphere1.intersects(sphere2));
+        assert!(sphere1.intersects(&sphere2));
     }
 
     #[test]
