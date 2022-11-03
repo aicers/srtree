@@ -12,18 +12,18 @@ mod sphere;
 mod node;
 use crate::node::{Data, Node};
 
-pub struct SRTree<T, const dimension: usize> {
-    root: Option<node::Node<T, dimension>>,
-    m: usize, // min number of entries in a node / leaf
-    M: usize  // max number of entries in a node / leaf
+pub struct SRTree<T> {
+    root: Option<Node<T>>,
+    min_number_of_elements: usize,
+    max_number_of_elements: usize
 }
 
 
-impl <T, const dimension: usize> SRTree<T, dimension>
+impl <T> SRTree<T>
 where
     T: Float + Zero + FromPrimitive + AddAssign + SubAssign + DivAssign + MulAssign,
 {
-    pub fn new(m: usize, M: usize) -> SRTree<T, dimension>{
-        SRTree { root: None, m, M }
+    pub fn new(min_number_of_elements: usize, max_number_of_elements: usize) -> SRTree<T>{
+        SRTree { root: None, min_number_of_elements, max_number_of_elements }
     }
 }
