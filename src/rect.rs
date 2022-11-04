@@ -6,7 +6,7 @@ use std::ops::DivAssign;
 use std::ops::MulAssign;
 use std::ops::SubAssign;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Rect<T> {
     low: Vec<T>,
     high: Vec<T>
@@ -23,8 +23,8 @@ where
         Some(Rect { low, high })
     }
 
-    pub fn from_point(point: &Vec<T>) -> Option<Rect<T>> {
-        Rect::new(point.clone(), point.clone())
+    pub fn from_point(point: &[T]) -> Option<Rect<T>> {
+        Rect::new(point.to_owned(), point.to_owned())
     }
 }
 
