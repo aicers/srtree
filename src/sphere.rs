@@ -1,3 +1,4 @@
+use crate::distance::distance;
 use num_traits::Float;
 use num_traits::FromPrimitive;
 use num_traits::Zero;
@@ -5,9 +6,6 @@ use std::ops::AddAssign;
 use std::ops::DivAssign;
 use std::ops::MulAssign;
 use std::ops::SubAssign;
-
-use crate::distance::distance;
-
 
 #[allow(dead_code)]
 #[derive(Debug)]
