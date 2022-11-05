@@ -6,14 +6,17 @@ use std::ops::DivAssign;
 use std::ops::MulAssign;
 use std::ops::SubAssign;
 
-use crate::distance::Euclidean;
+use crate::distance::distance;
 
+
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Sphere<T> {
     pub center: Vec<T>,
     pub radius: T,
 }
 
+#[allow(dead_code)]
 impl<T> Sphere<T>
 where
     T: Float + Zero + FromPrimitive + AddAssign + SubAssign + DivAssign + MulAssign,
@@ -27,7 +30,7 @@ where
     }
 
     pub fn intersects(&self, sphere: &Sphere<T>) -> bool {
-        let distance = Euclidean::distance(&self.center, &sphere.center);
+        let distance = distance(&self.center, &sphere.center);
         distance - (self.radius + sphere.radius) <= T::zero()
     }
 }
@@ -37,8 +40,8 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_from_point(){
-        let sphere = Sphere::from_point(&vec![1.,1.]);
+    pub fn test_from_point() {
+        let sphere = Sphere::from_point(&vec![1., 1.]);
         assert_eq!(sphere.radius, 0.);
     }
 
