@@ -8,7 +8,6 @@ use std::ops::DivAssign;
 use std::ops::MulAssign;
 use std::ops::SubAssign;
 
-
 #[allow(dead_code)]
 pub enum Data<T> {
     Point(Vec<T>),
