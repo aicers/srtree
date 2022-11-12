@@ -2,7 +2,7 @@ use ordered_float::Float;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 #[allow(dead_code)]
-pub fn distance<T>(point1: &Vec<T>, point2: &Vec<T>) -> T
+pub fn euclidean<T>(point1: &Vec<T>, point2: &Vec<T>) -> T
 where
     T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -25,13 +25,13 @@ mod tests {
     pub fn test_distance() {
         let point1 = vec![1., 0., 0.];
         let point2 = vec![2., 0., 0.];
-        assert_eq!(distance(&point1, &point2), 1.);
+        assert_eq!(euclidean(&point1, &point2), 1.);
     }
 
     #[test]
     pub fn test_distance_different_dimensions() {
         let point1 = vec![1., 2.];
         let point2 = vec![1., 2., 3.];
-        assert_eq!(distance(&point1, &point2), Float::infinity());
+        assert_eq!(euclidean(&point1, &point2), Float::infinity());
     }
 }

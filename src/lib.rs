@@ -1,5 +1,4 @@
-mod distance;
+mod algorithm;
 mod node;
-mod rect;
-mod sphere;
+mod shape;
 mod srtree;

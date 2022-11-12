@@ -1,4 +1,4 @@
-use crate::distance::distance;
+use crate::algorithm::distance::euclidean;
 use ordered_float::Float;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
@@ -23,7 +23,7 @@ where
     }
 
     pub fn distance2(&self, point: &Vec<T>) -> T {
-        let distance = distance(&self.center, point);
+        let distance = euclidean(&self.center, point);
         T::zero().max(distance - (self.radius))
     }
 

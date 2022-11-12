@@ -1,4 +1,6 @@
 use crate::node::Node;
+use crate::algorithm::insertion::insert;
+use crate::algorithm::query::nearest_neighbors;
 use ordered_float::Float;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
@@ -27,13 +29,13 @@ where
         if self.root.is_none() {
             self.root = Some(Node::new_leaf(point, self.max_number_of_elements));
         }
-        self.root.as_mut().unwrap().insert_data(point);
+        insert(self.root.as_mut().unwrap(), point);
     }
 
     pub fn query(&self, point: &Vec<T>, k: usize) -> Vec<Vec<T>> {
         let mut neigbors = Vec::with_capacity(k);
         if self.root.is_some() {
-            self.root.as_ref().unwrap().query(point, k, &mut neigbors);
+            nearest_neighbors(self.root.as_ref().unwrap(), point, k, &mut neigbors);
         }
         neigbors
     }
