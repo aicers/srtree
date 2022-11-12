@@ -1,15 +1,10 @@
-use num_traits::Float;
-use num_traits::FromPrimitive;
-use num_traits::Zero;
-use std::ops::AddAssign;
-use std::ops::DivAssign;
-use std::ops::MulAssign;
-use std::ops::SubAssign;
+use ordered_float::Float;
+use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 #[allow(dead_code)]
 pub fn distance<T>(point1: &Vec<T>, point2: &Vec<T>) -> T
 where
-    T: Float + Zero + FromPrimitive + AddAssign + SubAssign + DivAssign + MulAssign,
+    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if point1.len() != point2.len() {
         return T::infinity();
