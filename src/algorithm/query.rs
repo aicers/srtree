@@ -1,7 +1,7 @@
 use crate::algorithm::distance::euclidean;
 use crate::node::Node;
 use ordered_float::{Float, OrderedFloat};
-use priority_queue::PriorityQueue;
+use priority_queue::DoublePriorityQueue;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 
@@ -11,14 +11,14 @@ where
 {
     if node.is_leaf() {
         // construct a queue with distance as a priority
-        let mut queue: PriorityQueue<usize, OrderedFloat<T>> = PriorityQueue::new();
+        let mut queue: DoublePriorityQueue<usize, OrderedFloat<T>> = DoublePriorityQueue::new();
         for (index, candidate) in node.points().iter().enumerate() {
-            queue.push(index, -OrderedFloat(euclidean(candidate, point)));
+            queue.push(index, OrderedFloat(euclidean(candidate, point)));
         }
 
-        // keep selecting the next nearest item
+        // keep selecting the next nearest item until k neighbors are found:
         while !queue.is_empty() {
-            let (index, _) = queue.pop().unwrap();
+            let (index, _) = queue.pop_min().unwrap();
             if result.len() < k {
                 result.push(node.points()[index].clone());
             } else {

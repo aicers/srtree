@@ -48,6 +48,14 @@ where
         )
     }
 
+    pub fn sphere(&self) -> &Sphere<T> {
+        &self.sphere
+    }
+
+    pub fn rectangle(&self) -> &Rect<T> {
+        &self.rect
+    }
+
     pub fn is_leaf(&self) -> bool {
         matches!(self.data, Data::Points(_))
     }
