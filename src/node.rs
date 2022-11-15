@@ -14,6 +14,7 @@ pub struct Node<T> {
     sphere: Sphere<T>,
     data: Data<T>,
     total_children: usize,
+    height: usize, // height above leaf
 }
 
 #[allow(dead_code)]
@@ -21,21 +22,29 @@ impl<T> Node<T>
 where
     T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    pub fn new(rect: Rect<T>, sphere: Sphere<T>, data: Data<T>, total_children: usize) -> Node<T> {
+    pub fn new(
+        rect: Rect<T>,
+        sphere: Sphere<T>,
+        data: Data<T>,
+        total_children: usize,
+        height: usize,
+    ) -> Node<T> {
         Node {
             rect,
             sphere,
             data,
             total_children,
+            height,
         }
     }
 
-    pub fn new_node(point: &Vec<T>, capacity: usize) -> Node<T> {
+    pub fn new_node(point: &Vec<T>, capacity: usize, height: usize) -> Node<T> {
         Node::new(
             Rect::from_point(point).unwrap(),
             Sphere::from_point(point),
             Data::Nodes(Vec::with_capacity(capacity)),
             0,
+            height,
         )
     }
 
@@ -44,6 +53,7 @@ where
             Rect::from_point(point).unwrap(),
             Sphere::from_point(point),
             Data::Points(Vec::with_capacity(capacity)),
+            0,
             0,
         )
     }
