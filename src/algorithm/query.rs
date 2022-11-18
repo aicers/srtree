@@ -4,7 +4,6 @@ use ordered_float::{Float, OrderedFloat};
 use priority_queue::DoublePriorityQueue;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
-
 pub fn nearest_neighbors<T>(node: &Node<T>, point: &Vec<T>, k: usize, result: &mut Vec<Vec<T>>)
 where
     T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
