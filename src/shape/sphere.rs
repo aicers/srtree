@@ -5,8 +5,8 @@ use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct Sphere<T> {
-    pub center: Vec<T>,
-    pub radius: T,
+    center: Vec<T>,
+    radius: T,
 }
 
 #[allow(dead_code)]

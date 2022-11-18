@@ -1,11 +1,64 @@
-use crate::algorithm::distance::euclidean;
 use crate::node::Node;
 use ordered_float::Float;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
-fn choose_split_dimension<T>(node: &Node<T>) -> usize {
-    // choose the dimension with the highest variance
-    0
+fn calculate_mean<T>(points: &Vec<Vec<T>>) -> Vec<T>
+where T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
+    if points.is_empty() {
+        return Vec::new();
+    }
+    let mut number_of_points = T::zero();
+    let mut mean: Vec<T> = vec![T::zero(); points[0].len()];
+    points.iter().for_each(|point| {
+        for i in 0..point.len() {
+            mean[i] += point[i];
+        }
+        number_of_points += T::one();
+    });
+    for i in 0..mean.len() {
+        mean[i] /= number_of_points;
+    }
+    mean
+}
+
+fn calculate_variance<T>(points: &Vec<Vec<T>>, mean: &Vec<T>) -> Vec<T>
+where T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
+    if points.is_empty() {
+        return Vec::new();
+    }
+    let mut number_of_points = T::zero();
+    let mut variance = vec![T::zero(); points[0].len()];
+    points.iter().for_each(|point| {
+        for i in 0..point.len() {
+            variance[i] += (point[i] - mean[i]).powi(2);
+        }
+        number_of_points += T::one();
+    });
+    for i in 0..mean.len() {
+        variance[i] /= number_of_points;
+    }
+    variance
+}
+
+fn choose_split_dimension<T>(node: &Node<T>) -> usize
+where T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
+    // 1. Calculate mean for each dimension:
+    let mean = calculate_mean(node.points());
+
+    // 2. Find the sum of squared difference for each dimension and divide by number_of_points:
+    let variance = calculate_variance(node.points(), &mean);
+
+    // 3. Choose the dimension with the highest variance
+    let mut selected_index = 0;
+    for i in 0..variance.len() {
+        if variance[i] > variance[selected_index] {
+            selected_index = i;
+        }
+    }
+    selected_index
 }
 
 fn choose_split_index<T>(node: &Node<T>, dimension: usize) -> usize {
@@ -28,6 +81,23 @@ mod tests {
         points.push(vec![0., 8.]);
         points.push(vec![0., 9.]);
         points
+    }
+
+    #[test]
+    pub fn test_mean_calculation(){
+        let points = get_test_points();
+        let mean = calculate_mean(&points);
+        assert_eq!(mean[0], 0.);
+        assert_eq!(mean[1], 4.);
+    }
+
+    #[test]
+    pub fn test_mean_variance(){
+        let points = get_test_points();
+        let mean = calculate_mean(&points);
+        let variance = calculate_variance(&points, &mean);
+        assert_eq!(variance[0], 0.);
+        assert_eq!(variance[1], 14.);
     }
 
     #[test]

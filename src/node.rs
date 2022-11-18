@@ -15,12 +15,13 @@ pub struct Node<T> {
     data: Data<T>,
     total_children: usize,
     height: usize, // height above leaf
+    dimension: usize,
 }
 
 #[allow(dead_code)]
 impl<T> Node<T>
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     pub fn new(
         rect: Rect<T>,
@@ -28,6 +29,7 @@ where
         data: Data<T>,
         total_children: usize,
         height: usize,
+        dimension: usize,
     ) -> Node<T> {
         Node {
             rect,
@@ -35,6 +37,7 @@ where
             data,
             total_children,
             height,
+            dimension,
         }
     }
 
@@ -45,6 +48,7 @@ where
             Data::Nodes(Vec::with_capacity(capacity)),
             0,
             height,
+            point.len(),
         )
     }
 
@@ -55,6 +59,7 @@ where
             Data::Points(Vec::with_capacity(capacity)),
             0,
             0,
+            point.len(),
         )
     }
 
@@ -68,6 +73,10 @@ where
 
     pub fn is_leaf(&self) -> bool {
         matches!(self.data, Data::Points(_))
+    }
+
+    pub fn dimension(&self) -> usize {
+        self.dimension
     }
 
     pub fn nodes(&self) -> &Vec<Node<T>> {
