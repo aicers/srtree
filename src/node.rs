@@ -13,9 +13,9 @@ pub struct Node<T> {
     rect: Rect<T>,
     sphere: Sphere<T>,
     data: Data<T>,
+    variance: Vec<T>,
     total_children: usize,
     height: usize, // height above leaf
-    dimension: usize,
 }
 
 #[allow(dead_code)]
@@ -27,17 +27,17 @@ where
         rect: Rect<T>,
         sphere: Sphere<T>,
         data: Data<T>,
+        variance: Vec<T>,
         total_children: usize,
         height: usize,
-        dimension: usize,
     ) -> Node<T> {
         Node {
             rect,
             sphere,
             data,
+            variance,
             total_children,
-            height,
-            dimension,
+            height
         }
     }
 
@@ -46,9 +46,9 @@ where
             Rect::from_point(point).unwrap(),
             Sphere::from_point(point),
             Data::Nodes(Vec::with_capacity(capacity)),
+            vec![T::zero(); point.len()],
             0,
             height,
-            point.len(),
         )
     }
 
@@ -57,26 +57,41 @@ where
             Rect::from_point(point).unwrap(),
             Sphere::from_point(point),
             Data::Points(Vec::with_capacity(capacity)),
+            vec![T::zero(); point.len()],
             0,
             0,
-            point.len(),
         )
     }
 
-    pub fn sphere(&self) -> &Sphere<T> {
-        &self.sphere
-    }
-
-    pub fn rectangle(&self) -> &Rect<T> {
-        &self.rect
+    pub fn new_sibling(node: &Node<T>, capacity: usize) -> Node<T> {
+        let data = match node.data {
+            Data::Nodes(_) => Data::Nodes(Vec::with_capacity(capacity)),
+            Data::Points(_) => Data::Points(Vec::with_capacity(capacity)),
+        };
+        Node::new(
+            Rect::from_point(node.centroid()).unwrap(),
+            Sphere::from_point(node.centroid()),
+            data,
+            vec![T::zero(); node.dimension()],
+            0,
+            0,
+        )
     }
 
     pub fn is_leaf(&self) -> bool {
         matches!(self.data, Data::Points(_))
     }
 
+    pub fn centroid(&self) -> &Vec<T> {
+        &self.sphere.centroid()
+    }
+
+    pub fn get_variance(&self) -> &Vec<T> {
+        &self.variance
+    }
+
     pub fn dimension(&self) -> usize {
-        self.dimension
+        self.centroid().len()
     }
 
     pub fn nodes(&self) -> &Vec<Node<T>> {
@@ -104,6 +119,50 @@ where
         match &mut self.data {
             Data::Points(points) => points,
             Data::Nodes(_) => panic!("not a leaf"),
+        }
+    }
+
+    pub fn immed_children(&self) -> usize {
+        match &self.data {
+            Data::Nodes(_) => self.nodes().len(),
+            Data::Points(_) => self.points().len(),
+        }
+    }
+
+    pub fn child_centroid(&self, i: usize) -> &Vec<T> {
+        match &self.data {
+            Data::Nodes(_) => self.nodes()[i].centroid(),
+            Data::Points(_) => &self.points()[i],
+        }
+    }
+
+    pub fn child_immed_children(&self, i: usize) -> usize {
+        match &self.data {
+            Data::Nodes(_) => self.nodes()[i].immed_children(),
+            Data::Points(_) => 1,
+        }
+    }
+
+    pub fn child_variance(&self, i: usize) -> &Vec<T> {
+        match &self.data {
+            Data::Nodes(_) => self.nodes()[i].get_variance(),
+            Data::Points(_) => self.get_variance(),
+        }
+    }
+
+    pub fn adjust_shape(&mut self, variance: Vec<T>) {
+        match &mut self.data {
+            Data::Points(points) => {
+                self.rect.reshape_with(points);
+                self.sphere.reshape_with(points); // todo: implement SRTree radius
+                self.total_children = points.len();
+                self.variance = variance;
+            },
+            Data::Nodes(nodes) => {
+                // todo: reshape with child rects & spheres
+                self.total_children = self.nodes().iter().map(|child| child.total_children).sum();
+                self.variance = variance;
+            },
         }
     }
 
