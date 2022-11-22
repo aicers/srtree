@@ -1,4 +1,4 @@
-use crate::algorithm::distance::euclidean;
+use crate::measure::distance::euclidean;
 use crate::node::Node;
 use ordered_float::{Float, OrderedFloat};
 use priority_queue::DoublePriorityQueue;

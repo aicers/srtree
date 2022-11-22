@@ -1,51 +1,25 @@
-use crate::algorithm::distance::euclidean;
+use crate::measure::distance::euclidean;
 use ordered_float::Float;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct Sphere<T> {
-    center: Vec<T>,
-    radius: T,
+    pub center: Vec<T>,
+    pub radius: T,
 }
 
 #[allow(dead_code)]
 impl<T> Sphere<T>
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     pub fn new(center: Vec<T>, radius: T) -> Sphere<T> {
         Sphere { center, radius }
     }
 
-    pub fn reshape_with(&mut self, points: &Vec<Vec<T>>){
-        if points.is_empty() {
-            return;
-        }
-        if points[0].len() != self.center.len() {
-            panic!("Trying to reshape Sphere with different dimensions");
-        }
-
-        let number_of_points = T::from(points.len()).unwrap();
-        let mut new_centroid: Vec<T> = vec![T::zero(); points[0].len()];
-        points.iter().for_each(|point| {
-            for i in 0..point.len() {
-                new_centroid[i] += point[i];
-            }
-        });
-        for i in 0..new_centroid.len() {
-            new_centroid[i] /= number_of_points;
-        }
-
-        self.center = new_centroid;
-    }
-
     pub fn from_point(point: &[T]) -> Sphere<T> {
         Sphere::new(point.to_owned(), T::zero())
-    }
-
-    pub fn centroid(&self) -> &Vec<T> {
-        &self.center
     }
 
     pub fn distance2(&self, point: &Vec<T>) -> T {
