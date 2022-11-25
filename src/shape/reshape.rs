@@ -1,8 +1,8 @@
-use crate::node::Node;
-use ordered_float::Float;
 use crate::measure::distance::euclidean;
 use crate::measure::mean::calculate_mean;
 use crate::measure::variance::calculate_variance;
+use crate::node::Node;
+use ordered_float::Float;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 use super::{rect::Rect, sphere::Sphere};
@@ -26,19 +26,22 @@ where
             ds = ds.max(euclidean(&centroid, &point));
             dr = ds;
         });
-    }else{
+    } else {
         node.nodes().iter().for_each(|node| {
             for i in 0..node.dimension() {
                 low[i] = low[i].min(node.get_rect().low[i]);
                 high[i] = high[i].max(node.get_rect().high[i]);
             }
-            ds = ds.max(euclidean(&centroid, &node.get_sphere().center) + node.get_sphere().radius );
-            dr = dr.max(euclidean(&centroid, &node.get_rect().farthest_point_to(&centroid)));
+            ds = ds.max(euclidean(&centroid, &node.get_sphere().center) + node.get_sphere().radius);
+            dr = dr.max(euclidean(
+                &centroid,
+                &node.get_rect().farthest_point_to(&centroid),
+            ));
         });
     }
     let rect = Rect::new(low, high);
     node.set_rect(rect);
-    
+
     let radius = ds.min(dr);
     node.set_sphere(Sphere::new(centroid, radius));
 
@@ -46,13 +49,12 @@ where
     node.set_variance(variance);
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    pub fn test_reshape_leaf_node(){
+    pub fn test_reshape_leaf_node() {
         let origin = vec![0., 0.];
         let mut leaf = Node::new_leaf(&origin, 5);
         for i in 0..5 {
@@ -74,7 +76,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_reshape_leaf_node_radius(){
+    pub fn test_reshape_leaf_node_radius() {
         let origin = vec![0., 0.];
         let mut leaf = Node::new_leaf(&origin, 5);
         leaf.points_mut().push(vec![100., 100.]);
