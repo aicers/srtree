@@ -11,6 +11,10 @@ impl Params {
         reinsert_count: usize,
     ) -> Params {
         // todo: validate params
-        Params { min_number_of_elements, max_number_of_elements, reinsert_count }
+        Params {
+            min_number_of_elements,
+            max_number_of_elements,
+            reinsert_count,
+        }
     }
 }
