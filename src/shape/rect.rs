@@ -25,7 +25,7 @@ where
         for i in 0..point.len() {
             if (self.high[i] - point[i]).abs() >= (self.low[i] - point[i]).abs() {
                 result[i] = self.high[i];
-            }else{
+            } else {
                 result[i] = self.low[i];
             }
         }
@@ -62,7 +62,7 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_rect_farthest_point(){
+    pub fn test_rect_farthest_point() {
         let rec = Rect::new(vec![5., 5.], vec![10., 10.]);
         assert_eq!(&rec.farthest_point_to(&vec![0., 0.]), &vec![10., 10.]);
         assert_eq!(&rec.farthest_point_to(&vec![15., 0.]), &vec![5., 10.]);

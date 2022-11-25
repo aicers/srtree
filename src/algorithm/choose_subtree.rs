@@ -1,5 +1,5 @@
-use crate::node::Node;
 use crate::measure::distance::euclidean;
+use crate::node::Node;
 use ordered_float::Float;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
@@ -21,19 +21,23 @@ where
 
 pub fn choose_subtree<'a, T>(
     node: &'a mut Node<T>,
-    point: &'a Vec<T>,
-    level: usize,
+    search_node: &Node<T>,
+    target_height: usize,
 ) -> &'a mut Node<T>
 where
     T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if node.is_leaf() {
+    if node.is_leaf() || node.get_height() == target_height {
         return node;
     } else {
         // choose a node with the closest centroid to point
-        let closest_node_index = choose_closest_node_index(node, point);
+        let closest_node_index = choose_closest_node_index(node, &search_node.get_sphere().center);
         // descend until a leaf is reached
-        choose_subtree(&mut node.nodes_mut()[closest_node_index], point, level)
+        choose_subtree(
+            &mut node.nodes_mut()[closest_node_index],
+            search_node,
+            target_height,
+        )
     }
 }
 

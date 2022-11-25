@@ -37,7 +37,7 @@ where
             data,
             variance,
             total_children,
-            height
+            height,
         }
     }
 
@@ -78,6 +78,10 @@ where
         )
     }
 
+    pub fn new_point(point: &Vec<T>) -> Node<T> {
+        Node::new_leaf(point, 1)
+    }
+
     pub fn is_leaf(&self) -> bool {
         matches!(self.data, Data::Points(_))
     }
@@ -101,7 +105,7 @@ where
     pub fn get_sphere(&self) -> &Sphere<T> {
         &self.sphere
     }
-    
+
     pub fn set_variance(&mut self, variance: Vec<T>) {
         self.variance = variance;
     }
@@ -164,8 +168,16 @@ where
             Data::Nodes(_) => self.nodes()[i].get_variance(),
             Data::Points(_) => {
                 panic!("Trying to access variance of a point");
-            },
+            }
         }
+    }
+
+    pub fn set_height(&mut self, height: usize) {
+        self.height = height;
+    }
+
+    pub fn get_height(&self) -> usize {
+        self.height
     }
 
     pub fn intersects_point(&self, point: &Vec<T>) -> bool {

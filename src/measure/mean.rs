@@ -9,9 +9,11 @@ where
     let mut number_of_entries = T::zero();
     let mut mean = vec![T::zero(); node.dimension()];
     for child_index in from..end {
-        let child_number_of_entries = T::from(node.child_immed_children(child_index)).unwrap_or(T::one());
+        let child_number_of_entries =
+            T::from(node.child_immed_children(child_index)).unwrap_or(T::one());
         for axis_index in 0..mean.len() {
-            mean[axis_index] += node.child_centroid(child_index)[axis_index] * child_number_of_entries;
+            mean[axis_index] +=
+                node.child_centroid(child_index)[axis_index] * child_number_of_entries;
         }
         number_of_entries += child_number_of_entries;
     }
@@ -26,7 +28,7 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_leaf_mean_calculation(){
+    pub fn test_leaf_mean_calculation() {
         let mut leaf = Node::new_leaf(&vec![0., 0.], 5);
         leaf.points_mut().push(vec![1., 0.]);
         leaf.points_mut().push(vec![0., 1.]);
@@ -35,7 +37,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_node_mean_calculation(){
+    pub fn test_node_mean_calculation() {
         let mut leaf1 = Node::new_leaf(&vec![0., 1.], 5);
         leaf1.points_mut().push(vec![0., 0.]);
         leaf1.points_mut().push(vec![0., 1.]);

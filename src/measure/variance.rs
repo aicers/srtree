@@ -1,5 +1,5 @@
-use crate::node::Node;
 use super::mean::calculate_mean;
+use crate::node::Node;
 use ordered_float::Float;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
@@ -7,7 +7,7 @@ pub fn calculate_variance<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
 where
     T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if node.immed_children() == 0 || node.immed_children() < end || from >= end{
+    if node.immed_children() == 0 || node.immed_children() < end || from >= end {
         return Vec::new();
     }
 
@@ -18,11 +18,15 @@ where
     let mut number_of_entries = T::zero();
     let mut variance = vec![T::zero(); mean.len()];
     for child_index in from..end {
-        let child_number_of_entries = T::from(node.child_immed_children(child_index)).unwrap_or(T::one());
+        let child_number_of_entries =
+            T::from(node.child_immed_children(child_index)).unwrap_or(T::one());
         for axis_index in 0..variance.len() {
-            variance[axis_index] += (node.child_centroid(child_index)[axis_index] - mean[axis_index]).powi(2) * child_number_of_entries;
+            variance[axis_index] +=
+                (node.child_centroid(child_index)[axis_index] - mean[axis_index]).powi(2)
+                    * child_number_of_entries;
             if !node.is_leaf() {
-                variance[axis_index] += child_number_of_entries * node.child_variance(child_index)[axis_index];
+                variance[axis_index] +=
+                    child_number_of_entries * node.child_variance(child_index)[axis_index];
             }
         }
         number_of_entries += child_number_of_entries;
@@ -36,7 +40,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     pub fn get_test_points() -> Vec<Vec<f64>> {
         let mut points = Vec::new();
         points.push(vec![0., 0.]);
@@ -73,4 +77,3 @@ mod tests {
         assert_eq!(variance[1], 0.25);
     }
 }
-

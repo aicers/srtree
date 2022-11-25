@@ -24,7 +24,7 @@ where
                 break;
             }
         }
-    }else{
+    } else {
         todo!("query from a node");
     }
 }
@@ -32,22 +32,23 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::algorithm::insertion::insert_data;
     use crate::node::Node;
-    use crate::algorithm::insertion::insert;
+    use crate::params::Params;
 
     #[test]
-    pub fn test_nearest_neighbors_with_leaf(){
+    pub fn test_nearest_neighbors_with_leaf() {
+        let params = Params::new(4, 9, 4);
         let origin = vec![0., 0.];
-        let maximum_num_of_elements = 100;
-        let mut leaf_node = Node::new_leaf(&origin, maximum_num_of_elements);
+        let mut leaf_node = Node::new_leaf(&origin, params.max_number_of_elements);
 
-        for i in 0..maximum_num_of_elements {
+        for i in 0..params.max_number_of_elements {
             let point = vec![i as f64, 0.];
-            insert(&mut leaf_node, &point);
+            insert_data(&mut leaf_node, &point, &params);
         }
 
         let mut result = Vec::new();
-        let k = maximum_num_of_elements / 3;
+        let k = params.max_number_of_elements / 3;
         nearest_neighbors(&leaf_node, &origin, k, &mut result);
 
         assert!(result.len() == k);

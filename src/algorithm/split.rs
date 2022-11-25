@@ -1,7 +1,7 @@
-use crate::node::Node;
-use ordered_float::{Float, OrderedFloat};
 use crate::measure::variance::calculate_variance;
+use crate::node::Node;
 use crate::shape::reshape::reshape;
+use ordered_float::{Float, OrderedFloat};
 use std::{
     fmt::Debug,
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
@@ -35,7 +35,7 @@ where
     if node.immed_children() < 2 * min_number_of_elements {
         panic!("Trying to split a node with less elements");
     }
-    
+
     // Minimize the sum of variances for two groups of node.points
     let mut selected_index = min_number_of_elements;
     let mut min_variance = T::infinity();
@@ -48,11 +48,9 @@ where
         let mut current_variance = T::zero();
 
         // first group
-        calculate_variance(node, 0, i)
-            .iter()
-            .for_each(|variance| {
-                current_variance += variance.to_owned();
-            });
+        calculate_variance(node, 0, i).iter().for_each(|variance| {
+            current_variance += variance.to_owned();
+        });
 
         // second group
         calculate_variance(node, i, number_of_entries)
@@ -69,7 +67,8 @@ where
     selected_index
 }
 
-pub fn split<T>(node: &mut Node<T>,
+pub fn split<T>(
+    node: &mut Node<T>,
     min_number_of_elements: usize,
     max_number_of_elements: usize,
 ) -> Option<Node<T>>
@@ -86,8 +85,9 @@ where
     // 2. Sort node points along that axis
     if node.is_leaf() {
         node.points_mut().sort_by_key(|p| OrderedFloat(p[axis]));
-    }else{
-        node.nodes_mut().sort_by_key(|child| OrderedFloat(child.get_sphere().center[axis]));
+    } else {
+        node.nodes_mut()
+            .sort_by_key(|child| OrderedFloat(child.get_sphere().center[axis]));
     }
 
     // 3. Choose the split index along this axis
@@ -98,7 +98,7 @@ where
     while node.immed_children() > index {
         if new_node.is_leaf() {
             new_node.points_mut().push(node.points_mut().pop().unwrap());
-        }else {
+        } else {
             new_node.nodes_mut().push(node.nodes_mut().pop().unwrap());
         }
     }
@@ -123,11 +123,11 @@ mod tests {
     }
 
     #[test]
-    pub fn test_node_mean_variance_calculation(){
+    pub fn test_node_mean_variance_calculation() {
         let min_number_of_elements = 2;
         let max_number_of_elements = 5;
         let origin = vec![0., 0.];
-        let mut node = Node::new_node(&origin, max_number_of_elements,1);
+        let mut node = Node::new_node(&origin, max_number_of_elements, 1);
 
         let mut leaf1 = Node::new_leaf(&origin, max_number_of_elements);
         leaf1.points_mut().push(vec![0., 0.]);
@@ -174,7 +174,7 @@ mod tests {
     }
 
     #[test]
-    pub fn test_split_leaf_node(){
+    pub fn test_split_leaf_node() {
         let min_number_of_elements = 2;
         let max_number_of_elements = 5;
 
@@ -191,12 +191,12 @@ mod tests {
     }
 
     #[test]
-    pub fn test_split_node(){
+    pub fn test_split_node() {
         let min_number_of_elements = 2;
         let max_number_of_elements = 5;
 
         let origin = vec![0., 0.];
-        let mut node = Node::new_node(&origin, max_number_of_elements,1);
+        let mut node = Node::new_node(&origin, max_number_of_elements, 1);
         get_test_points().iter().for_each(|point| {
             let mut leaf = Node::new_leaf(point, max_number_of_elements);
             leaf.points_mut().push(point.to_owned());
