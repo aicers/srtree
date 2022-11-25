@@ -3,14 +3,15 @@ use crate::node::Node;
 use ordered_float::Float;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
-fn choose_closest_node_index<T>(node: &Node<T>, point: &Vec<T>) -> usize
+pub fn choose_closest_node_index<T>(node: &Node<T>, search_node: &Node<T>) -> usize
 where
     T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     let mut closest_node_index = 0;
     let mut distance = T::infinity();
     for (i, child) in node.nodes().iter().enumerate() {
-        let current_distance = euclidean(&child.get_sphere().center, point);
+        let current_distance =
+            euclidean(&child.get_sphere().center, &search_node.get_sphere().center);
         if current_distance < distance {
             distance = current_distance;
             closest_node_index = i;
@@ -31,7 +32,7 @@ where
         return node;
     } else {
         // choose a node with the closest centroid to point
-        let closest_node_index = choose_closest_node_index(node, &search_node.get_sphere().center);
+        let closest_node_index = choose_closest_node_index(node, &search_node);
         // descend until a leaf is reached
         choose_subtree(
             &mut node.nodes_mut()[closest_node_index],
@@ -57,7 +58,8 @@ mod tests {
         }
 
         let expected_index = 9;
-        let selected_index = choose_closest_node_index(&node, &vec![100., 0.]);
+        let search_node = Node::new_point(&vec![100., 0.]);
+        let selected_index = choose_closest_node_index(&node, &search_node);
         assert_eq!(selected_index, expected_index);
     }
 }
