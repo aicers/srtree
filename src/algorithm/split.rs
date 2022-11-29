@@ -1,6 +1,6 @@
-use crate::measure::variance::calculate_variance;
 use crate::node::Node;
 use crate::shape::reshape::reshape;
+use crate::{measure::variance::calculate_variance, params::Params};
 use ordered_float::{Float, OrderedFloat};
 use std::{
     fmt::Debug,
@@ -24,25 +24,24 @@ where
     selected_index
 }
 
-fn choose_split_index<T>(
-    node: &Node<T>,
-    min_number_of_elements: usize,
-    max_number_of_elements: usize,
-) -> usize
+fn choose_split_index<T>(node: &Node<T>, params: &Params) -> usize
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if node.immed_children() < 2 * min_number_of_elements {
+    if node.immed_children() < 2 * params.min_number_of_elements {
         panic!("Trying to split a node with less elements");
     }
 
     // Minimize the sum of variances for two groups of node.points
-    let mut selected_index = min_number_of_elements;
+    let mut selected_index = params.min_number_of_elements;
     let mut min_variance = T::infinity();
 
     let number_of_entries = node.immed_children();
-    let start = min_number_of_elements;
-    let end = max_number_of_elements.min(number_of_entries - min_number_of_elements) + 1;
+    let start = params.min_number_of_elements;
+    let end = params
+        .max_number_of_elements
+        .min(number_of_entries - params.min_number_of_elements)
+        + 1;
 
     for i in start..end {
         let mut current_variance = T::zero();
@@ -67,15 +66,11 @@ where
     selected_index
 }
 
-pub fn split<T>(
-    node: &mut Node<T>,
-    min_number_of_elements: usize,
-    max_number_of_elements: usize,
-) -> Option<Node<T>>
+pub fn split<T>(node: &mut Node<T>, params: &Params) -> Option<Node<T>>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if node.immed_children() < 2 * min_number_of_elements {
+    if node.immed_children() < 2 * params.min_number_of_elements {
         return None;
     }
 
@@ -91,10 +86,10 @@ where
     }
 
     // 3. Choose the split index along this axis
-    let index = choose_split_index(node, min_number_of_elements, max_number_of_elements);
+    let index = choose_split_index(node, params);
 
     // 4. Pop entries from end until node has index elements
-    let mut new_node = Node::new_sibling(node, max_number_of_elements);
+    let mut new_node = Node::new_sibling(node, params.max_number_of_elements);
     while node.immed_children() > index {
         if new_node.is_leaf() {
             new_node.points_mut().push(node.points_mut().pop().unwrap());
@@ -168,23 +163,23 @@ mod tests {
             node.points_mut().push(point.to_owned());
         });
 
+        let params = Params::new(2, 3, 1);
         let expected_index = 3;
-        let selected_index = choose_split_index(&node, 2, 3);
+        let selected_index = choose_split_index(&node, &params);
         assert_eq!(expected_index, selected_index);
     }
 
     #[test]
     pub fn test_split_leaf_node() {
-        let min_number_of_elements = 2;
-        let max_number_of_elements = 5;
+        let params = Params::new(2, 5, 2);
 
         let origin = vec![0., 0.];
-        let mut node = Node::new_leaf(&origin, max_number_of_elements);
+        let mut node = Node::new_leaf(&origin, params.max_number_of_elements);
         get_test_points().iter().for_each(|point| {
             node.points_mut().push(point.to_owned());
         });
 
-        let sibling = split(&mut node, min_number_of_elements, max_number_of_elements);
+        let sibling = split(&mut node, &params);
         assert!(sibling.is_some());
         assert_eq!(node.immed_children(), 3);
         assert_eq!(sibling.unwrap().immed_children(), 2);
@@ -192,20 +187,19 @@ mod tests {
 
     #[test]
     pub fn test_split_node() {
-        let min_number_of_elements = 2;
-        let max_number_of_elements = 5;
+        let params = Params::new(2, 5, 2);
 
         let origin = vec![0., 0.];
-        let mut node = Node::new_node(&origin, max_number_of_elements, 1);
+        let mut node = Node::new_node(&origin, params.max_number_of_elements, 1);
         get_test_points().iter().for_each(|point| {
-            let mut leaf = Node::new_leaf(point, max_number_of_elements);
+            let mut leaf = Node::new_leaf(point, params.max_number_of_elements);
             leaf.points_mut().push(point.to_owned());
             reshape(&mut leaf);
             node.nodes_mut().push(leaf);
         });
         reshape(&mut node);
 
-        let sibling = split(&mut node, min_number_of_elements, max_number_of_elements);
+        let sibling = split(&mut node, &params);
         assert!(sibling.is_some());
         assert_eq!(node.immed_children(), 3);
         assert_eq!(sibling.unwrap().immed_children(), 2);
