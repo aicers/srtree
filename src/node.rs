@@ -1,6 +1,9 @@
 use crate::shape::{rect::Rect, sphere::Sphere};
 use ordered_float::Float;
-use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
+use std::{
+    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
+    rc::Weak,
+};
 
 #[allow(dead_code)]
 pub enum Data<T> {
