@@ -1,6 +1,6 @@
 use crate::measure::distance::euclidean;
 use ordered_float::Float;
-use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
+use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -12,7 +12,7 @@ pub struct Sphere<T> {
 #[allow(dead_code)]
 impl<T> Sphere<T>
 where
-    T: Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     pub fn new(center: Vec<T>, radius: T) -> Sphere<T> {
         Sphere { center, radius }

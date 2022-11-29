@@ -3,13 +3,13 @@ use crate::measure::mean::calculate_mean;
 use crate::measure::variance::calculate_variance;
 use crate::node::Node;
 use ordered_float::Float;
-use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
+use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
 
 use super::{rect::Rect, sphere::Sphere};
 
 pub fn reshape<T>(node: &mut Node<T>)
 where
-    T: Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     let centroid = calculate_mean(node, 0, node.immed_children());
     let mut ds = T::zero(); // farthest point to child spheres

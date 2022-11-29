@@ -1,12 +1,15 @@
 use crate::measure::distance::euclidean;
 use crate::node::Node;
 use ordered_float::Float;
-use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
+use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
 
 pub fn choose_closest_node_index<T>(node: &Node<T>, search_node: &Node<T>) -> usize
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
+    if node.is_leaf() {
+        panic!("Trying to choose from a leaf node");
+    }
     let mut closest_node_index = 0;
     let mut distance = T::infinity();
     for (i, child) in node.nodes().iter().enumerate() {
@@ -26,7 +29,7 @@ pub fn choose_subtree<'a, T>(
     target_height: usize,
 ) -> &'a mut Node<T>
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.is_leaf() || node.get_height() == target_height {
         return node;

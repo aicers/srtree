@@ -1,10 +1,10 @@
 use ordered_float::Float;
-use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
+use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
 
 #[allow(dead_code)]
 pub fn euclidean<T>(point1: &Vec<T>, point2: &Vec<T>) -> T
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if point1.len() != point2.len() {
         return T::infinity();

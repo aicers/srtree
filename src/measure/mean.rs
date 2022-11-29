@@ -1,10 +1,10 @@
 use crate::node::Node;
 use ordered_float::Float;
-use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
+use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
 
 pub fn calculate_mean<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     let mut number_of_entries = T::zero();
     let mut mean = vec![T::zero(); node.dimension()];

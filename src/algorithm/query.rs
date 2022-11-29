@@ -2,11 +2,11 @@ use crate::measure::distance::euclidean;
 use crate::node::Node;
 use ordered_float::{Float, OrderedFloat};
 use priority_queue::DoublePriorityQueue;
-use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
+use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
 
 pub fn nearest_neighbors<T>(node: &Node<T>, point: &Vec<T>, k: usize, result: &mut Vec<Vec<T>>)
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.is_leaf() {
         // construct a queue with distance as a priority

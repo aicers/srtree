@@ -1,11 +1,11 @@
 use super::mean::calculate_mean;
 use crate::node::Node;
 use ordered_float::Float;
-use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
+use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
 
 pub fn calculate_variance<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.immed_children() == 0 || node.immed_children() < end || from >= end {
         return Vec::new();
