@@ -2,6 +2,7 @@ use crate::algorithm::query::nearest_neighbors;
 use crate::params::Params;
 use crate::{algorithm::insertion::insert_data, node::Node};
 use ordered_float::Float;
+use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 #[allow(dead_code)]
@@ -13,7 +14,7 @@ pub struct SRTree<T> {
 #[allow(dead_code)]
 impl<T> SRTree<T>
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     #[must_use]
     pub fn new(

@@ -1,8 +1,11 @@
-use crate::shape::{rect::Rect, sphere::Sphere};
-use ordered_float::Float;
+use crate::{
+    measure::distance::euclidean,
+    shape::{rect::Rect, sphere::Sphere},
+};
+use ordered_float::{Float, OrderedFloat};
 use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-    rc::Weak,
+    rc::Weak, fmt::Debug,
 };
 
 #[allow(dead_code)]
@@ -24,7 +27,7 @@ pub struct Node<T> {
 #[allow(dead_code)]
 impl<T> Node<T>
 where
-    T: Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     pub fn new(
         rect: Rect<T>,
@@ -62,27 +65,34 @@ where
             Data::Points(Vec::with_capacity(capacity)),
             vec![T::zero(); point.len()],
             0,
-            0,
+            1,
         )
     }
 
-    pub fn new_sibling(node: &Node<T>, capacity: usize) -> Node<T> {
-        let data = match node.data {
+    pub fn new_sibling(&self, capacity: usize) -> Node<T> {
+        let data = match self.data {
             Data::Nodes(_) => Data::Nodes(Vec::with_capacity(capacity)),
             Data::Points(_) => Data::Points(Vec::with_capacity(capacity)),
         };
         Node::new(
-            Rect::from_point(&node.get_sphere().center),
-            Sphere::from_point(&node.get_sphere().center),
+            Rect::from_point(&self.get_sphere().center),
+            Sphere::from_point(&self.get_sphere().center),
             data,
-            vec![T::zero(); node.dimension()],
+            vec![T::zero(); self.dimension()],
             0,
-            0,
+            self.height,
         )
     }
 
     pub fn new_point(point: &Vec<T>) -> Node<T> {
-        Node::new_leaf(point, 1)
+        Node::new(
+            Rect::from_point(point),
+            Sphere::from_point(point),
+            Data::Points(Vec::with_capacity(1)),
+            vec![T::zero(); point.len()],
+            0,
+            0,
+        )
     }
 
     pub fn is_leaf(&self) -> bool {
@@ -183,7 +193,48 @@ where
         self.height
     }
 
+    pub fn pop_last(&mut self, n: usize) -> Vec<Node<T>> {
+        let center = self.get_sphere().center.clone();
+        let number_of_immediate_children = self.immed_children();
+        if self.is_leaf() {
+            self.points_mut()
+                .sort_by_key(|p| OrderedFloat(euclidean(&center, p)));
+            self.points_mut()
+                .split_off(number_of_immediate_children - n)
+                .iter()
+                .map(|p| Node::new_point(p))
+                .collect()
+        } else {
+            self.nodes_mut()
+                .sort_by_key(|node| OrderedFloat(euclidean(&center, &node.sphere.center)));
+            self.nodes_mut().split_off(number_of_immediate_children - n)
+        }
+    }
+
     pub fn intersects_point(&self, point: &Vec<T>) -> bool {
         self.rect.intersects_point(point) && self.sphere.intersects_point(point)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::{algorithm::insertion::insert_data, shape::reshape::reshape};
+
+    use super::*;
+
+    #[test]
+    pub fn test_pop_last() {
+        let origin = vec![0., 0.];
+        let mut leaf_node = Node::new_leaf(&origin, 10);
+        leaf_node.points_mut().push(origin);
+        for i in 1..10 {
+            leaf_node.points_mut().push(vec![0., i as f64]);
+        }
+        reshape(&mut leaf_node);
+        assert_eq!(leaf_node.get_sphere().center, vec![0., 4.5]);
+        let last = leaf_node.pop_last(2);
+        assert_eq!(last[0].get_sphere().center, vec![0., 0.]);
+        assert_eq!(last[1].get_sphere().center, vec![0., 9.]);
     }
 }

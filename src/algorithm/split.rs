@@ -66,12 +66,12 @@ where
     selected_index
 }
 
-pub fn split<T>(node: &mut Node<T>, params: &Params) -> Option<Node<T>>
+pub fn split<T>(node: &mut Node<T>, params: &Params) -> Node<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.immed_children() < 2 * params.min_number_of_elements {
-        return None;
+        panic!("don't split a node with less elements than min_num_of_elements");
     }
 
     // 1. Choose the split axis
@@ -89,7 +89,7 @@ where
     let index = choose_split_index(node, params);
 
     // 4. Pop entries from end until node has index elements
-    let mut new_node = Node::new_sibling(node, params.max_number_of_elements);
+    let mut new_node = node.new_sibling(params.max_number_of_elements);
     while node.immed_children() > index {
         if new_node.is_leaf() {
             new_node.points_mut().push(node.points_mut().pop().unwrap());
@@ -100,7 +100,7 @@ where
     reshape(node);
     reshape(&mut new_node);
 
-    Some(new_node)
+    new_node
 }
 
 #[cfg(test)]
@@ -180,9 +180,8 @@ mod tests {
         });
 
         let sibling = split(&mut node, &params);
-        assert!(sibling.is_some());
         assert_eq!(node.immed_children(), 3);
-        assert_eq!(sibling.unwrap().immed_children(), 2);
+        assert_eq!(sibling.immed_children(), 2);
     }
 
     #[test]
@@ -200,8 +199,7 @@ mod tests {
         reshape(&mut node);
 
         let sibling = split(&mut node, &params);
-        assert!(sibling.is_some());
         assert_eq!(node.immed_children(), 3);
-        assert_eq!(sibling.unwrap().immed_children(), 2);
+        assert_eq!(sibling.immed_children(), 2);
     }
 }
