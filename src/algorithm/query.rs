@@ -2,7 +2,10 @@ use crate::measure::distance::euclidean;
 use crate::node::Node;
 use ordered_float::{Float, OrderedFloat};
 use priority_queue::DoublePriorityQueue;
-use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
+use std::{
+    fmt::Debug,
+    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
+};
 
 pub fn nearest_neighbors<T>(node: &Node<T>, point: &Vec<T>, k: usize, result: &mut Vec<Vec<T>>)
 where
@@ -38,7 +41,7 @@ mod tests {
 
     #[test]
     pub fn test_nearest_neighbors_with_leaf() {
-        let params = Params::new(4, 9, 4);
+        let params = Params::new(4, 9, 4, true);
         let origin = vec![0., 0.];
         let mut leaf_node = Node::new_leaf(&origin, params.max_number_of_elements);
 

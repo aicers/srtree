@@ -4,8 +4,9 @@ use crate::{
 };
 use ordered_float::{Float, OrderedFloat};
 use std::{
+    fmt::Debug,
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-    rc::Weak, fmt::Debug,
+    rc::Weak,
 };
 
 #[allow(dead_code)]

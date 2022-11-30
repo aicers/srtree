@@ -1,6 +1,9 @@
 use crate::measure::distance::euclidean;
 use ordered_float::Float;
-use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
+use std::{
+    fmt::Debug,
+    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
+};
 
 #[allow(dead_code)]
 #[derive(Debug)]
