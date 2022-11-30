@@ -1,7 +1,10 @@
 use crate::measure::distance::euclidean;
 use crate::node::Node;
 use ordered_float::Float;
-use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
+use std::{
+    fmt::Debug,
+    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
+};
 
 pub fn choose_closest_node_index<T>(node: &Node<T>, search_node: &Node<T>) -> usize
 where

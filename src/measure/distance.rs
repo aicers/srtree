@@ -1,5 +1,8 @@
 use ordered_float::Float;
-use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
+use std::{
+    fmt::Debug,
+    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
+};
 
 #[allow(dead_code)]
 pub fn euclidean<T>(point1: &Vec<T>, point2: &Vec<T>) -> T

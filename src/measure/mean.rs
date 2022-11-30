@@ -1,6 +1,9 @@
 use crate::node::Node;
 use ordered_float::Float;
-use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
+use std::{
+    fmt::Debug,
+    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
+};
 
 pub fn calculate_mean<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
 where

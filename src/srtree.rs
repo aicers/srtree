@@ -1,6 +1,8 @@
+use crate::algorithm::insertion::{insert_data, insert_node};
 use crate::algorithm::query::nearest_neighbors;
+use crate::algorithm::split::split;
+use crate::node::Node;
 use crate::params::Params;
-use crate::{algorithm::insertion::insert_data, node::Node};
 use ordered_float::Float;
 use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
@@ -21,6 +23,7 @@ where
         min_number_of_elements: usize,
         max_number_of_elements: usize,
         reinsert_count: usize,
+        prefer_close_reinsert: bool,
     ) -> SRTree<T> {
         SRTree {
             root: None,
@@ -28,6 +31,7 @@ where
                 min_number_of_elements,
                 max_number_of_elements,
                 reinsert_count,
+                prefer_close_reinsert,
             ),
         }
     }
@@ -37,6 +41,18 @@ where
             self.root = Some(Node::new_leaf(point, self.params.max_number_of_elements));
         }
         insert_data(self.root.as_mut().unwrap(), point, &self.params);
+        let root = self.root.as_mut().unwrap();
+        if root.immed_children() > self.params.max_number_of_elements {
+            let sibling = split(root, &self.params);
+            let mut new_root = Node::new_node(
+                &root.get_sphere().center,
+                self.params.max_number_of_elements,
+                root.get_height() + 1,
+            );
+            insert_node(&mut new_root, self.root.take().unwrap(), &self.params);
+            insert_node(&mut new_root, sibling, &self.params);
+            self.root = Some(new_root);
+        }
     }
 
     pub fn query(&self, point: &Vec<T>, k: usize) -> Vec<Vec<T>> {
@@ -54,7 +70,7 @@ mod tests {
 
     #[test]
     pub fn test_insertion_query() {
-        let mut tree: SRTree<f64> = SRTree::new(3, 10, 3);
+        let mut tree: SRTree<f64> = SRTree::new(3, 10, 3, true);
         let search_point = vec![1.0, 0.0];
         assert!(!tree.query(&search_point, 1).contains(&search_point)); // not inserted yet
         tree.insert(&vec![1.0, 0.0]);

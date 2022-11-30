@@ -3,7 +3,10 @@ use crate::measure::mean::calculate_mean;
 use crate::measure::variance::calculate_variance;
 use crate::node::Node;
 use ordered_float::Float;
-use std::{ops::{AddAssign, DivAssign, MulAssign, SubAssign}, fmt::Debug};
+use std::{
+    fmt::Debug,
+    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
+};
 
 use super::{rect::Rect, sphere::Sphere};
 

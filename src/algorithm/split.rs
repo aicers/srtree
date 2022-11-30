@@ -163,7 +163,7 @@ mod tests {
             node.points_mut().push(point.to_owned());
         });
 
-        let params = Params::new(2, 3, 1);
+        let params = Params::new(2, 3, 1, true);
         let expected_index = 3;
         let selected_index = choose_split_index(&node, &params);
         assert_eq!(expected_index, selected_index);
@@ -171,7 +171,7 @@ mod tests {
 
     #[test]
     pub fn test_split_leaf_node() {
-        let params = Params::new(2, 5, 2);
+        let params = Params::new(2, 5, 2, true);
 
         let origin = vec![0., 0.];
         let mut node = Node::new_leaf(&origin, params.max_number_of_elements);
@@ -186,7 +186,7 @@ mod tests {
 
     #[test]
     pub fn test_split_node() {
-        let params = Params::new(2, 5, 2);
+        let params = Params::new(2, 5, 2, true);
 
         let origin = vec![0., 0.];
         let mut node = Node::new_node(&origin, params.max_number_of_elements, 1);
