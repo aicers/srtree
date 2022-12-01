@@ -100,6 +100,7 @@ where
     reshape(node);
     reshape(&mut new_node);
 
+    // todo: return the node whose centroid is closest to parent
     new_node
 }
 
