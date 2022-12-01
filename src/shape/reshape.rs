@@ -20,6 +20,7 @@ where
 
     let mut low = centroid.clone();
     let mut high = centroid.clone();
+    let mut total_children = 0;
     if node.is_leaf() {
         node.points().iter().for_each(|point| {
             for i in 0..node.dimension() {
@@ -29,17 +30,19 @@ where
             ds = ds.max(euclidean(&centroid, &point));
             dr = ds;
         });
+        total_children = node.points().len();
     } else {
-        node.nodes().iter().for_each(|node| {
-            for i in 0..node.dimension() {
-                low[i] = low[i].min(node.get_rect().low[i]);
-                high[i] = high[i].max(node.get_rect().high[i]);
+        node.nodes().iter().for_each(|child| {
+            for i in 0..child.dimension() {
+                low[i] = low[i].min(child.get_rect().low[i]);
+                high[i] = high[i].max(child.get_rect().high[i]);
             }
-            ds = ds.max(euclidean(&centroid, &node.get_sphere().center) + node.get_sphere().radius);
+            ds = ds.max(euclidean(&centroid, &child.get_sphere().center) + child.get_sphere().radius);
             dr = dr.max(euclidean(
                 &centroid,
-                &node.get_rect().farthest_point_to(&centroid),
+                &child.get_rect().farthest_point_to(&centroid),
             ));
+            total_children += child.get_total_children();
         });
     }
     let rect = Rect::new(low, high);
@@ -50,6 +53,8 @@ where
 
     let variance = calculate_variance(&node, 0, node.immed_children());
     node.set_variance(variance);
+
+    node.set_total_children(total_children);
 }
 
 #[cfg(test)]

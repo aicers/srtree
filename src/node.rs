@@ -194,6 +194,14 @@ where
         self.height
     }
 
+    pub fn set_total_children(&mut self, total_children: usize) {
+        self.total_children = total_children;
+    }
+
+    pub fn get_total_children(&self) -> usize {
+        self.total_children
+    }
+
     pub fn pop_last(&mut self, n: usize) -> Vec<Node<T>> {
         let center = self.get_sphere().center.clone();
         let number_of_immediate_children = self.immed_children();
