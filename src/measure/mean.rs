@@ -5,7 +5,7 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-pub fn calculate_mean<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
+pub fn calculate<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -13,15 +13,14 @@ where
     let mut mean = vec![T::zero(); node.dimension()];
     for child_index in from..end {
         let child_number_of_entries =
-            T::from(node.child_immed_children(child_index)).unwrap_or(T::one());
-        for axis_index in 0..mean.len() {
-            mean[axis_index] +=
-                node.child_centroid(child_index)[axis_index] * child_number_of_entries;
+            T::from(node.child_immed_children(child_index)).unwrap_or_else(T::one);
+        for (axis_index, m) in mean.iter_mut().enumerate() {
+            *m += node.child_centroid(child_index)[axis_index] * child_number_of_entries;
         }
         number_of_entries += child_number_of_entries;
     }
-    for axis_index in 0..mean.len() {
-        mean[axis_index] /= number_of_entries;
+    for m in &mut mean {
+        *m /= number_of_entries;
     }
     mean
 }
@@ -35,7 +34,7 @@ mod tests {
         let mut leaf = Node::new_leaf(&vec![0., 0.], 5);
         leaf.points_mut().push(vec![1., 0.]);
         leaf.points_mut().push(vec![0., 1.]);
-        let mean = calculate_mean(&leaf, 0, leaf.immed_children());
+        let mean = calculate(&leaf, 0, leaf.immed_children());
         assert_eq!(mean, vec![0.5, 0.5]);
     }
 
@@ -53,7 +52,7 @@ mod tests {
         node.nodes_mut().push(leaf1);
         node.nodes_mut().push(leaf2);
 
-        let mean = calculate_mean(&node, 0, node.immed_children());
+        let mean = calculate(&node, 0, node.immed_children());
         assert_eq!(mean, vec![0., 2.2]);
     }
 }

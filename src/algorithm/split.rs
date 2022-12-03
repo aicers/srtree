@@ -1,6 +1,6 @@
 use crate::node::Node;
 use crate::shape::reshape::reshape;
-use crate::{measure::variance::calculate_variance, params::Params};
+use crate::{measure::variance::calculate, params::Params};
 use ordered_float::{Float, OrderedFloat};
 use std::{
     fmt::Debug,
@@ -12,7 +12,7 @@ where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     // 1. Calculate variance for each axis:
-    let variance = calculate_variance(node, 0, node.immed_children());
+    let variance = calculate(node, 0, node.immed_children());
 
     // 2. Choose the axis with the highest variance
     let mut selected_index = 0;
@@ -28,9 +28,10 @@ fn choose_split_index<T>(node: &Node<T>, params: &Params) -> usize
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if node.immed_children() < 2 * params.min_number_of_elements {
-        panic!("Trying to split a node with less elements");
-    }
+    assert!(
+        node.immed_children() >= 2 * params.min_number_of_elements,
+        "trying to split a node with less elements"
+    );
 
     // Minimize the sum of variances for two groups of node.points
     let mut selected_index = params.min_number_of_elements;
@@ -47,16 +48,14 @@ where
         let mut current_variance = T::zero();
 
         // first group
-        calculate_variance(node, 0, i).iter().for_each(|variance| {
-            current_variance += variance.to_owned();
-        });
+        for variance in calculate(node, 0, i) {
+            current_variance += variance;
+        }
 
         // second group
-        calculate_variance(node, i, number_of_entries)
-            .iter()
-            .for_each(|variance| {
-                current_variance += variance.to_owned();
-            });
+        for variance in calculate(node, i, number_of_entries) {
+            current_variance += variance;
+        }
 
         if current_variance < min_variance {
             min_variance = current_variance;
@@ -70,9 +69,10 @@ pub fn split<T>(node: &mut Node<T>, params: &Params) -> Node<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if node.immed_children() < 2 * params.min_number_of_elements {
-        panic!("don't split a node with less elements than min_num_of_elements");
-    }
+    assert!(
+        node.immed_children() >= 2 * params.min_number_of_elements,
+        "don't split a node with less elements than min_num_of_elements"
+    );
 
     // 1. Choose the split axis
     let axis = choose_split_axis(node);
@@ -120,7 +120,6 @@ mod tests {
 
     #[test]
     pub fn test_node_mean_variance_calculation() {
-        let min_number_of_elements = 2;
         let max_number_of_elements = 5;
         let origin = vec![0., 0.];
         let mut node = Node::new_node(&origin, max_number_of_elements, 1);

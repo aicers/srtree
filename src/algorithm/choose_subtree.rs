@@ -10,9 +10,8 @@ pub fn choose_closest_node_index<T>(node: &Node<T>, search_node: &Node<T>) -> us
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if node.is_leaf() {
-        panic!("Trying to choose from a leaf node");
-    }
+    assert!(!node.is_leaf(), "Trying to choose from a leaf node");
+
     let mut closest_node_index = 0;
     let mut distance = T::infinity();
     for (i, child) in node.nodes().iter().enumerate() {
@@ -26,21 +25,18 @@ where
     closest_node_index
 }
 
-pub fn choose_subtree<'a, T>(
-    node: &'a Node<T>,
-    search_node: &Node<T>,
-) -> &'a Node<T>
+#[allow(dead_code)]
+pub fn choose_subtree<'a, T>(node: &'a Node<T>, search_node: &Node<T>) -> &'a Node<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.is_leaf() || node.get_height() == search_node.get_height() + 1 {
         return node;
-    } else {
-        // choose a node with the closest centroid to point
-        let closest_node_index = choose_closest_node_index(node, &search_node);
-        // descend until a leaf is reached
-        choose_subtree(&node.nodes()[closest_node_index],search_node)
     }
+    // choose a node with the closest centroid to point
+    let closest_node_index = choose_closest_node_index(node, search_node);
+    // descend until a leaf is reached
+    choose_subtree(&node.nodes()[closest_node_index], search_node)
 }
 
 #[cfg(test)]

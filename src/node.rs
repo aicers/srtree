@@ -6,7 +6,6 @@ use ordered_float::{Float, OrderedFloat};
 use std::{
     fmt::Debug,
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-    rc::Weak,
 };
 
 #[allow(dead_code)]
@@ -228,7 +227,7 @@ where
 #[cfg(test)]
 mod tests {
 
-    use crate::{algorithm::insertion::insert_data, shape::reshape::reshape};
+    use crate::shape::reshape::reshape;
 
     use super::*;
 
