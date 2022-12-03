@@ -11,6 +11,7 @@ pub struct Rect<T> {
     pub high: Vec<T>,
 }
 
+#[allow(dead_code)]
 impl<T> Rect<T>
 where
     T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
@@ -39,7 +40,7 @@ where
         if self.low.len() != point.len() {
             return false;
         }
-        for (i, d) in point.iter().enumerate() {
+        for (i, _) in point.iter().enumerate() {
             if point[i] < self.low[i] || self.high[i] < point[i] {
                 return false;
             }

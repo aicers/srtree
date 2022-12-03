@@ -1,11 +1,11 @@
-use crate::node::{Data, Node};
+use crate::node::Node;
 use crate::params::Params;
 use crate::shape::reshape::reshape;
 use ordered_float::Float;
 use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
-use super::choose_subtree::{choose_closest_node_index, choose_subtree};
+use super::choose_subtree::choose_closest_node_index;
 use super::split::split;
 
 enum OverflowTreatment<T> {
@@ -28,7 +28,7 @@ where
     insert(root, node, params);
 }
 
-fn insert<'a, T>(root: &mut Node<T>, insert_node: Node<T>, params: &Params)
+fn insert<T>(root: &mut Node<T>, insert_node: Node<T>, params: &Params)
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -37,12 +37,12 @@ where
     while let Some(node) = reinsert_list.pop() {
         let result = overflow_treatment(root, node, params, reinsert_height);
         match result {
-            OverflowTreatment::NotRequired => {},
+            OverflowTreatment::NotRequired => {}
             OverflowTreatment::Reinsert(nodes_to_reinsert) => {
                 reinsert_list.extend(nodes_to_reinsert);
                 // Increase reinsertion height to prevent future reinsertion attempts in the same level:
                 reinsert_height += 1;
-            },
+            }
             OverflowTreatment::Split(new_node) => {
                 reinsert_list.push(new_node);
             }
@@ -50,7 +50,7 @@ where
     }
 }
 
-fn overflow_treatment<'a, T>(
+fn overflow_treatment<T>(
     root: &mut Node<T>,
     insert_node: Node<T>,
     params: &Params,
@@ -75,9 +75,11 @@ where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     let target_height = insert_node.get_height() + 1;
-    if node.get_height() < target_height {
-        panic!("trying to insert_or_reinsert a node on lower subtree that its height");
-    }
+    assert!(
+        node.get_height() >= target_height,
+        "trying to insert_or_reinsert a node on lower subtree that its height"
+    );
+
     if node.get_height() == target_height {
         if node.is_leaf() {
             node.points_mut()
@@ -115,13 +117,14 @@ where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     let target_height = insert_node.get_height() + 1;
-    if node.get_height() < target_height {
-        panic!("trying to insert_or_split a node on lower subtree that its height");
-    }
+    assert!(
+        node.get_height() >= target_height,
+        "trying to insert_or_split a node on lower subtree that its height"
+    );
+
     if node.get_height() == target_height {
         if node.is_leaf() {
-            node
-                .points_mut()
+            node.points_mut()
                 .push(insert_node.get_sphere().center.clone());
         } else {
             node.nodes_mut().push(insert_node);
@@ -134,11 +137,11 @@ where
         {
             OverflowTreatment::NotRequired
         } else {
-            let sibling = split(node, &params);
+            let sibling = split(node, params);
             OverflowTreatment::Split(sibling)
         }
     } else {
-        let closest_child_index = choose_closest_node_index(&node, &insert_node);
+        let closest_child_index = choose_closest_node_index(node, &insert_node);
         let closest_child = &mut node.nodes_mut()[closest_child_index];
         let result = insert_or_split(closest_child, insert_node, params, tree_height);
         reshape(node);
@@ -242,7 +245,7 @@ mod tests {
         let params = Params::new(1, 4, 2, true);
 
         // The first leaf
-        let first_leaf_points = vec![vec![1., 1.],vec![3., 1.],vec![1., 3.],vec![3., 3.]];
+        let first_leaf_points = vec![vec![1., 1.], vec![3., 1.], vec![1., 3.], vec![3., 3.]];
         let mut leaf_node1 = Node::new_leaf(&first_leaf_points[0], params.max_number_of_elements);
         for point in first_leaf_points {
             insert_data(&mut leaf_node1, &point, &params);
@@ -254,7 +257,7 @@ mod tests {
         assert_eq!(leaf_node1.get_sphere().radius, (2.0).sqrt());
 
         // The second leaf
-        let second_leaf_points = vec![vec![5., 1.],vec![6., 2.]];
+        let second_leaf_points = vec![vec![5., 1.], vec![6., 2.]];
         let mut leaf_node2 = Node::new_leaf(&second_leaf_points[0], params.max_number_of_elements);
         for point in second_leaf_points {
             insert_data(&mut leaf_node2, &point, &params);
@@ -274,7 +277,10 @@ mod tests {
         assert_eq!(root.get_total_children(), 6);
         assert_eq!(root.get_rect().low, vec![1., 1.]);
         assert_eq!(root.get_rect().high, vec![6., 3.]);
-        assert_eq!(root.get_sphere().center, vec![3.1666666666666665, 1.8333333333333333]);
+        assert_eq!(
+            root.get_sphere().center,
+            vec![3.1666666666666665, 1.8333333333333333]
+        );
         assert_eq!(root.get_sphere().radius, 2.953340857778225);
 
         // These two points expands the second leaf
@@ -303,9 +309,18 @@ mod tests {
         assert_eq!(root.get_rect().high, vec![9., 5.]);
 
         println!("--------After insertion--------");
-        println!("Root centroid = {:?}, radius = {:?}", root.get_sphere().center, root.get_sphere().radius);
+        println!(
+            "Root centroid = {:?}, radius = {:?}",
+            root.get_sphere().center,
+            root.get_sphere().radius
+        );
         for i in 0..root.immed_children() {
-            println!("Node {:?} centroid = {:?}, radius = {:?}", i + 1, root.child_centroid(i), root.nodes()[i].get_sphere().radius);
+            println!(
+                "Node {:?} centroid = {:?}, radius = {:?}",
+                i + 1,
+                root.child_centroid(i),
+                root.nodes()[i].get_sphere().radius
+            );
             for j in 0..root.child_immed_children(i) {
                 println!("{:?}", root.nodes()[i].points()[j]);
             }

@@ -1,6 +1,6 @@
 use crate::measure::distance::euclidean;
-use crate::measure::mean::calculate_mean;
-use crate::measure::variance::calculate_variance;
+use crate::measure::mean;
+use crate::measure::variance;
 use crate::node::Node;
 use ordered_float::Float;
 use std::{
@@ -14,7 +14,7 @@ pub fn reshape<T>(node: &mut Node<T>)
 where
     T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    let centroid = calculate_mean(node, 0, node.immed_children());
+    let centroid = mean::calculate(node, 0, node.immed_children());
     let mut ds = T::zero(); // farthest point to child spheres
     let mut dr = T::zero(); // farthest point to child rectangles
 
@@ -27,7 +27,7 @@ where
                 low[i] = low[i].min(point[i]);
                 high[i] = high[i].max(point[i]);
             }
-            ds = ds.max(euclidean(&centroid, &point));
+            ds = ds.max(euclidean(&centroid, point));
             dr = ds;
         });
         total_children = node.points().len();
@@ -37,7 +37,8 @@ where
                 low[i] = low[i].min(child.get_rect().low[i]);
                 high[i] = high[i].max(child.get_rect().high[i]);
             }
-            ds = ds.max(euclidean(&centroid, &child.get_sphere().center) + child.get_sphere().radius);
+            ds = ds
+                .max(euclidean(&centroid, &child.get_sphere().center) + child.get_sphere().radius);
             dr = dr.max(euclidean(
                 &centroid,
                 &child.get_rect().farthest_point_to(&centroid),
@@ -51,7 +52,7 @@ where
     let radius = ds.min(dr);
     node.set_sphere(Sphere::new(centroid, radius));
 
-    let variance = calculate_variance(&node, 0, node.immed_children());
+    let variance = variance::calculate(node, 0, node.immed_children());
     node.set_variance(variance);
 
     node.set_total_children(total_children);
