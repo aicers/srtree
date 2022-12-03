@@ -27,24 +27,19 @@ where
 }
 
 pub fn choose_subtree<'a, T>(
-    node: &'a mut Node<T>,
+    node: &'a Node<T>,
     search_node: &Node<T>,
-    target_height: usize,
-) -> &'a mut Node<T>
+) -> &'a Node<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if node.is_leaf() || node.get_height() == target_height {
+    if node.is_leaf() || node.get_height() == search_node.get_height() + 1 {
         return node;
     } else {
         // choose a node with the closest centroid to point
         let closest_node_index = choose_closest_node_index(node, &search_node);
         // descend until a leaf is reached
-        choose_subtree(
-            &mut node.nodes_mut()[closest_node_index],
-            search_node,
-            target_height,
-        )
+        choose_subtree(&node.nodes()[closest_node_index],search_node)
     }
 }
 

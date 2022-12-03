@@ -5,22 +5,12 @@ use ordered_float::Float;
 use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
-use super::choose_subtree::choose_closest_node_index;
+use super::choose_subtree::{choose_closest_node_index, choose_subtree};
 use super::split::split;
-
-enum Reinsert<T> {
-    NotRequired,
-    Nodes(Vec<Node<T>>),
-}
-
-enum Split<T> {
-    NotRequired,
-    NewSibling(Node<T>),
-}
 
 enum OverflowTreatment<T> {
     NotRequired,
-    Reinsert(Vec<Node<T>>, usize),
+    Reinsert(Vec<Node<T>>),
     Split(Node<T>),
 }
 
@@ -48,9 +38,10 @@ where
         let result = overflow_treatment(root, node, params, reinsert_height);
         match result {
             OverflowTreatment::NotRequired => {},
-            OverflowTreatment::Reinsert(nodes_to_reinsert, new_reinsert_height) => {
+            OverflowTreatment::Reinsert(nodes_to_reinsert) => {
                 reinsert_list.extend(nodes_to_reinsert);
-                reinsert_height = new_reinsert_height;
+                // Increase reinsertion height to prevent future reinsertion attempts in the same level:
+                reinsert_height += 1;
             },
             OverflowTreatment::Split(new_node) => {
                 reinsert_list.push(new_node);
@@ -69,98 +60,88 @@ where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if reinsert_height == insert_node.get_height() {
-        // Increase reinsertion height to prevent future reinsertion attempts in the same level:
-        let new_reinsert_height = reinsert_height + 1;
-        let result = insert_or_reinsert(root, insert_node, params);
-        match result {
-            Reinsert::Nodes(nodes) => OverflowTreatment::Reinsert(nodes, new_reinsert_height),
-            Reinsert::NotRequired => OverflowTreatment::NotRequired,
-        }
+        insert_or_reinsert(root, insert_node, params)
     } else {
-        let result = insert_or_split(root, insert_node, params, root.get_height());
-        match result {
-            Split::NewSibling(new_node) => OverflowTreatment::Split(new_node),
-            Split::NotRequired => OverflowTreatment::NotRequired,
-        }
+        insert_or_split(root, insert_node, params, root.get_height())
     }
 }
 
 fn insert_or_reinsert<T>(
-    parent: &mut Node<T>,
+    node: &mut Node<T>,
     insert_node: Node<T>,
     params: &Params,
-) -> Reinsert<T>
+) -> OverflowTreatment<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     let target_height = insert_node.get_height() + 1;
-    if parent.get_height() < target_height {
+    if node.get_height() < target_height {
         panic!("trying to insert_or_reinsert a node on lower subtree that its height");
     }
-    if parent.get_height() == target_height {
-        if parent.is_leaf() {
-            parent.points_mut()
+    if node.get_height() == target_height {
+        if node.is_leaf() {
+            node.points_mut()
                 .push(insert_node.get_sphere().center.clone());
         } else {
-            parent.nodes_mut().push(insert_node);
+            node.nodes_mut().push(insert_node);
         }
-        reshape(parent);
+        reshape(node);
 
-        if parent.immed_children() <= params.max_number_of_elements {
-            Reinsert::NotRequired
+        if node.immed_children() <= params.max_number_of_elements {
+            OverflowTreatment::NotRequired
         } else {
-            let mut nodes_to_reinsert = parent.pop_last(params.reinsert_count);
+            let mut nodes_to_reinsert = node.pop_last(params.reinsert_count);
             if params.prefer_close_reinsert {
                 nodes_to_reinsert.reverse();
             }
-            Reinsert::Nodes(nodes_to_reinsert)
+            OverflowTreatment::Reinsert(nodes_to_reinsert)
         }
     } else {
-        let closest_child_index = choose_closest_node_index(parent, &insert_node);
-        let closest_child = &mut parent.nodes_mut()[closest_child_index];
+        let closest_child_index = choose_closest_node_index(node, &insert_node);
+        let closest_child = &mut node.nodes_mut()[closest_child_index];
         let result = insert_or_reinsert(closest_child, insert_node, params);
-        reshape(parent);
+        reshape(node);
         result
     }
 }
 
 fn insert_or_split<T>(
-    parent: &mut Node<T>,
+    node: &mut Node<T>,
     insert_node: Node<T>,
     params: &Params,
     tree_height: usize,
-) -> Split<T>
+) -> OverflowTreatment<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     let target_height = insert_node.get_height() + 1;
-    if parent.get_height() < target_height {
+    if node.get_height() < target_height {
         panic!("trying to insert_or_split a node on lower subtree that its height");
     }
-    if parent.get_height() == target_height {
-        if parent.is_leaf() {
-            parent
+    if node.get_height() == target_height {
+        if node.is_leaf() {
+            node
                 .points_mut()
                 .push(insert_node.get_sphere().center.clone());
         } else {
-            parent.nodes_mut().push(insert_node);
+            node.nodes_mut().push(insert_node);
         }
-        reshape(parent);
+        reshape(node);
 
         // don't split if parent is the root or is not an overfilled node.
-        if parent.immed_children() <= params.max_number_of_elements
-            || parent.get_height() == tree_height
+        if node.immed_children() <= params.max_number_of_elements
+            || node.get_height() == tree_height
         {
-            Split::NotRequired
+            OverflowTreatment::NotRequired
         } else {
-            let sibling = split(parent, &params);
-            Split::NewSibling(sibling)
+            let sibling = split(node, &params);
+            OverflowTreatment::Split(sibling)
         }
     } else {
-        let closest_child_index = choose_closest_node_index(&parent, &insert_node);
-        let closest_child = &mut parent.nodes_mut()[closest_child_index];
+        let closest_child_index = choose_closest_node_index(&node, &insert_node);
+        let closest_child = &mut node.nodes_mut()[closest_child_index];
         let result = insert_or_split(closest_child, insert_node, params, tree_height);
-        reshape(parent);
+        reshape(node);
         result
     }
 }
@@ -211,7 +192,7 @@ mod tests {
 
         // search the point
         let search_node = Node::new_point(&point);
-        let leaf = choose_subtree(&mut root, &search_node, 0);
+        let leaf = choose_subtree(&mut root, &search_node);
         assert_eq!(leaf.points().len(), 2);
         assert_eq!(leaf.get_sphere().center, vec![0., 10.5]);
         assert_eq!(root.get_sphere().center, vec![0., 7.]);
