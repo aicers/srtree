@@ -43,7 +43,7 @@ where
         let root = self.root.as_mut().unwrap();
         insert_data(root, point, &self.params);
         if root.immed_children() > self.params.max_number_of_elements {
-            let sibling = split(root, &self.params);
+            let sibling = split(root, &root.get_sphere().center.clone(), &self.params);
             let mut new_root = Node::new_node(
                 &root.get_sphere().center,
                 self.params.max_number_of_elements,

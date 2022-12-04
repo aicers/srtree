@@ -62,7 +62,13 @@ where
     if reinsert_height == insert_node.get_height() {
         insert_or_reinsert(root, insert_node, params)
     } else {
-        insert_or_split(root, insert_node, params, root.get_height())
+        insert_or_split(
+            &root.get_sphere().center.clone(),
+            root,
+            insert_node,
+            params,
+            root.get_height(),
+        )
     }
 }
 
@@ -108,6 +114,7 @@ where
 }
 
 fn insert_or_split<T>(
+    parent_centroid: &Vec<T>,
     node: &mut Node<T>,
     insert_node: Node<T>,
     params: &Params,
@@ -137,13 +144,20 @@ where
         {
             OverflowTreatment::NotRequired
         } else {
-            let sibling = split(node, params);
+            let sibling = split(node, parent_centroid, params);
             OverflowTreatment::Split(sibling)
         }
     } else {
         let closest_child_index = choose_closest_node_index(node, &insert_node);
+        let parent_centroid = node.get_sphere().center.clone();
         let closest_child = &mut node.nodes_mut()[closest_child_index];
-        let result = insert_or_split(closest_child, insert_node, params, tree_height);
+        let result = insert_or_split(
+            &parent_centroid,
+            closest_child,
+            insert_node,
+            params,
+            tree_height,
+        );
         reshape(node);
         result
     }

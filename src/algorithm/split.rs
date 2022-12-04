@@ -1,3 +1,5 @@
+use crate::measure::distance::euclidean;
+use crate::measure::mean;
 use crate::node::Node;
 use crate::shape::reshape::reshape;
 use crate::{measure::variance::calculate, params::Params};
@@ -65,7 +67,7 @@ where
     selected_index
 }
 
-pub fn split<T>(node: &mut Node<T>, params: &Params) -> Node<T>
+pub fn split<T>(node: &mut Node<T>, parent_centroid: &Vec<T>, params: &Params) -> Node<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -86,7 +88,22 @@ where
     }
 
     // 3. Choose the split index along this axis
-    let index = choose_split_index(node, params);
+    let mut index = choose_split_index(node, params);
+
+    let node_centroid = mean::calculate(node, 0, index);
+    let node_distance = euclidean(parent_centroid, &node_centroid);
+
+    let sibling_centroid = mean::calculate(node, index, node.immed_children());
+    let sibling_distance = euclidean(parent_centroid, &sibling_centroid);
+
+    if node_distance > sibling_distance {
+        if node.is_leaf() {
+            node.points_mut().reverse();
+        } else {
+            node.nodes_mut().reverse();
+        }
+        index = node.immed_children() - index;
+    }
 
     // 4. Pop entries from end until node has index elements
     let mut new_node = node.new_sibling(params.max_number_of_elements);
@@ -179,7 +196,7 @@ mod tests {
             node.points_mut().push(point.to_owned());
         });
 
-        let sibling = split(&mut node, &params);
+        let sibling = split(&mut node, &origin, &params);
         assert_eq!(node.immed_children(), 3);
         assert_eq!(sibling.immed_children(), 2);
     }
@@ -198,8 +215,27 @@ mod tests {
         });
         reshape(&mut node);
 
-        let sibling = split(&mut node, &params);
+        let sibling = split(&mut node, &origin, &params);
         assert_eq!(node.immed_children(), 3);
+        assert_eq!(sibling.immed_children(), 2);
+    }
+
+    #[test]
+    pub fn test_split_node_with_parent() {
+        let params = Params::new(2, 5, 2, true);
+
+        let origin = vec![0., 10.];
+        let mut node = Node::new_leaf(&origin, params.max_number_of_elements);
+        node.points_mut().push(vec![0., 9.]);
+        node.points_mut().push(vec![0., 8.]);
+        node.points_mut().push(vec![0., 7.]);
+        node.points_mut().push(vec![0., 6.]);
+        node.points_mut().push(vec![0., 1.]);
+        node.points_mut().push(vec![0., 2.]);
+        reshape(&mut node);
+
+        let sibling = split(&mut node, &origin, &params);
+        assert_eq!(node.immed_children(), 4);
         assert_eq!(sibling.immed_children(), 2);
     }
 }
