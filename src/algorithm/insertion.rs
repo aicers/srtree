@@ -245,7 +245,7 @@ mod tests {
             insert_data(&mut root, &new_point, &params);
         }
 
-        // the first leaf node will be overfilled and one of its children will be reinserted to the second leaf
+        // the second leaf node will be overfilled and one of its points will be reinserted to the first leaf
         // Initial:         0  1
         // After insertion: 0  12345  <- overflow!
         // After reinsert:  01  2345
@@ -321,23 +321,5 @@ mod tests {
         assert_eq!(root.get_total_children(), 9);
         assert_eq!(root.get_rect().low, vec![1., 1.]);
         assert_eq!(root.get_rect().high, vec![9., 5.]);
-
-        println!("--------After insertion--------");
-        println!(
-            "Root centroid = {:?}, radius = {:?}",
-            root.get_sphere().center,
-            root.get_sphere().radius
-        );
-        for i in 0..root.immed_children() {
-            println!(
-                "Node {:?} centroid = {:?}, radius = {:?}",
-                i + 1,
-                root.child_centroid(i),
-                root.nodes()[i].get_sphere().radius
-            );
-            for j in 0..root.child_immed_children(i) {
-                println!("{:?}", root.nodes()[i].points()[j]);
-            }
-        }
     }
 }
