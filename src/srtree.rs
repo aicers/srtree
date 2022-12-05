@@ -7,7 +7,6 @@ use ordered_float::Float;
 use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
-#[allow(dead_code)]
 pub struct SRTree<T> {
     root: Option<Node<T>>,
     params: Params,
@@ -36,7 +35,7 @@ where
         }
     }
 
-    pub fn insert(&mut self, point: &Vec<T>) {
+    pub fn insert(&mut self, point: &[T]) {
         if self.root.is_none() {
             self.root = Some(Node::new_leaf(point, self.params.max_number_of_elements));
         }
@@ -55,7 +54,7 @@ where
         }
     }
 
-    pub fn query(&self, point: &Vec<T>, k: usize) -> Vec<Vec<T>> {
+    pub fn query(&self, point: &[T], k: usize) -> Vec<Vec<T>> {
         let mut neighbors = Vec::with_capacity(k);
         if self.root.is_some() {
             nearest_neighbors(self.root.as_ref().unwrap(), point, k, &mut neighbors);

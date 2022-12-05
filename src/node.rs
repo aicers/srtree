@@ -8,13 +8,11 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-#[allow(dead_code)]
 pub enum Data<T> {
     Points(Vec<Vec<T>>),
     Nodes(Vec<Node<T>>),
 }
 
-#[allow(dead_code)]
 pub struct Node<T> {
     rect: Rect<T>,
     sphere: Sphere<T>,
@@ -47,7 +45,7 @@ where
         }
     }
 
-    pub fn new_node(point: &Vec<T>, capacity: usize, height: usize) -> Node<T> {
+    pub fn new_node(point: &[T], capacity: usize, height: usize) -> Node<T> {
         Node::new(
             Rect::from_point(point),
             Sphere::from_point(point),
@@ -58,7 +56,7 @@ where
         )
     }
 
-    pub fn new_leaf(point: &Vec<T>, capacity: usize) -> Node<T> {
+    pub fn new_leaf(point: &[T], capacity: usize) -> Node<T> {
         Node::new(
             Rect::from_point(point),
             Sphere::from_point(point),
@@ -84,7 +82,7 @@ where
         )
     }
 
-    pub fn new_point(point: &Vec<T>) -> Node<T> {
+    pub fn new_point(point: &[T]) -> Node<T> {
         Node::new(
             Rect::from_point(point),
             Sphere::from_point(point),
@@ -123,7 +121,7 @@ where
         self.variance = variance;
     }
 
-    pub fn get_variance(&self) -> &Vec<T> {
+    pub fn get_variance(&self) -> &[T] {
         &self.variance
     }
 
@@ -162,7 +160,7 @@ where
         }
     }
 
-    pub fn child_centroid(&self, i: usize) -> &Vec<T> {
+    pub fn child_centroid(&self, i: usize) -> &[T] {
         match &self.data {
             Data::Nodes(_) => &self.nodes()[i].sphere.center,
             Data::Points(_) => &self.points()[i],
@@ -176,7 +174,7 @@ where
         }
     }
 
-    pub fn child_variance(&self, i: usize) -> &Vec<T> {
+    pub fn child_variance(&self, i: usize) -> &[T] {
         match &self.data {
             Data::Nodes(_) => self.nodes()[i].get_variance(),
             Data::Points(_) => {
@@ -219,7 +217,7 @@ where
         }
     }
 
-    pub fn intersects_point(&self, point: &Vec<T>) -> bool {
+    pub fn intersects_point(&self, point: &[T]) -> bool {
         self.rect.intersects_point(point) && self.sphere.intersects_point(point)
     }
 }

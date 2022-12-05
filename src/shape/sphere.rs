@@ -25,12 +25,12 @@ where
         Sphere::new(point.to_owned(), T::zero())
     }
 
-    pub fn distance2(&self, point: &Vec<T>) -> T {
+    pub fn distance2(&self, point: &[T]) -> T {
         let distance = euclidean(&self.center, point);
         T::zero().max(distance - (self.radius))
     }
 
-    pub fn intersects_point(&self, point: &Vec<T>) -> bool {
+    pub fn intersects_point(&self, point: &[T]) -> bool {
         self.distance2(point) <= T::zero()
     }
 

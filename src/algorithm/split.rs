@@ -67,7 +67,7 @@ where
     selected_index
 }
 
-pub fn split<T>(node: &mut Node<T>, parent_centroid: &Vec<T>, params: &Params) -> Node<T>
+pub fn split<T>(node: &mut Node<T>, parent_centroid: &[T], params: &Params) -> Node<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {

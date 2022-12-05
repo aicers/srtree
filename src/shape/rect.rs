@@ -4,7 +4,6 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Rect<T> {
     pub low: Vec<T>,
@@ -24,7 +23,7 @@ where
         Rect::new(point.to_owned(), point.to_owned())
     }
 
-    pub fn farthest_point_to(&self, point: &Vec<T>) -> Vec<T> {
+    pub fn farthest_point_to(&self, point: &[T]) -> Vec<T> {
         let mut result = self.low.clone();
         for i in 0..point.len() {
             if (self.high[i] - point[i]).abs() >= (self.low[i] - point[i]).abs() {
@@ -36,7 +35,7 @@ where
         result
     }
 
-    pub fn intersects_point(&self, point: &Vec<T>) -> bool {
+    pub fn intersects_point(&self, point: &[T]) -> bool {
         if self.low.len() != point.len() {
             return false;
         }

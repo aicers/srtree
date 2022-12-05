@@ -14,7 +14,7 @@ enum OverflowTreatment<T> {
     Split(Node<T>),
 }
 
-pub fn insert_data<T>(node: &mut Node<T>, point: &Vec<T>, params: &Params)
+pub fn insert_data<T>(node: &mut Node<T>, point: &[T], params: &Params)
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -114,7 +114,7 @@ where
 }
 
 fn insert_or_split<T>(
-    parent_centroid: &Vec<T>,
+    parent_centroid: &[T],
     node: &mut Node<T>,
     insert_node: Node<T>,
     params: &Params,
