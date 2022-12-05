@@ -4,8 +4,7 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-#[allow(dead_code)]
-pub fn euclidean<T>(point1: &Vec<T>, point2: &Vec<T>) -> T
+pub fn euclidean<T>(point1: &[T], point2: &[T]) -> T
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {

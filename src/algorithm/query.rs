@@ -7,7 +7,7 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-pub fn nearest_neighbors<T>(node: &Node<T>, point: &Vec<T>, k: usize, result: &mut Vec<Vec<T>>)
+pub fn nearest_neighbors<T>(node: &Node<T>, point: &[T], k: usize, result: &mut Vec<Vec<T>>)
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
