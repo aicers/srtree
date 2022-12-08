@@ -39,25 +39,30 @@ where
         if self.root.is_none() {
             self.root = Some(Node::new_leaf(point, self.params.max_number_of_elements));
         }
-        let root = self.root.as_mut().unwrap();
-        insert_data(root, point, &self.params);
-        if root.immed_children() > self.params.max_number_of_elements {
-            let sibling = split(root, &root.get_sphere().center.clone(), &self.params);
-            let mut new_root = Node::new_node(
-                &root.get_sphere().center,
-                self.params.max_number_of_elements,
-                root.get_height() + 1,
-            );
-            insert_node(&mut new_root, self.root.take().unwrap(), &self.params);
-            insert_node(&mut new_root, sibling, &self.params);
-            self.root = Some(new_root);
+
+        if let Some(root) = self.root.as_mut() {
+            insert_data(root, point, &self.params);
+
+            if root.immed_children() > self.params.max_number_of_elements {
+                let sibling = split(root, &root.get_sphere().center.clone(), &self.params);
+                let mut new_root = Node::new_node(
+                    &root.get_sphere().center,
+                    self.params.max_number_of_elements,
+                    root.get_height() + 1,
+                );
+                if let Some(old_root) = self.root.take() {
+                    insert_node(&mut new_root, old_root, &self.params);
+                }
+                insert_node(&mut new_root, sibling, &self.params);
+                self.root = Some(new_root);
+            }
         }
     }
 
     pub fn query(&self, point: &[T], k: usize) -> Vec<Vec<T>> {
         let mut neighbors = Vec::with_capacity(k);
-        if self.root.is_some() {
-            nearest_neighbors(self.root.as_ref().unwrap(), point, k, &mut neighbors);
+        if let Some(root) = &self.root {
+            nearest_neighbors(root, point, k, &mut neighbors);
         }
         neighbors
     }
