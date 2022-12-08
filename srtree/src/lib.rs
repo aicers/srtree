@@ -3,5 +3,5 @@ mod measure;
 mod node;
 mod params;
 mod shape;
-mod srtree;
-pub use srtree::SRTree;
+mod tree;
+pub use tree::SRTree;
