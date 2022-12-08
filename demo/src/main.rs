@@ -1,4 +1,4 @@
-use srtree::sr::SRTree;
+use srtree::SRTree;
 
 fn main() {
     let mut srtree = SRTree::new(7, 15, 7, true);
