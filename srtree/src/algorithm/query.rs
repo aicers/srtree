@@ -41,7 +41,7 @@ mod tests {
 
     #[test]
     pub fn test_nearest_neighbors_with_leaf() {
-        let params = Params::new(4, 9, 4, true);
+        let params = Params::new(4, 9, 4, true).unwrap();
         let origin = vec![0., 0.];
         let mut leaf_node = Node::new_leaf(&origin, params.max_number_of_elements);
 

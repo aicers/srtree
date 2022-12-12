@@ -19,19 +19,11 @@ where
 {
     #[must_use]
     pub fn new(
-        min_number_of_elements: usize,
-        max_number_of_elements: usize,
-        reinsert_count: usize,
-        prefer_close_reinsert: bool,
+        params: Params
     ) -> SRTree<T> {
         SRTree {
             root: None,
-            params: Params::new(
-                min_number_of_elements,
-                max_number_of_elements,
-                reinsert_count,
-                prefer_close_reinsert,
-            ),
+            params,
         }
     }
 
@@ -74,7 +66,8 @@ mod tests {
 
     #[test]
     pub fn test_insertion_query() {
-        let mut tree: SRTree<f64> = SRTree::new(3, 10, 3, true);
+        let params = Params::new(3, 7, 3, true).unwrap();
+        let mut tree: SRTree<f64> = SRTree::new(params);
         let search_point = vec![1.0, 0.0];
         assert!(!tree.query(&search_point, 1).contains(&search_point)); // not inserted yet
         tree.insert(&vec![1.0, 0.0]);

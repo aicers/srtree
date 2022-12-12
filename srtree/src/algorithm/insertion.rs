@@ -173,7 +173,7 @@ mod tests {
     #[test]
     pub fn test_leaf_insertion() {
         let point = vec![0., 0.];
-        let params = Params::new(4, 9, 4, true);
+        let params = Params::new(4, 9, 4, true).unwrap();
         let mut leaf_node = Node::new_leaf(&point, params.max_number_of_elements);
         insert_data(&mut leaf_node, &point, &params);
         let mut result = Vec::new();
@@ -183,7 +183,7 @@ mod tests {
 
     #[test]
     pub fn test_insert_now() {
-        let params = Params::new(1, 10, 4, true);
+        let params = Params::new(1, 10, 4, true).unwrap();
 
         // first leaf
         let point = vec![0., 0.];
@@ -219,7 +219,7 @@ mod tests {
 
     #[test]
     pub fn test_insert_overflow_treatment() {
-        let params = Params::new(1, 4, 2, true);
+        let params = Params::new(1, 4, 2, true).unwrap();
 
         // first leaf
         let point = vec![0., 0.];
@@ -256,7 +256,7 @@ mod tests {
 
     #[test]
     pub fn test_insert_dynamic_reorganization() {
-        let params = Params::new(1, 4, 2, true);
+        let params = Params::new(1, 4, 2, true).unwrap();
 
         // The first leaf
         let first_leaf_points = vec![vec![1., 1.], vec![3., 1.], vec![1., 3.], vec![3., 3.]];
