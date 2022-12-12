@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 srtree = { path = "../srtree" }
+rand = "0.8.5"
+ordered-float = "3.4.0"

@@ -13,8 +13,9 @@ pub fn euclidean(point1: &[f64], point2: &[f64]) -> f64 {
     distance.sqrt()
 }
 
-fn main() {
-    let params = Params::new(7, 15, 7, true).unwrap();
+#[test]
+fn test_with_random_points() {    
+    let params = Params::new(7, 15, 7,true).unwrap();
     let mut tree: SRTree<f64> = SRTree::new(params);
     let number_of_points = 100;
     let mut rng = rand::thread_rng();
