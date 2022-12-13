@@ -8,6 +8,13 @@ pub fn euclidean<T>(point1: &[T], point2: &[T]) -> T
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
+    euclidean_squared(point1, point2).sqrt()
+}
+
+pub fn euclidean_squared<T>(point1: &[T], point2: &[T]) -> T
+where
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
     if point1.len() != point2.len() {
         return T::infinity();
     }
@@ -15,7 +22,7 @@ where
     for i in 0..point1.len() {
         distance += (point1[i] - point2[i]).powi(2);
     }
-    distance.sqrt()
+    distance
 }
 
 #[cfg(test)]

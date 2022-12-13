@@ -216,10 +216,6 @@ where
             self.nodes_mut().split_off(number_of_immediate_children - n)
         }
     }
-
-    pub fn intersects_point(&self, point: &[T]) -> bool {
-        self.rect.intersects_point(point) && self.sphere.intersects_point(point)
-    }
 }
 
 #[cfg(test)]

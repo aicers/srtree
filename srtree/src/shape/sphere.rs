@@ -25,17 +25,9 @@ where
         Sphere::new(point.to_owned(), T::zero())
     }
 
-    pub fn distance2(&self, point: &[T]) -> T {
+    pub fn min_distance(&self, point: &[T]) -> T {
         let distance = euclidean(&self.center, point);
         T::zero().max(distance - (self.radius))
-    }
-
-    pub fn intersects_point(&self, point: &[T]) -> bool {
-        self.distance2(point) <= T::zero()
-    }
-
-    pub fn intersects(&self, sphere: &Sphere<T>) -> bool {
-        self.distance2(&sphere.center) - (self.radius + sphere.radius) <= T::zero()
     }
 }
 
@@ -44,44 +36,9 @@ mod tests {
     use super::*;
 
     #[test]
-    pub fn test_sphere_intersects_point() {
+    pub fn test_sphere_min_distance() {
         let sphere1 = Sphere::new(vec![0., 0.], 10.);
-        let point1 = vec![5., 5.];
-        assert!(sphere1.intersects_point(&point1));
-    }
-
-    #[test]
-    pub fn test_sphere_doesnot_intersect_point() {
-        let sphere1 = Sphere::new(vec![0., 0.], 10.);
-        let point2 = vec![15., 15.];
-        assert!(!sphere1.intersects_point(&point2));
-    }
-
-    #[test]
-    pub fn test_sphere_intersects_sphere() {
-        let sphere1 = Sphere::new(vec![0., 0.], 10.);
-        let sphere2 = Sphere::new(vec![15., 15.], 15.);
-        assert!(sphere1.intersects(&sphere2));
-    }
-
-    #[test]
-    pub fn test_sphere_doesnot_intersect_sphere() {
-        let sphere1 = Sphere::new(vec![0., 0.], 5.);
-        let sphere2 = Sphere::new(vec![20., 20.], 5.);
-        assert_eq!(sphere1.intersects(&sphere2), false);
-    }
-
-    #[test]
-    pub fn test_sphere_intersects_its_clone() {
-        let sphere1 = Sphere::new(vec![0., 0.], 10.);
-        let sphere2 = Sphere::new(vec![0., 0.], 10.);
-        assert!(sphere1.intersects(&sphere2));
-    }
-
-    #[test]
-    pub fn test_sphere_intersects_smaller_sphere() {
-        let sphere1 = Sphere::new(vec![0., 0.], 10.);
-        let sphere2 = Sphere::new(vec![10., 10.], 100.);
-        assert!(sphere1.intersects(&sphere2));
+        let point1 = vec![15., 0.];
+        assert_eq!(sphere1.min_distance(&point1), 5.);
     }
 }
