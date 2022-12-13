@@ -6,7 +6,6 @@ pub struct Params {
 }
 
 impl Params {
-
     #[must_use]
     pub fn new(
         min_number_of_elements: usize,
@@ -14,7 +13,9 @@ impl Params {
         reinsert_count: usize,
         prefer_close_reinsert: bool,
     ) -> Option<Params> {
-        if min_number_of_elements > (max_number_of_elements + 1) / 2 || reinsert_count >= max_number_of_elements - min_number_of_elements {
+        if min_number_of_elements > (max_number_of_elements + 1) / 2
+            || reinsert_count >= max_number_of_elements - min_number_of_elements
+        {
             return None;
         }
         Some(Params {
@@ -35,7 +36,12 @@ mod tests {
         let min_num_of_elements_per_node = 6;
         let max_num_of_elements_per_node = 10;
         let reinsert_count = 4;
-        let params = Params::new(min_num_of_elements_per_node, max_num_of_elements_per_node, reinsert_count, true);
+        let params = Params::new(
+            min_num_of_elements_per_node,
+            max_num_of_elements_per_node,
+            reinsert_count,
+            true,
+        );
         assert!(params.is_none())
     }
 
@@ -44,7 +50,12 @@ mod tests {
         let min_num_of_elements_per_node = 4;
         let max_num_of_elements_per_node = 10;
         let reinsert_count = 7;
-        let params = Params::new(min_num_of_elements_per_node, max_num_of_elements_per_node, reinsert_count, true);
+        let params = Params::new(
+            min_num_of_elements_per_node,
+            max_num_of_elements_per_node,
+            reinsert_count,
+            true,
+        );
         assert!(params.is_none())
     }
 
@@ -53,7 +64,12 @@ mod tests {
         let min_num_of_elements_per_node = 4;
         let max_num_of_elements_per_node = 10;
         let reinsert_count = 5;
-        let params = Params::new(min_num_of_elements_per_node, max_num_of_elements_per_node, reinsert_count, true);
+        let params = Params::new(
+            min_num_of_elements_per_node,
+            max_num_of_elements_per_node,
+            reinsert_count,
+            true,
+        );
         assert!(params.is_some())
     }
 }

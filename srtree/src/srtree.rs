@@ -7,7 +7,13 @@ use ordered_float::Float;
 use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
+pub enum InsertionResult {
+    Success,
+    Failure,
+}
+
 pub struct SRTree<T> {
+    dimension: usize,
     root: Option<Node<T>>,
     params: Params,
 }
@@ -18,16 +24,19 @@ where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     #[must_use]
-    pub fn new(
-        params: Params
-    ) -> SRTree<T> {
+    pub fn new(dimension: usize, params: Params) -> SRTree<T> {
         SRTree {
             root: None,
             params,
+            dimension,
         }
     }
 
-    pub fn insert(&mut self, point: &[T]) {
+    pub fn insert(&mut self, point: &[T]) -> InsertionResult {
+        if self.dimension != point.len() {
+            eprintln!("Problem inserting a point: different dimensions");
+            return InsertionResult::Failure;
+        }
         if self.root.is_none() {
             self.root = Some(Node::new_leaf(point, self.params.max_number_of_elements));
         }
@@ -49,6 +58,7 @@ where
                 self.root = Some(new_root);
             }
         }
+        InsertionResult::Success
     }
 
     pub fn query(&self, point: &[T], k: usize) -> Vec<Vec<T>> {
@@ -67,7 +77,7 @@ mod tests {
     #[test]
     pub fn test_insertion_query() {
         let params = Params::new(3, 7, 3, true).unwrap();
-        let mut tree: SRTree<f64> = SRTree::new(params);
+        let mut tree: SRTree<f64> = SRTree::new(2, params);
         let search_point = vec![1.0, 0.0];
         assert!(!tree.query(&search_point, 1).contains(&search_point)); // not inserted yet
         tree.insert(&vec![1.0, 0.0]);
