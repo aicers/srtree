@@ -61,12 +61,13 @@ where
         InsertionResult::Success
     }
 
-    pub fn query(&self, point: &[T], k: usize) -> Vec<Vec<T>> {
-        let mut neighbors = Vec::with_capacity(k);
-        if let Some(root) = &self.root {
-            nearest_neighbors(root, point, k, &mut neighbors);
+    pub fn query(&mut self, point: &[T], k: usize) -> Vec<Vec<T>> {
+        if let Some(root) = self.root.as_mut() {
+            let (result, max_distance) = nearest_neighbors(root, point, k, T::infinity());
+            result
+        } else {
+            Vec::new()
         }
-        neighbors
     }
 }
 

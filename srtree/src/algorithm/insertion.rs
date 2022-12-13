@@ -176,9 +176,7 @@ mod tests {
         let params = Params::new(4, 9, 4, true).unwrap();
         let mut leaf_node = Node::new_leaf(&point, params.max_number_of_elements);
         insert_data(&mut leaf_node, &point, &params);
-        let mut result = Vec::new();
-        nearest_neighbors(&mut leaf_node, &point, 1, &mut result);
-        assert!(result.contains(&point));
+        assert!(leaf_node.points().contains(&point));
     }
 
     #[test]
