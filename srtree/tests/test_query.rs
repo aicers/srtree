@@ -15,25 +15,33 @@ pub fn euclidean(point1: &[f64], point2: &[f64]) -> f64 {
 
 #[test]
 fn test_with_random_points() {
-    let params = Params::new(7, 15, 7, true).unwrap();
-    let mut tree: SRTree<f64> = SRTree::new(2, params);
+    let number_of_dimensions = 2;
     let number_of_points = 100;
+    let k = 5;
+
+    let params = Params::new(3, 7, 3, true).unwrap();
+    let mut tree: SRTree<f64> = SRTree::new(number_of_dimensions, params);
+
     let mut rng = rand::thread_rng();
 
-    let mut inserted = 0;
     let mut all_points = Vec::new();
-    while inserted < number_of_points {
-        let x: f64 = 1000. * rng.gen::<f64>();
-        let y: f64 = 1000. * rng.gen::<f64>();
-        all_points.push(vec![x, y]);
-        tree.insert(&[x, y]);
-        inserted += 1;
+    for _ in 0..number_of_points {
+        let mut point = Vec::new();
+        for _ in 0..number_of_dimensions {
+            let x: f64 = 100000. * rng.gen::<f64>();
+            point.push(x);
+        }
+        tree.insert(&point);
+        all_points.push(point);
     }
 
     let mut points = all_points.clone();
     for p in all_points.iter() {
-        let k = 10;
-        let result = tree.query(&p, 10);
+
+        // SRTree nearest neighbors
+        let result = tree.query(&p, k);
+
+        // Brute-force
         points.sort_by_key(|a| OrderedFloat(euclidean(p, a)));
 
         for i in 0..k {

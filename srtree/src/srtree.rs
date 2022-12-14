@@ -1,9 +1,10 @@
 use crate::algorithm::insertion::{insert_data, insert_node};
 use crate::algorithm::query::nearest_neighbors;
 use crate::algorithm::split::split;
+use crate::measure::distance::euclidean;
 use crate::node::Node;
 use crate::params::Params;
-use ordered_float::Float;
+use ordered_float::{Float, OrderedFloat};
 use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
@@ -61,13 +62,21 @@ where
         InsertionResult::Success
     }
 
-    pub fn query(&mut self, point: &[T], k: usize) -> Vec<Vec<T>> {
+    pub fn query_all(&mut self, point: &[T], k: usize) -> Vec<Vec<T>> {
         if let Some(root) = self.root.as_mut() {
-            let (result, max_distance) = nearest_neighbors(root, point, k, T::infinity());
+            let (candidates, _) = nearest_neighbors(root, point, k, T::infinity());
+            let mut result = candidates.to_owned();
+            result.sort_by_key(|candidate| OrderedFloat(euclidean(&point, &candidate)));
             result
         } else {
             Vec::new()
         }
+    }
+    
+    pub fn query(&mut self, point: &[T], k: usize) -> Vec<Vec<T>> {
+        let mut result = self.query_all(point, k);
+        result.truncate(k);
+        result
     }
 }
 
