@@ -11,7 +11,6 @@ pub struct Rect<T> {
     pub high: Vec<T>,
 }
 
-#[allow(dead_code)]
 impl<T> Rect<T>
 where
     T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
@@ -50,6 +49,7 @@ where
         result
     }
 
+    #[allow(dead_code)]
     pub fn min_max_distance(&self, point: &[T]) -> T {
         let min_max = self.farthest_point_to(point);
         let mut distance = euclidean(&min_max, point);

@@ -168,7 +168,7 @@ mod tests {
     use std::ops::Div;
 
     use super::*;
-    use crate::algorithm::{choose_subtree::choose_subtree, query::nearest_neighbors};
+    use crate::algorithm::choose_subtree::choose_subtree;
 
     #[test]
     pub fn test_leaf_insertion() {
