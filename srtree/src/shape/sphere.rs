@@ -5,14 +5,12 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Sphere<T> {
     pub center: Vec<T>,
     pub radius: T,
 }
 
-#[allow(dead_code)]
 impl<T> Sphere<T>
 where
     T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,

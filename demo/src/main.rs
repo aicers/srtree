@@ -2,7 +2,7 @@ use ordered_float::OrderedFloat;
 use rand::prelude::*;
 use srtree::{Params, SRTree};
 
-pub fn euclidean(point1: &[f64], point2: &[f64]) -> f64 {
+fn euclidean(point1: &[f64], point2: &[f64]) -> f64 {
     if point1.len() != point2.len() {
         return f64::INFINITY;
     }
@@ -30,9 +30,9 @@ fn main() {
     }
 
     let mut points = all_points.clone();
-    for p in all_points.iter() {
+    for p in &all_points {
         let k = 10;
-        let result = tree.query(&p, 10);
+        let result = tree.query(p, 10);
 
         // brute-force
         points.sort_by_key(|a| OrderedFloat(euclidean(p, a)));

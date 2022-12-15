@@ -1,72 +1,58 @@
 use crate::measure::distance::euclidean;
 use crate::node::Node;
 use ordered_float::{Float, OrderedFloat};
-use priority_queue::{DoublePriorityQueue, PriorityQueue};
 use std::{
+    collections::BinaryHeap,
     fmt::Debug,
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-fn min_distance<T>(node: &Node<T>, point: &[T]) -> T
+pub fn nearest_neighbors<T>(node: &Node<T>, point: &[T], k: usize) -> Vec<Vec<T>>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    let ds = node.get_sphere().min_distance(point);
-    let dr = node.get_rect().min_distance(point);
-    ds.max(dr)
+    let mut result = Vec::new();
+    let mut distance_heap = BinaryHeap::new();
+    search(node, point, k, &mut result, &mut distance_heap);
+    result.sort_by_key(|neighbor| OrderedFloat(euclidean(point, neighbor)));
+    result
 }
 
-fn min_max_distance<T>(node: &Node<T>, point: &[T]) -> T
-where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
-{
-    node.get_rect().min_max_distance(point)
-}
-
-pub fn nearest_neighbors<T>(
+fn search<T>(
     node: &Node<T>,
     point: &[T],
     k: usize,
-    distance: T
-) -> (Vec<Vec<T>>, T)
-where
+    result: &mut Vec<Vec<T>>,
+    distance_heap: &mut BinaryHeap<OrderedFloat<T>>,
+) where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.is_leaf() {
-        let mut result = Vec::new();
-        let mut max_distance = T::min_value();
-        node.points().iter().for_each(|candidate| {
-            result.push(candidate.clone());
-            max_distance = max_distance.max(euclidean(candidate, point));
+        // insert all potential neighbors in a leaf node:
+        node.points().iter().for_each(|neighbor| {
+            let neighbor_distance = euclidean(neighbor, point);
+            distance_heap.push(OrderedFloat(neighbor_distance));
+            result.push(neighbor.clone());
         });
-        (result, max_distance)
+
+        // keep only closest k distances:
+        while distance_heap.len() > k {
+            distance_heap.pop();
+        }
     } else {
-        let mut result = Vec::new();
-        let mut max_distance = T::min_value();
-        let mut target_distance = distance;
-
-        // construct a queue with distance as a priority
-        let mut queue: DoublePriorityQueue<usize, OrderedFloat<T>> = DoublePriorityQueue::new();
-        for (index, candidate) in node.nodes().iter().enumerate() {
-            queue.push(index, OrderedFloat(min_distance(candidate, point)));
-        }
-
-        while !queue.is_empty() {
-            // pop the closest candidate
-            let (candidate_index, candidate_min_dist) = queue.pop_min().unwrap();
-            if candidate_min_dist > OrderedFloat(target_distance) || candidate_min_dist > OrderedFloat(distance) {
-                break;
+        node.nodes().iter().for_each(|child| {
+            // if k neighbors were already sampled, then the target distance is kth closest distance:
+            let mut target_distance = OrderedFloat(T::infinity());
+            if distance_heap.len() == k {
+                target_distance = *distance_heap.peek().unwrap();
             }
 
-            let (candidate_result, candidate_max_dist) = nearest_neighbors(&node.nodes()[candidate_index], point, k, target_distance);
-            result.extend(candidate_result.to_owned());
-            max_distance = max_distance.max(candidate_max_dist);
-
-            if result.len() >= k {
-                target_distance = max_distance;
+            // search pruning: don't visit nodes with min_distance bigger than kth distance
+            let distance_to_child = OrderedFloat(child.min_distance(point));
+            if distance_to_child < target_distance {
+                search(child, point, k, result, distance_heap);
             }
-        }
-        (result, target_distance)
+        });
     }
 }
 
@@ -89,7 +75,7 @@ mod tests {
         }
 
         let k = params.max_number_of_elements / 3;
-        let (result, max_distance) = nearest_neighbors(&mut leaf_node, &origin, k, f64::infinity());
+        let result = nearest_neighbors(&mut leaf_node, &origin, k);
 
         for i in 0..k {
             let point = vec![i as f64, 0.];

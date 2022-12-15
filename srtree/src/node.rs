@@ -22,7 +22,6 @@ pub struct Node<T> {
     height: usize, // height above leaf
 }
 
-#[allow(dead_code)]
 impl<T> Node<T>
 where
     T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
@@ -183,10 +182,6 @@ where
         }
     }
 
-    pub fn set_height(&mut self, height: usize) {
-        self.height = height;
-    }
-
     pub fn get_height(&self) -> usize {
         self.height
     }
@@ -215,6 +210,15 @@ where
                 .sort_by_key(|node| OrderedFloat(euclidean(&center, &node.sphere.center)));
             self.nodes_mut().split_off(number_of_immediate_children - n)
         }
+    }
+
+    pub fn min_distance(&self, point: &[T]) -> T
+    where
+        T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    {
+        let ds = self.get_sphere().min_distance(point);
+        let dr = self.get_rect().min_distance(point);
+        ds.max(dr)
     }
 }
 

@@ -37,7 +37,6 @@ fn test_with_random_points() {
 
     let mut points = all_points.clone();
     for p in all_points.iter() {
-
         // SRTree nearest neighbors
         let result = tree.query(&p, k);
 
