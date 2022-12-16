@@ -1,95 +1,92 @@
 use srtree::{SRTree, Params};
 
-fn main() {
-    const N: usize = 1_000_000;
+fn test_srtree(){
+    const N: usize = 1_000_000; // # of training points
+    const D: usize = 9; // dimension of each point
+    const M: usize = 100; // # of search points
+    const K: usize = 100; // # of nearest neighbors to search
+
+    println!("");
+    println!("Number of training points:   {:?}", N);
+    println!("Dimension of each point:     {:?}", D);
+    println!("Number of query points:      {:?}", M);
+    println!("Number of nearest neighbors: {:?}", K);
     
     let mut pts = Vec::new();
     for _ in 0..N {
-        let pt = [
-            rand::random::<f64>() * 360.0 - 180.0,
-            rand::random::<f64>() * 180.0 - 90.0,
-        ];
-        pts.push(pt);
+        let mut point = [0.; D];
+        for i in 0..D {
+            point[i] = rand::random::<f64>() * 1_000_000.;
+        }
+        pts.push(point);
     }
 
-    // 1%
-    let mut r1 = Vec::new();
-    for _ in 0..10_000 {
-        let p = 0.01;
-        let min = [
-            rand::random::<f64>() * 360.0 - 180.0,
-            rand::random::<f64>() * 180.0 - 90.0,
-        ];
-        let max = [min[0] + 360.0 * p, min[1] + 180.0 * p];
-        r1.push((min, max));
-    }
-    // 5%
-    let mut r5 = Vec::new();
-    for _ in 0..10_000 {
-        let p = 0.05;
-        let min = [
-            rand::random::<f64>() * 360.0 - 180.0,
-            rand::random::<f64>() * 180.0 - 90.0,
-        ];
-        let max = [min[0] + 360.0 * p, min[1] + 180.0 * p];
-        r5.push((min, max));
-    }
-    // 10%
-    let mut r10 = Vec::new();
-    for _ in 0..10_000 {
-        let p = 0.10;
-        let min = [
-            rand::random::<f64>() * 360.0 - 180.0,
-            rand::random::<f64>() * 180.0 - 90.0,
-        ];
-        let max = [min[0] + 360.0 * p, min[1] + 180.0 * p];
-        r10.push((min, max));
+    let mut search_points = Vec::new();
+    for _ in 0..M {
+        let mut point = [0.; D];
+        for i in 0..D {
+            point[i] = rand::random::<f64>() * 1_000_000.;
+        }
+        search_points.push(point);
     }
 
-    println!(">>> SRTree::new() <<<");
+    println!("");
+    println!("---- RTree ----");
+    let mut tree = rtree_rs::RTree::new();
+    print!("insert:        ");
+    lotsa::ops(pts.len(), 1, |i, _| {
+        tree.insert(rtree_rs::Rect::new(pts[i], pts[i]), i);
+    });
+    print!("kNN query:     ");
+    lotsa::ops(search_points.len(), 1, |i, _| {
+        // scan kNN
+        let mut count = 0;
+        let target = rtree_rs::Rect::new(search_points[i], search_points[i]);
+        while let Some(_) = tree.nearby(|rect, _| rect.box_dist(&target)).next() {
+            count += 1;
+            if count == K {
+                break;
+            }
+        }
+        assert_eq!(count, K);
+    });
+
+    println!("");
+    println!("---- RStar ----");
+    let mut tree = rstar::RTree::new();
+    print!("insert:        ");
+    lotsa::ops(N, 1, |i, _| {
+        tree.insert(pts[i]);
+    });
+    print!("kNN query:     ");
+    lotsa::ops(search_points.len(), 1, |i, _| {
+        let mut count = 0;
+        while let Some(_) = tree.nearest_neighbor_iter(&search_points[i]).next() {
+            count += 1;
+            if count == K {
+                break;
+            }
+        }
+        assert_eq!(count, K);
+    });
+
+    println!("");
+    println!("---- SRTree ----");
     let max_elements = 32;
     let min_elements = max_elements * 20 / 100;
     let reinsert_count = min_elements;
     let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-    let mut tr = SRTree::new(2, params);
+    let mut tree = SRTree::new(D, params);
     print!("insert:        ");
     lotsa::ops(pts.len(), 1, |i, _| {
-        tr.insert(&pts[i]);
+        tree.insert(&pts[i]);
     });
-    print!("search-item:   ");
-    lotsa::ops(pts.len(), 1, |i, _| {
-        for _ in tr.query(&pts[i], 1) {
-            break;
-        }
+    print!("kNN query:     ");
+    lotsa::ops(search_points.len(), 1, |i, _| {
+        tree.query(&search_points[i], K);
     });
-    print!("search-1%:     ");
-    lotsa::ops(r1.len(), 1, |i, _| {
-        for _ in tr.query(&pts[i], 1) {}
-    });
-    print!("search-5%:     ");
-    lotsa::ops(r5.len(), 1, |i, _| {
-        for _ in tr.query(&pts[i], 1) {}
-    });
-    print!("search-10%:    ");
-    lotsa::ops(r10.len(), 1, |i, _| {
-        for _ in tr.query(&pts[i], 1) {}
-    });
-    // print!("remove-half:   ");
-    // lotsa::ops(pts.len()/2, 1, |i, _| {
-    //     tr.remove(rtree_rs::Rect::new(pts[i*2],pts[i*2]), &(i*2)).unwrap();
-    // });
-    print!("reinsert-half: ");
-    lotsa::ops(pts.len()/2, 1, |i, _| {
-        tr.insert(&pts[i]);
-    });
-    print!("search-item:   ");
-    lotsa::ops(pts.len(), 1, |i, _| {
-        for _ in tr.query(&pts[i], 1) {
-            break;
-        }
-    });
-    print!("search-1%:     ");
-    lotsa::ops(r1.len(), 1, |i, _| {
-        for _ in tr.query(&pts[i], 1) {}
-    });
+}
+
+fn main() {
+    test_srtree();
 }

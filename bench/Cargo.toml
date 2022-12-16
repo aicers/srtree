@@ -10,3 +10,5 @@ srtree = { path = "../srtree" }
 rand = "0.8.5"
 ordered-float = "3.4.0"
 lotsa = "*"
+rtree_rs = "0.1.4"
+rstar = "0.9.3"
