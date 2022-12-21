@@ -9,8 +9,8 @@ use std::{
 };
 
 pub enum Data<T> {
-    Points(Box<Vec<Vec<T>>>),
-    Nodes(Box<Vec<Node<T>>>),
+    Points(Vec<Vec<T>>),
+    Nodes(Vec<Node<T>>),
 }
 
 pub struct Node<T> {
@@ -48,7 +48,7 @@ where
         Node::new(
             Rect::from_point(point),
             Sphere::from_point(point),
-            Data::Nodes(Box::new(Vec::with_capacity(capacity))),
+            Data::Nodes(Vec::with_capacity(capacity)),
             vec![T::zero(); point.len()],
             0,
             height,
@@ -59,7 +59,7 @@ where
         Node::new(
             Rect::from_point(point),
             Sphere::from_point(point),
-            Data::Points(Box::new(Vec::with_capacity(capacity))),
+            Data::Points(Vec::with_capacity(capacity)),
             vec![T::zero(); point.len()],
             0,
             1,
@@ -68,8 +68,8 @@ where
 
     pub fn new_sibling(&self, capacity: usize) -> Node<T> {
         let data = match self.data {
-            Data::Nodes(_) => Data::Nodes(Box::new(Vec::with_capacity(capacity))),
-            Data::Points(_) => Data::Points(Box::new(Vec::with_capacity(capacity))),
+            Data::Nodes(_) => Data::Nodes(Vec::with_capacity(capacity)),
+            Data::Points(_) => Data::Points(Vec::with_capacity(capacity)),
         };
         Node::new(
             Rect::from_point(&self.get_sphere().center),
@@ -85,7 +85,7 @@ where
         Node::new(
             Rect::from_point(point),
             Sphere::from_point(point),
-            Data::Points(Box::new(Vec::with_capacity(1))),
+            Data::Points(Vec::with_capacity(1)),
             vec![T::zero(); point.len()],
             0,
             0,

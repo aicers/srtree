@@ -8,7 +8,7 @@ pub fn euclidean<T>(point1: &[T], point2: &[T]) -> T
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    euclidean_squared(point1, point2)//.sqrt()
+    euclidean_squared(point1, point2) //.sqrt()
 }
 
 pub fn euclidean_squared<T>(point1: &[T], point2: &[T]) -> T

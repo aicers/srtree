@@ -1,22 +1,22 @@
-use srtree::{SRTree, Params};
+use srtree::{Params, SRTree};
 
-fn test_srtree(){
+fn test_srtree() {
     const N: usize = 1_000_000; // # of training points
     const D: usize = 9; // dimension of each point
-    const M: usize = 100; // # of search points
-    const K: usize = 100; // # of nearest neighbors to search
+    const M: usize = 1000; // # of search points
+    const K: usize = 1; // # of nearest neighbors to search
 
-    println!("");
+    println!();
     println!("Number of training points:   {:?}", N);
     println!("Dimension of each point:     {:?}", D);
     println!("Number of query points:      {:?}", M);
     println!("Number of nearest neighbors: {:?}", K);
-    
+
     let mut pts = Vec::new();
     for _ in 0..N {
         let mut point = [0.; D];
-        for i in 0..D {
-            point[i] = rand::random::<f64>() * 1_000_000.;
+        for item in point.iter_mut().take(D) {
+            *item = rand::random::<f64>() * 1_000_000.;
         }
         pts.push(point);
     }
@@ -24,13 +24,13 @@ fn test_srtree(){
     let mut search_points = Vec::new();
     for _ in 0..M {
         let mut point = [0.; D];
-        for i in 0..D {
-            point[i] = rand::random::<f64>() * 1_000_000.;
+        for item in point.iter_mut().take(D) {
+            *item = rand::random::<f64>() * 1_000_000.;
         }
         search_points.push(point);
     }
 
-    println!("");
+    println!();
     println!("---- RTree ----");
     let mut tree = rtree_rs::RTree::new();
     print!("insert:        ");
@@ -39,19 +39,11 @@ fn test_srtree(){
     });
     print!("kNN query:     ");
     lotsa::ops(search_points.len(), 1, |i, _| {
-        // scan kNN
-        let mut count = 0;
         let target = rtree_rs::Rect::new(search_points[i], search_points[i]);
-        while let Some(_) = tree.nearby(|rect, _| rect.box_dist(&target)).next() {
-            count += 1;
-            if count == K {
-                break;
-            }
-        }
-        assert_eq!(count, K);
+        tree.nearby(|rect, _| rect.box_dist(&target)).next();
     });
 
-    println!("");
+    println!();
     println!("---- RStar ----");
     let mut tree = rstar::RTree::new();
     print!("insert:        ");
@@ -60,17 +52,10 @@ fn test_srtree(){
     });
     print!("kNN query:     ");
     lotsa::ops(search_points.len(), 1, |i, _| {
-        let mut count = 0;
-        while let Some(_) = tree.nearest_neighbor_iter(&search_points[i]).next() {
-            count += 1;
-            if count == K {
-                break;
-            }
-        }
-        assert_eq!(count, K);
+        tree.nearest_neighbor_iter(&search_points[i]).next();
     });
 
-    println!("");
+    println!();
     println!("---- SRTree ----");
     let max_elements = 32;
     let min_elements = max_elements * 20 / 100;
