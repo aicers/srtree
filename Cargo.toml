@@ -3,4 +3,5 @@
 members = [
     "srtree",
     "demo",
+    "bench",
 ]

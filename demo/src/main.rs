@@ -1,45 +1,17 @@
-use ordered_float::OrderedFloat;
-use rand::prelude::*;
 use srtree::{Params, SRTree};
-
-fn euclidean(point1: &[f64], point2: &[f64]) -> f64 {
-    if point1.len() != point2.len() {
-        return f64::INFINITY;
-    }
-    let mut distance = 0.;
-    for i in 0..point1.len() {
-        distance += (point1[i] - point2[i]).powi(2);
-    }
-    distance.sqrt()
-}
 
 fn main() {
     let params = Params::new(7, 15, 7, true).unwrap();
     let mut tree: SRTree<f64> = SRTree::new(2, params);
     let number_of_points = 100;
-    let mut rng = rand::thread_rng();
 
-    let mut inserted = 0;
-    let mut all_points = Vec::new();
-    while inserted < number_of_points {
-        let x: f64 = 1000. * rng.gen::<f64>();
-        let y: f64 = 1000. * rng.gen::<f64>();
-        all_points.push(vec![x, y]);
+    for i in 0..number_of_points {
+        let x = f64::from(i);
+        let y = f64::from(i);
         tree.insert(&[x, y]);
-        inserted += 1;
     }
 
-    let mut points = all_points.clone();
-    for p in &all_points {
-        let k = 10;
-        let result = tree.query(p, 10);
-
-        // brute-force
-        points.sort_by_key(|a| OrderedFloat(euclidean(p, a)));
-
-        // compare the query result with brute-force
-        for i in 0..k {
-            assert_eq!(result[i], points[i]);
-        }
-    }
+    let neighbors = tree.query(&[0., 0.], 2);
+    println!("{:?}", neighbors[0]); // [0., 0.]
+    println!("{:?}", neighbors[1]); // [1., 1.]
 }
