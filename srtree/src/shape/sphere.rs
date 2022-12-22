@@ -25,7 +25,7 @@ where
 
     pub fn min_distance(&self, point: &[T]) -> T {
         let distance = euclidean(&self.center, point);
-        T::zero().max(distance - (self.radius))
+        T::zero().max(distance - (self.radius)).powi(2)
     }
 }
 
@@ -37,6 +37,6 @@ mod tests {
     pub fn test_sphere_min_distance() {
         let sphere1 = Sphere::new(vec![0., 0.], 10.);
         let point1 = vec![15., 0.];
-        assert_eq!(sphere1.min_distance(&point1), 5.);
+        assert_eq!(sphere1.min_distance(&point1), 25.);
     }
 }

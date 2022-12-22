@@ -1,4 +1,4 @@
-use crate::measure::distance::euclidean;
+use crate::measure::distance::euclidean_squared;
 use crate::node::Node;
 use ordered_float::Float;
 use std::{
@@ -16,7 +16,7 @@ where
     let mut distance = T::infinity();
     for (i, child) in node.nodes().iter().enumerate() {
         let current_distance =
-            euclidean(&child.get_sphere().center, &search_node.get_sphere().center);
+            euclidean_squared(&child.get_sphere().center, &search_node.get_sphere().center);
         if current_distance < distance {
             distance = current_distance;
             closest_node_index = i;
