@@ -1,5 +1,5 @@
 use crate::{
-    measure::distance::euclidean,
+    measure::distance::euclidean_squared,
     shape::{rect::Rect, sphere::Sphere},
 };
 use ordered_float::{Float, OrderedFloat};
@@ -199,7 +199,7 @@ where
         let number_of_immediate_children = self.immed_children();
         if self.is_leaf() {
             self.points_mut()
-                .sort_by_key(|p| OrderedFloat(euclidean(&center, p)));
+                .sort_by_key(|p| OrderedFloat(euclidean_squared(&center, p)));
             self.points_mut()
                 .split_off(number_of_immediate_children - n)
                 .iter()
@@ -207,7 +207,7 @@ where
                 .collect()
         } else {
             self.nodes_mut()
-                .sort_by_key(|node| OrderedFloat(euclidean(&center, &node.sphere.center)));
+                .sort_by_key(|node| OrderedFloat(euclidean_squared(&center, &node.sphere.center)));
             self.nodes_mut().split_off(number_of_immediate_children - n)
         }
     }
