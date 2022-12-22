@@ -1,4 +1,4 @@
-use crate::measure::distance::euclidean;
+use crate::measure::distance::euclidean_squared;
 use crate::node::Node;
 use ordered_float::{Float, OrderedFloat};
 use std::{
@@ -14,7 +14,7 @@ where
     let mut result = Vec::new();
     let mut distance_heap = BinaryHeap::new();
     search(node, point, k, &mut result, &mut distance_heap);
-    result.sort_by_key(|neighbor| OrderedFloat(euclidean(point, neighbor)));
+    result.sort_by_key(|neighbor| OrderedFloat(euclidean_squared(point, neighbor)));
     result
 }
 
@@ -30,7 +30,7 @@ fn search<T>(
     if node.is_leaf() {
         // insert all potential neighbors in a leaf node:
         node.points().iter().for_each(|neighbor| {
-            let neighbor_distance = euclidean(neighbor, point);
+            let neighbor_distance = euclidean_squared(neighbor, point);
             distance_heap.push(OrderedFloat(neighbor_distance));
             result.push(neighbor.clone());
         });

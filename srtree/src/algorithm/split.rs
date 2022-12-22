@@ -1,4 +1,4 @@
-use crate::measure::distance::euclidean;
+use crate::measure::distance::euclidean_squared;
 use crate::measure::mean;
 use crate::node::Node;
 use crate::shape::reshape::reshape;
@@ -91,10 +91,10 @@ where
     let mut index = choose_split_index(node, params);
 
     let node_centroid = mean::calculate(node, 0, index);
-    let node_distance = euclidean(parent_centroid, &node_centroid);
+    let node_distance = euclidean_squared(parent_centroid, &node_centroid);
 
     let sibling_centroid = mean::calculate(node, index, node.immed_children());
-    let sibling_distance = euclidean(parent_centroid, &sibling_centroid);
+    let sibling_distance = euclidean_squared(parent_centroid, &sibling_centroid);
 
     if node_distance > sibling_distance {
         if node.is_leaf() {
