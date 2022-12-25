@@ -28,7 +28,7 @@ fn search<T>(
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.is_leaf() {
-        // insert all potential neighbors in a leaf node:
+        // insert all potential neighbors (with their distances) in a leaf node:
         node.points().iter().for_each(|neighbor| {
             let neighbor_distance = euclidean_squared(neighbor, point);
             distance_heap.push(OrderedFloat(neighbor_distance));
@@ -40,7 +40,14 @@ fn search<T>(
             distance_heap.pop();
         }
     } else {
-        node.nodes().iter().for_each(|child| {
+        let mut to_visit = Vec::new();
+        for (child_index, child) in node.nodes().iter().enumerate() {
+            let distance = child.min_distance(point);
+            to_visit.push((OrderedFloat(distance), child_index));
+        }
+        to_visit.sort();
+
+        for (child_distance, child_index) in to_visit {
             // if k neighbors were already sampled, then the target distance is kth closest distance:
             let mut target_distance = OrderedFloat(T::infinity());
             if distance_heap.len() == k {
@@ -48,11 +55,12 @@ fn search<T>(
             }
 
             // search pruning: don't visit nodes with min_distance bigger than kth distance
-            let distance_to_child = OrderedFloat(child.min_distance(point));
-            if distance_to_child < target_distance {
-                search(child, point, k, result, distance_heap);
+            if child_distance > target_distance {
+                break;
             }
-        });
+
+            search(&node.nodes()[child_index], point, k, result, distance_heap);
+        }
     }
 }
 
