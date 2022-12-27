@@ -1,8 +1,8 @@
-use std::collections::BinaryHeap;
 use ordered_float::OrderedFloat;
 use srtree::{Params, SRTree};
+use std::collections::BinaryHeap;
 
-pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
+fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
     if point1.len() != point2.len() {
         return f64::INFINITY;
     }
@@ -13,19 +13,19 @@ pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
     distance
 }
 
-fn bench_exhaustive<const D: usize>(pts: &Vec<[f64; D]>, search_points: &Vec<[f64; D]>, k: usize) {
+fn bench_exhaustive<const D: usize>(pts: &[[f64; D]], search_points: &[[f64; D]], k: usize) {
     println!();
     println!("---- Exhaustive search ----");
     print!("kNN query:     ");
     lotsa::ops(search_points.len(), 1, |i, _| {
         // iterate through the points and keep the closest K distances:
         let mut result_heap = BinaryHeap::new();
-        pts.iter().for_each(|point| {
+        for point in pts.iter() {
             result_heap.push(OrderedFloat(euclidean_squared(&search_points[i], point)));
             if result_heap.len() > k {
                 result_heap.pop();
             }
-        });
+        }
     });
 }
 
@@ -74,7 +74,12 @@ fn bench_rstar(pts: &Vec<[f64; 9]>, search_points: &Vec<[f64; 9]>, k: usize) {
     });
 }
 
-fn bench_srtree<const D: usize>(dimension: usize, pts: &Vec<[f64; D]>, search_points: &Vec<[f64; D]>, k: usize) {
+fn bench_srtree<const D: usize>(
+    dimension: usize,
+    pts: &Vec<[f64; D]>,
+    search_points: &Vec<[f64; D]>,
+    k: usize,
+) {
     println!();
     println!("---- SRTree ----");
     let max_elements = 21;
@@ -128,7 +133,7 @@ fn test_with_random_dataset() {
     bench_exhaustive(&pts, &search_points, K);
 }
 
-fn test_with_cluster_dataset(){
+fn test_with_cluster_dataset() {
     // As the dimensionality increases, points tend to form similar distances in randomly-generated datasets.
     // Therefore, high dimensions should be benchmarked with non-uniform data (the cluster dataset):
     const N: usize = 1000; // # of clusters
@@ -145,8 +150,8 @@ fn test_with_cluster_dataset(){
     println!("Number of nearest neighbors: {:?}", K);
 
     let mut pts = Vec::new();
-    for n in 0..N {
-        let start = 10_000. * n as f64;
+    let mut start = 0.;
+    for _ in 0..N {
         for _ in 0..W {
             let mut point = [0.; D];
             for item in point.iter_mut().take(D) {
@@ -154,6 +159,7 @@ fn test_with_cluster_dataset(){
             }
             pts.push(point);
         }
+        start += 10_000.;
     }
 
     let mut search_points = Vec::new();
@@ -171,6 +177,6 @@ fn test_with_cluster_dataset(){
 }
 
 fn main() {
-    // test_with_random_dataset();
+    test_with_random_dataset();
     test_with_cluster_dataset();
 }
