@@ -1,4 +1,17 @@
+use std::collections::BinaryHeap;
+use ordered_float::OrderedFloat;
 use srtree::{Params, SRTree};
+
+pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
+    if point1.len() != point2.len() {
+        return f64::INFINITY;
+    }
+    let mut distance = 0.;
+    for i in 0..point1.len() {
+        distance += (point1[i] - point2[i]).powi(2);
+    }
+    distance
+}
 
 fn test_srtree() {
     const N: usize = 1_000_000; // # of training points
@@ -84,6 +97,20 @@ fn test_srtree() {
     print!("kNN query:     ");
     lotsa::ops(search_points.len(), 1, |i, _| {
         tree.query(&search_points[i], K);
+    });
+
+    println!();
+    println!("---- Exhaustive search ----");
+    print!("kNN query:     ");
+    lotsa::ops(search_points.len(), 1, |i, _| {
+        // keep the closest K distances:
+        let mut result_heap = BinaryHeap::new();
+        pts.iter().for_each(|point| {
+            result_heap.push(OrderedFloat(euclidean_squared(&search_points[i], point)));
+            if result_heap.len() > K {
+                result_heap.pop();
+            }
+        });
     });
 }
 
