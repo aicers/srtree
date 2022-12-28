@@ -166,7 +166,7 @@ fn test_with_cluster_dataset() {
     for _ in 0..M {
         let mut point = [0.; D];
         for item in point.iter_mut().take(D) {
-            *item = rand::random::<f64>() * 2_000_000.;
+            *item = rand::random::<f64>() * 1_000_000.;
         }
         search_points.push(point);
     }
