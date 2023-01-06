@@ -3,8 +3,6 @@ name = "bench"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 srtree = { path = "../srtree" }
 rand = "0.8.5"
@@ -12,3 +10,8 @@ ordered-float = "3.4.0"
 lotsa = "*"
 rtree_rs = "0.1.4"
 rstar = "0.9.3"
+criterion = "0.3"
+
+[[bench]]
+name = "srtree"
+harness = false
