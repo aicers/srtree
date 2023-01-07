@@ -7,6 +7,8 @@ edition = "2021"
 srtree = { path = "../srtree" }
 rand = "0.8.5"
 criterion = "0.3"
+rtree_rs = "0.1.4"
+rstar = "0.9.3"
 
 [[bench]]
 name = "srtree"
