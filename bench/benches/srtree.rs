@@ -80,9 +80,7 @@ fn query(criterion: &mut Criterion) {
                 }
             }
         });
-    });
-
-    group.bench_function("rstar", |bencher| {
+    }).bench_function("rstar", |bencher| {
         bencher.iter(|| {
             for i in 0..M {
                 let mut count = 0;
@@ -94,9 +92,7 @@ fn query(criterion: &mut Criterion) {
                 }
             }
         });
-    });
-
-    group.bench_function("srtree", |bencher| {
+    }).bench_function("srtree", |bencher| {
         bencher.iter(|| {
             for point in &query_pts {
                 srtree.query(point, K);
