@@ -1,11 +1,24 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
+use ordered_float::OrderedFloat;
 use petal_neighbors::BallTree;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use srtree::{Params, SRTree};
+use std::collections::BinaryHeap;
 
 const INPUT_SEED: [u8; 32] = *b"PiH6Xi3GBBXhTK6UsXJYngHaF3fx4aYS";
 const QUERY_SEED: [u8; 32] = *b"H4NNoe0r5BDtWChfJEgXpXCNaS5IfVxC";
+
+fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
+    if point1.len() != point2.len() {
+        return f64::INFINITY;
+    }
+    let mut distance = 0.;
+    for i in 0..point1.len() {
+        distance += (point1[i] - point2[i]).powi(2);
+    }
+    distance
+}
 
 fn generate_points<const D: usize>(n: usize, seed: [u8; 32]) -> Vec<[f64; D]> {
     let mut rng = StdRng::from_seed(seed);
@@ -41,7 +54,7 @@ fn insert(criterion: &mut Criterion) {
 }
 
 fn query(criterion: &mut Criterion) {
-    const N: usize = 1000; // # of training points
+    const N: usize = 10_000; // # of training points
     const D: usize = 9; // dimension of each point
     const M: usize = 100; // # of search points
     const K: usize = 100; // # of nearest neighbors to search
@@ -120,6 +133,22 @@ fn query(criterion: &mut Criterion) {
         bencher.iter(|| {
             for point in &query_pts {
                 srtree.query(point, K);
+            }
+        });
+    });
+
+    // Exhaustive search
+    group.bench_function("exhaustive", |bencher| {
+        bencher.iter(|| {
+            for query_point in &query_pts {
+                // iterate through the points and keep the closest K distances:
+                let mut result_heap = BinaryHeap::new();
+                for point in pts.iter() {
+                    result_heap.push(OrderedFloat(euclidean_squared(query_point, point)));
+                    if result_heap.len() > k {
+                        result_heap.pop();
+                    }
+                }
             }
         });
     });
