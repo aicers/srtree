@@ -67,38 +67,41 @@ fn query(criterion: &mut Criterion) {
 
     let mut group = criterion.benchmark_group("query");
 
-    group.bench_function("rtree", |bencher| {
-        bencher.iter(|| {
-            for i in 0..M {
-                let mut count = 0;
-                let target = rtree_rs::Rect::new(query_pts[i], query_pts[i]);
-                while let Some(_) = rtree.nearby(|rect, _| rect.box_dist(&target)).next() {
-                    count += 1;
-                    if count == K {
-                        break;
+    group
+        .bench_function("rtree", |bencher| {
+            bencher.iter(|| {
+                for i in 0..M {
+                    let mut count = 0;
+                    let target = rtree_rs::Rect::new(query_pts[i], query_pts[i]);
+                    while let Some(_) = rtree.nearby(|rect, _| rect.box_dist(&target)).next() {
+                        count += 1;
+                        if count == K {
+                            break;
+                        }
                     }
                 }
-            }
-        });
-    }).bench_function("rstar", |bencher| {
-        bencher.iter(|| {
-            for i in 0..M {
-                let mut count = 0;
-                while let Some(_) = rstar.nearest_neighbor_iter(&query_pts[i]).next() {
-                    count += 1;
-                    if count == K {
-                        break;
+            });
+        })
+        .bench_function("rstar", |bencher| {
+            bencher.iter(|| {
+                for i in 0..M {
+                    let mut count = 0;
+                    while let Some(_) = rstar.nearest_neighbor_iter(&query_pts[i]).next() {
+                        count += 1;
+                        if count == K {
+                            break;
+                        }
                     }
                 }
-            }
+            });
+        })
+        .bench_function("srtree", |bencher| {
+            bencher.iter(|| {
+                for point in &query_pts {
+                    srtree.query(point, K);
+                }
+            });
         });
-    }).bench_function("srtree", |bencher| {
-        bencher.iter(|| {
-            for point in &query_pts {
-                srtree.query(point, K);
-            }
-        });
-    });
 }
 
 criterion_group!(benches, insert, query);
