@@ -1,4 +1,6 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use ndarray::{ArrayBase, ArrayView, CowRepr};
+use petal_neighbors::BallTree;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use srtree::{Params, SRTree};
 
@@ -39,23 +41,73 @@ fn insert(criterion: &mut Criterion) {
 }
 
 fn query(criterion: &mut Criterion) {
-    const N: usize = 10_000; // # of training points
+    const N: usize = 1000; // # of training points
     const D: usize = 9; // dimension of each point
     const M: usize = 100; // # of search points
     const K: usize = 100; // # of nearest neighbors to search
     let pts: Vec<[f64; D]> = generate_points(N, INPUT_SEED);
     let query_pts: Vec<[f64; D]> = generate_points(M, QUERY_SEED);
 
+    let mut group = criterion.benchmark_group("query");
+
+    // R-tree (https://github.com/tidwall/rtree.rs)
     let mut rtree = rtree_rs::RTree::new();
     for i in 0..N {
         rtree.insert(rtree_rs::Rect::new(pts[i], pts[i]), i);
     }
+    group.bench_function("rtree", |bencher| {
+        bencher.iter(|| {
+            for i in 0..M {
+                let mut count = 0;
+                let target = rtree_rs::Rect::new(query_pts[i], query_pts[i]);
+                while let Some(_) = rtree.nearby(|rect, _| rect.box_dist(&target)).next() {
+                    count += 1;
+                    if count == K {
+                        break;
+                    }
+                }
+            }
+        });
+    });
 
+    // R*tree (https://github.com/georust/rstar)
     let mut rstar = rstar::RTree::new();
     for point in pts.clone() {
         rstar.insert(point);
     }
+    group.bench_function("rstar", |bencher| {
+        bencher.iter(|| {
+            for i in 0..M {
+                let mut count = 0;
+                while let Some(_) = rstar.nearest_neighbor_iter(&query_pts[i]).next() {
+                    count += 1;
+                    if count == K {
+                        break;
+                    }
+                }
+            }
+        });
+    });
 
+    // Ball-tree (https://github.com/petabi/petal-neighbors)
+    let n = black_box(N);
+    let dim = black_box(D);
+    let k = black_box(K);
+    let data: Vec<f64> = pts.clone().into_iter().flatten().collect();
+    let array = ArrayView::from_shape((n, dim), &data).unwrap();
+    let tree = BallTree::euclidean(array).expect("`array` is not empty");
+    group.bench_function("ball-tree", |bencher| {
+        bencher.iter(|| {
+            for point in &query_pts {
+                tree.query(
+                    &<ArrayBase<CowRepr<f64>, _> as From<&[f64]>>::from(point),
+                    k,
+                );
+            }
+        })
+    });
+
+    // SR-tree
     let max_elements = 21;
     let min_elements = 7;
     let reinsert_count = min_elements;
@@ -64,44 +116,13 @@ fn query(criterion: &mut Criterion) {
     for point in &pts {
         srtree.insert(point);
     }
-
-    let mut group = criterion.benchmark_group("query");
-
-    group
-        .bench_function("rtree", |bencher| {
-            bencher.iter(|| {
-                for i in 0..M {
-                    let mut count = 0;
-                    let target = rtree_rs::Rect::new(query_pts[i], query_pts[i]);
-                    while let Some(_) = rtree.nearby(|rect, _| rect.box_dist(&target)).next() {
-                        count += 1;
-                        if count == K {
-                            break;
-                        }
-                    }
-                }
-            });
-        })
-        .bench_function("rstar", |bencher| {
-            bencher.iter(|| {
-                for i in 0..M {
-                    let mut count = 0;
-                    while let Some(_) = rstar.nearest_neighbor_iter(&query_pts[i]).next() {
-                        count += 1;
-                        if count == K {
-                            break;
-                        }
-                    }
-                }
-            });
-        })
-        .bench_function("srtree", |bencher| {
-            bencher.iter(|| {
-                for point in &query_pts {
-                    srtree.query(point, K);
-                }
-            });
+    group.bench_function("srtree", |bencher| {
+        bencher.iter(|| {
+            for point in &query_pts {
+                srtree.query(point, K);
+            }
         });
+    });
 }
 
 criterion_group!(benches, insert, query);
