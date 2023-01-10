@@ -3,16 +3,14 @@ name = "bench"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-ordered-float = "3.4.0"
+[dev-dependencies]
 srtree = { path = "../srtree" }
 rand = "0.8.5"
 rtree_rs = "0.1.4"
 rstar = "0.9.3"
 petal-neighbors = "0.8.0"
 ndarray = "0.15"
-
-[dev-dependencies]
+ordered-float = "3.4.0"
 criterion = "0.3"
 
 [[bench]]
