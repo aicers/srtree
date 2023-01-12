@@ -2,9 +2,14 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
 use ordered_float::OrderedFloat;
 use petal_neighbors::BallTree;
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
+use rand_chacha::ChaChaRng;
 use srtree::{Params, SRTree};
-use std::collections::BinaryHeap;
+use std::{
+    collections::BinaryHeap,
+    fs::File,
+    io::{BufRead, BufReader},
+};
 
 const INPUT_SEED: [u8; 32] = *b"PiH6Xi3GBBXhTK6UsXJYngHaF3fx4aYS";
 const QUERY_SEED: [u8; 32] = *b"H4NNoe0r5BDtWChfJEgXpXCNaS5IfVxC";
@@ -20,8 +25,8 @@ fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
     distance
 }
 
-fn generate_points<const D: usize>(n: usize, seed: [u8; 32]) -> Vec<[f64; D]> {
-    let mut rng = StdRng::from_seed(seed);
+fn uniform_dataset<const D: usize>(n: usize, m: usize) -> (Vec<[f64; D]>, Vec<[f64; D]>) {
+    let mut rng = StdRng::from_seed(INPUT_SEED);
     let mut pts = Vec::new();
     for _ in 0..n {
         let mut point = [0.; D];
@@ -30,36 +35,74 @@ fn generate_points<const D: usize>(n: usize, seed: [u8; 32]) -> Vec<[f64; D]> {
         }
         pts.push(point);
     }
-    pts
+
+    pts.shuffle(&mut ChaChaRng::from_seed(QUERY_SEED));
+    let mut query_pts: Vec<[f64; D]> = Vec::new();
+    for i in 0..m {
+        query_pts.push(pts[i].clone());
+    }
+    (pts, query_pts)
 }
 
-fn insert(criterion: &mut Criterion) {
-    const N: usize = 10_000; // # of training points
-    const D: usize = 10; // dimension of each point
-    let pts: Vec<[f64; D]> = generate_points(N, INPUT_SEED);
+/*
+This is the free version of World Cities Dataset that is licensed under Creative Commons Attribution 4.0.
+It contains about 43 thousand city records (population, country, location etc.).
+See more about the license: https://creativecommons.org/licenses/by/4.0/
+Link to the dataset: https://simplemaps.com/data/world-cities.
 
-    criterion.bench_function("insert", |bencher| {
-        bencher.iter(|| {
-            let max_elements = 21;
-            let min_elements = 7;
-            let reinsert_count = min_elements;
-            let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-            let mut tree = SRTree::new(D, params);
+This function doesn't modify the dataset but only uses locations (latitude & longitude) for benchmarking purposes.
+*/
+fn world_cities_dataset() -> (Vec<[f64; 2]>, Vec<[f64; 2]>) {
+    let mut pts = Vec::new();
+    let mut query_pts: Vec<[f64; 2]> = Vec::new();
+    let file = File::open("worldcities.csv");
+    if file.is_err() {
+        return (pts, query_pts);
+    }
 
-            for point in &pts {
-                tree.insert(point);
+    let reader = BufReader::new(file.unwrap());
+    let mut skip_csv_header = true;
+    for line in reader.lines() {
+        if skip_csv_header {
+            skip_csv_header = false;
+            continue;
+        }
+        if line.is_ok() {
+            let mut location = [0., 0.];
+            let line = line.as_ref().unwrap();
+            for (i, val) in line.split(",").enumerate() {
+                let mut chars = val.chars();
+                chars.next();
+                chars.next_back();
+                let val = chars.as_str();
+                if i == 2 || i == 3 {
+                    let c: f64 = val.parse().unwrap_or(f64::INFINITY);
+                    if c != f64::INFINITY {
+                        location[i - 2] = c;
+                    }
+                }
             }
-        });
-    });
+            pts.push(location);
+        }
+    }
+
+    pts.shuffle(&mut ChaChaRng::from_seed(QUERY_SEED));
+    for i in 0..100 {
+        query_pts.push(pts[i].clone());
+    }
+    (pts, query_pts)
 }
 
 fn query(criterion: &mut Criterion) {
     const N: usize = 10_000; // # of training points
-    const D: usize = 9; // dimension of each point
     const M: usize = 100; // # of search points
     const K: usize = 100; // # of nearest neighbors to search
-    let pts: Vec<[f64; D]> = generate_points(N, INPUT_SEED);
-    let query_pts: Vec<[f64; D]> = generate_points(M, QUERY_SEED);
+
+    // const D: usize = 9; // dimension of each point
+    // let (pts, query_pts): (Vec<[f64; D]>, Vec<[f64; D]>) = uniform_dataset(N, M);
+
+    const D: usize = 2; // dimension of each point
+    let (pts, query_pts) = world_cities_dataset();
 
     let mut group = criterion.benchmark_group("query");
 
@@ -154,5 +197,5 @@ fn query(criterion: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, insert, query);
+criterion_group!(benches, query);
 criterion_main!(benches);
