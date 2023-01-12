@@ -68,7 +68,7 @@ fn world_cities_dataset() -> (Vec<[f64; 2]>, Vec<[f64; 2]>) {
             continue;
         }
         if line.is_ok() {
-            let mut location = [0., 0.];
+            let mut location = [f64::INFINITY, f64::INFINITY];
             let line = line.as_ref().unwrap();
             for (i, val) in line.split(",").enumerate() {
                 let mut chars = val.chars();
@@ -77,12 +77,12 @@ fn world_cities_dataset() -> (Vec<[f64; 2]>, Vec<[f64; 2]>) {
                 let val = chars.as_str();
                 if i == 2 || i == 3 {
                     let c: f64 = val.parse().unwrap_or(f64::INFINITY);
-                    if c != f64::INFINITY {
-                        location[i - 2] = c;
-                    }
+                    location[i - 2] = c;
                 }
             }
-            pts.push(location);
+            if location[0] != f64::INFINITY && location[1] != f64::INFINITY {
+                pts.push(location);
+            }
         }
     }
 
