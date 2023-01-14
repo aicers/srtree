@@ -52,7 +52,7 @@ Link to the dataset: https://simplemaps.com/data/world-cities.
 
 This function doesn't modify the dataset but only uses locations (latitude & longitude) for benchmarking purposes.
 */
-fn world_cities_dataset() -> (Vec<[f64; 2]>, Vec<[f64; 2]>) {
+fn world_cities_dataset(m: usize) -> (Vec<[f64; 2]>, Vec<[f64; 2]>) {
     let mut pts = Vec::new();
     let mut query_pts: Vec<[f64; 2]> = Vec::new();
     let file = File::open("worldcities.csv");
@@ -87,7 +87,7 @@ fn world_cities_dataset() -> (Vec<[f64; 2]>, Vec<[f64; 2]>) {
     }
 
     pts.shuffle(&mut ChaChaRng::from_seed(QUERY_SEED));
-    for i in 0..100 {
+    for i in 0..m.min(pts.len()) {
         query_pts.push(pts[i].clone());
     }
     (pts, query_pts)
@@ -102,7 +102,7 @@ fn query(criterion: &mut Criterion) {
     //let (pts, query_pts): (Vec<[f64; D]>, Vec<[f64; D]>) = uniform_dataset(N, M);
 
     const D: usize = 2; // dimension of each point
-    let (pts, query_pts) = world_cities_dataset();
+    let (pts, query_pts) = world_cities_dataset(M);
 
     let mut group = criterion.benchmark_group("query");
 
