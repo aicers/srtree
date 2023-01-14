@@ -98,8 +98,8 @@ fn query(criterion: &mut Criterion) {
     const M: usize = 100; // # of search points
     const K: usize = 100; // # of nearest neighbors to search
 
-    // const D: usize = 9; // dimension of each point
-    // let (pts, query_pts): (Vec<[f64; D]>, Vec<[f64; D]>) = uniform_dataset(N, M);
+    //const D: usize = 9; // dimension of each point
+    //let (pts, query_pts): (Vec<[f64; D]>, Vec<[f64; D]>) = uniform_dataset(N, M);
 
     const D: usize = 2; // dimension of each point
     let (pts, query_pts) = world_cities_dataset();
