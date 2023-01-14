@@ -62,17 +62,17 @@ where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     let mut result = Vec::new();
-    let mut distance_heap = BinaryHeap::new();
-    search(node, point, k, &mut distance_heap);
-    while !distance_heap.is_empty() {
-        let last = distance_heap.pop().unwrap();
+    let mut neighbors = BinaryHeap::new();
+    search(node, point, k, &mut neighbors);
+    while !neighbors.is_empty() {
+        let last = neighbors.pop().unwrap();
         result.push(last.point);
     }
     result.reverse();
     result
 }
 
-fn search<T>(node: &Node<T>, point: &[T], k: usize, distance_heap: &mut BinaryHeap<Neighbor<T>>)
+fn search<T>(node: &Node<T>, point: &[T], k: usize, neighbors: &mut BinaryHeap<Neighbor<T>>)
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -80,16 +80,16 @@ where
         // insert all potential neighbors (with their distances) in a leaf node:
         node.points().iter().for_each(|candidate| {
             let neighbor_distance = euclidean_squared(candidate, point);
-            distance_heap.push(Neighbor::new(
+            neighbors.push(Neighbor::new(
                 OrderedFloat(neighbor_distance),
                 candidate.clone(),
             ));
-        });
 
-        // keep only closest k distances:
-        while distance_heap.len() > k {
-            distance_heap.pop();
-        }
+            // keep only closest k neighbors:
+            if neighbors.len() > k {
+                neighbors.pop();
+            }
+        });
     } else {
         let mut to_visit = Vec::new();
         for (child_index, child) in node.nodes().iter().enumerate() {
@@ -101,8 +101,8 @@ where
         for (child_distance, child_index) in to_visit {
             // if k neighbors were already sampled, then the target distance is kth closest distance:
             let mut target_distance = OrderedFloat(T::infinity());
-            if distance_heap.len() == k {
-                target_distance = distance_heap.peek().unwrap().distance;
+            if neighbors.len() == k {
+                target_distance = neighbors.peek().unwrap().distance;
             }
 
             // search pruning: don't visit nodes with min_distance bigger than kth distance
@@ -110,7 +110,7 @@ where
                 break;
             }
 
-            search(&node.nodes()[child_index], point, k, distance_heap);
+            search(&node.nodes()[child_index], point, k, neighbors);
         }
     }
 }
