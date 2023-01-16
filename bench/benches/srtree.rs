@@ -93,6 +93,56 @@ fn world_cities_dataset(m: usize) -> (Vec<[f64; 2]>, Vec<[f64; 2]>) {
     (pts, query_pts)
 }
 
+fn build(criterion: &mut Criterion) {
+    let (pts, _) = world_cities_dataset(0);
+    let mut group = criterion.benchmark_group("build");
+
+    // R-tree (https://github.com/tidwall/rtree.rs)
+    group.bench_function("rtree", |bencher| {
+        bencher.iter(|| {
+            let mut rtree = rtree_rs::RTree::new();
+            for i in 0..pts.len() {
+                rtree.insert(rtree_rs::Rect::new(pts[i], pts[i]), i);
+            }
+        });
+    });
+
+    // R*tree (https://github.com/georust/rstar)
+    group.bench_function("rstar", |bencher| {
+        bencher.iter(|| {
+            let mut rstar = rstar::RTree::new();
+            for i in 0..pts.len() {
+                rstar.insert(pts[i]);
+            }
+        });
+    });
+
+    // Ball-tree (https://github.com/petabi/petal-neighbors)
+    let n = black_box(pts.len());
+    let dim = black_box(2);
+    let data: Vec<f64> = pts.clone().into_iter().flatten().collect();
+    let array = ArrayView::from_shape((n, dim), &data).unwrap();
+    group.bench_function("ball-tree", |bencher| {
+        bencher.iter(|| {
+            BallTree::euclidean(array).expect("`array` is not empty");
+        });
+    });
+
+    // SR-tree
+    group.bench_function("srtree", |bencher| {
+        bencher.iter(|| {
+            let max_elements = 21;
+            let min_elements = 9;
+            let reinsert_count = 7;
+            let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
+            let mut srtree = SRTree::new(2, params);
+            for i in 0..pts.len() {
+                srtree.insert(&pts[i]);
+            }
+        });
+    });
+}
+
 fn query(criterion: &mut Criterion) {
     const N: usize = 10_000; // # of training points
     const M: usize = 100; // # of search points
@@ -165,8 +215,8 @@ fn query(criterion: &mut Criterion) {
 
     // SR-tree
     let max_elements = 21;
-    let min_elements = 7;
-    let reinsert_count = min_elements;
+    let min_elements = 9;
+    let reinsert_count = 7;
     let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
     let mut srtree = SRTree::new(D, params);
     for point in &pts {
@@ -197,5 +247,5 @@ fn query(criterion: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, query);
+criterion_group!(benches, build, query);
 criterion_main!(benches);

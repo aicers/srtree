@@ -1,6 +1,5 @@
 use crate::measure::distance::euclidean;
 use crate::measure::mean;
-use crate::measure::variance;
 use crate::node::Node;
 use ordered_float::Float;
 use std::{
@@ -51,9 +50,6 @@ where
 
     let radius = ds.min(dr);
     node.set_sphere(Sphere::new(centroid, radius));
-
-    let variance = variance::calculate(node, 0, node.immed_children());
-    node.set_variance(variance);
 
     node.set_total_children(total_children);
 }
