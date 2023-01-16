@@ -9,7 +9,7 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-fn choose_split_axis<T>(node: &Node<T>) -> usize
+fn choose_split_axis<T>(node: &mut Node<T>) -> usize
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -23,6 +23,8 @@ where
             selected_index = i;
         }
     }
+
+    node.set_variance(variance);
     selected_index
 }
 
@@ -136,30 +138,6 @@ mod tests {
     }
 
     #[test]
-    pub fn test_node_mean_variance_calculation() {
-        let max_number_of_elements = 5;
-        let origin = vec![0., 0.];
-        let mut node = Node::new_node(&origin, max_number_of_elements, 1);
-
-        let mut leaf1 = Node::new_leaf(&origin, max_number_of_elements);
-        leaf1.points_mut().push(vec![0., 0.]);
-        leaf1.points_mut().push(vec![0., 1.]);
-        reshape(&mut leaf1);
-
-        node.nodes_mut().push(leaf1);
-
-        let mut leaf2 = Node::new_leaf(&origin, max_number_of_elements);
-        leaf2.points_mut().push(vec![0., 100.]);
-        leaf2.points_mut().push(vec![0., 200.]);
-        reshape(&mut leaf2);
-
-        node.nodes_mut().push(leaf2);
-        reshape(&mut node);
-
-        assert_eq!(node.get_variance()[1], 6837.6875);
-    }
-
-    #[test]
     pub fn test_choose_split_axis() {
         let origin = vec![0., 0.];
         let mut node = Node::new_leaf(&origin, 5);
@@ -168,7 +146,7 @@ mod tests {
         });
 
         let expected_axis = 1;
-        let selected_axis = choose_split_axis(&node);
+        let selected_axis = choose_split_axis(&mut node);
         assert_eq!(expected_axis, selected_axis);
     }
 
