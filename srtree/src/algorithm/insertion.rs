@@ -1,5 +1,6 @@
 use crate::node::Node;
 use crate::params::Params;
+use crate::shape::point::Point;
 use crate::shape::reshape::reshape;
 use ordered_float::Float;
 use std::fmt::Debug;
@@ -14,7 +15,7 @@ enum OverflowTreatment<T> {
     Split(Node<T>),
 }
 
-pub fn insert_data<T>(node: &mut Node<T>, point: &[T], params: &Params)
+pub fn insert_data<T>(node: &mut Node<T>, point: &Point<T>, params: &Params)
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -88,8 +89,10 @@ where
 
     if node.get_height() == target_height {
         if node.is_leaf() {
-            node.points_mut()
-                .push(insert_node.get_sphere().center.clone());
+            node.points_mut().push(Point::new(
+                insert_node.get_sphere().center.clone(),
+                insert_node.get_total_children(),
+            ));
         } else {
             node.nodes_mut().push(insert_node);
         }
@@ -131,8 +134,10 @@ where
 
     if node.get_height() == target_height {
         if node.is_leaf() {
-            node.points_mut()
-                .push(insert_node.get_sphere().center.clone());
+            node.points_mut().push(Point::new(
+                insert_node.get_sphere().center.clone(),
+                insert_node.get_total_children(),
+            ));
         } else {
             node.nodes_mut().push(insert_node);
         }
@@ -165,18 +170,18 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::ops::Div;
+    use std::{ops::Div, sync::Arc};
 
     use super::*;
     use crate::algorithm::choose_subtree::choose_subtree;
 
     #[test]
     pub fn test_leaf_insertion() {
-        let point = vec![0., 0.];
+        let point = Point::with_coords(vec![0., 0.]);
         let params = Params::new(4, 9, 4, true).unwrap();
-        let mut leaf_node = Node::new_leaf(&point, params.max_number_of_elements);
+        let mut leaf_node = Node::new_leaf(&point.coords, params.max_number_of_elements);
         insert_data(&mut leaf_node, &point, &params);
-        assert!(leaf_node.points().contains(&point));
+        assert_eq!(leaf_node.points()[0].coords, point.coords);
     }
 
     #[test]
@@ -184,25 +189,25 @@ mod tests {
         let params = Params::new(1, 10, 4, true).unwrap();
 
         // first leaf
-        let point = vec![0., 0.];
-        let mut leaf_node1 = Node::new_leaf(&point, params.max_number_of_elements);
+        let point = Point::with_coords(vec![0., 0.]);
+        let mut leaf_node1 = Node::new_leaf(&point.coords, params.max_number_of_elements);
         insert_data(&mut leaf_node1, &point, &params);
         assert_eq!(leaf_node1.points().len(), 1);
 
         // second leaf
-        let point = vec![0., 10.];
-        let mut leaf_node2 = Node::new_leaf(&point, params.max_number_of_elements);
+        let point = Point::with_coords(vec![0., 10.]);
+        let mut leaf_node2 = Node::new_leaf(&point.coords, params.max_number_of_elements);
         insert_data(&mut leaf_node2, &point, &params);
         assert_eq!(leaf_node2.points().len(), 1);
 
         // insert the leaves
-        let mut root = Node::new_node(&point, params.max_number_of_elements, 2);
+        let mut root = Node::new_node(&point.coords, params.max_number_of_elements, 2);
         insert(&mut root, leaf_node1, &params);
         insert(&mut root, leaf_node2, &params);
         assert_eq!(root.nodes().len(), 2);
 
         // insert another point that's close to the second leaf
-        let point = vec![0., 11.];
+        let point = Point::with_coords(vec![0., 11.]);
         insert_data(&mut root, &point, &params);
 
         // search the point
@@ -220,14 +225,14 @@ mod tests {
         let params = Params::new(1, 4, 2, true).unwrap();
 
         // first leaf
-        let point = vec![0., 0.];
-        let mut leaf_node1 = Node::new_leaf(&point, params.max_number_of_elements);
+        let point = Point::with_coords(vec![0., 0.]);
+        let mut leaf_node1 = Node::new_leaf(&point.coords, params.max_number_of_elements);
         insert_data(&mut leaf_node1, &point, &params);
         assert_eq!(leaf_node1.points().len(), 1);
 
         // second leaf
-        let point = vec![0., 1.];
-        let mut leaf_node2 = Node::new_leaf(&point, params.max_number_of_elements);
+        let point = Point::with_coords(vec![0., 1.]);
+        let mut leaf_node2 = Node::new_leaf(&point.coords, params.max_number_of_elements);
         insert_data(&mut leaf_node2, &point, &params);
         assert_eq!(leaf_node2.points().len(), 1);
 
@@ -239,7 +244,7 @@ mod tests {
         assert_eq!(root.nodes().len(), 2);
 
         for i in 2..6 {
-            let new_point = vec![0., i as f64];
+            let new_point = Point::with_coords(vec![0., i as f64]);
             insert_data(&mut root, &new_point, &params);
         }
 
@@ -259,8 +264,8 @@ mod tests {
         // The first leaf
         let first_leaf_points = vec![vec![1., 1.], vec![3., 1.], vec![1., 3.], vec![3., 3.]];
         let mut leaf_node1 = Node::new_leaf(&first_leaf_points[0], params.max_number_of_elements);
-        for point in first_leaf_points {
-            insert_data(&mut leaf_node1, &point, &params);
+        for point_coords in first_leaf_points {
+            insert_data(&mut leaf_node1, &Point::with_coords(point_coords), &params);
         }
         assert_eq!(leaf_node1.immed_children(), 4);
         assert_eq!(leaf_node1.get_rect().low, vec![1., 1.]);
@@ -271,8 +276,8 @@ mod tests {
         // The second leaf
         let second_leaf_points = vec![vec![5., 1.], vec![6., 2.]];
         let mut leaf_node2 = Node::new_leaf(&second_leaf_points[0], params.max_number_of_elements);
-        for point in second_leaf_points {
-            insert_data(&mut leaf_node2, &point, &params);
+        for point_coords in second_leaf_points {
+            insert_data(&mut leaf_node2, &Point::with_coords(point_coords), &params);
         }
         assert_eq!(leaf_node2.immed_children(), 2);
         assert_eq!(leaf_node2.get_rect().low, vec![5., 1.]);
@@ -297,8 +302,8 @@ mod tests {
 
         // These two points expands the second leaf
         let new_points = vec![vec![7., 3.], vec![8., 4.]];
-        for point in new_points {
-            insert_data(&mut root, &point, &params);
+        for point_coords in new_points {
+            insert_data(&mut root, &Point::with_coords(point_coords), &params);
         }
 
         assert_eq!(root.immed_children(), 2);
@@ -312,7 +317,7 @@ mod tests {
         assert_eq!(root.nodes()[1].get_sphere().radius, (18.0).sqrt().div(2.));
 
         // This insertion causes reinsert and split:
-        let new_point = vec![9., 5.];
+        let new_point = Point::with_coords(vec![9., 5.]);
         insert_data(&mut root, &new_point, &params);
 
         assert_eq!(root.immed_children(), 3);

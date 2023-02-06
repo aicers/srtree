@@ -1,30 +1,24 @@
+use ordered_float::Float;
 use std::{
     fmt::Debug,
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-use ordered_float::Float;
-
-use crate::measure::distance::{euclidean, euclidean_squared};
-
-pub struct Point<T, D> {
+pub struct Point<T> {
     pub coords: Vec<T>,
-    pub data: D,
+    pub index: usize,
 }
 
-impl <T, D> Point<T, D>
+impl<T> Point<T>
 where
     T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    pub fn new(coords: Vec<T>, data: D) -> Point<T, D> {
-        Point { coords, data }
+    pub fn new(coords: Vec<T>, index: usize) -> Point<T> {
+        Point { coords, index }
     }
 
-    pub fn distance(&self, point: &Point<T, D>) -> T {
-        euclidean(&self.coords, &point.coords)
-    }
-
-    pub fn distance_squared(&self, point: &Point<T, D>) -> T {
-        euclidean_squared(&self.coords, &point.coords)
+    #[allow(dead_code)]
+    pub fn with_coords(coords: Vec<T>) -> Point<T> {
+        Point { coords, index: 0 }
     }
 }

@@ -42,6 +42,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::shape::point::Point;
+
     use super::*;
 
     pub fn get_test_points() -> Vec<Vec<f64>> {
@@ -58,8 +60,9 @@ mod tests {
     pub fn test_variance_calculation() {
         let origin = vec![0., 0.];
         let mut node = Node::new_leaf(&origin, 5);
-        get_test_points().iter().for_each(|point| {
-            node.points_mut().push(point.to_owned());
+        get_test_points().iter().for_each(|point_coords| {
+            node.points_mut()
+                .push(Point::with_coords(point_coords.to_owned()));
         });
 
         let variance = calculate(&node, 0, node.immed_children());
@@ -71,8 +74,9 @@ mod tests {
     pub fn test_range_variance_calculation() {
         let origin = vec![0., 0.];
         let mut node = Node::new_leaf(&origin, 5);
-        get_test_points().iter().for_each(|point| {
-            node.points_mut().push(point.to_owned());
+        get_test_points().iter().for_each(|point_coords| {
+            node.points_mut()
+                .push(Point::with_coords(point_coords.to_owned()));
         });
 
         let variance = calculate(&node, 0, 2);

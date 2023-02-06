@@ -52,12 +52,11 @@ Link to the dataset: https://simplemaps.com/data/world-cities.
 
 This function doesn't modify the dataset but only uses locations (latitude & longitude) for benchmarking purposes.
 */
-fn world_cities_dataset(m: usize) -> (Vec<[f64; 2]>, Vec<[f64; 2]>) {
+fn world_cities_dataset() -> Vec<[f64; 2]> {
     let mut pts = Vec::new();
-    let mut query_pts: Vec<[f64; 2]> = Vec::new();
     let file = File::open("worldcities.csv");
     if file.is_err() {
-        return (pts, query_pts);
+        return pts;
     }
 
     let reader = BufReader::new(file.unwrap());
@@ -86,15 +85,11 @@ fn world_cities_dataset(m: usize) -> (Vec<[f64; 2]>, Vec<[f64; 2]>) {
         }
     }
 
-    pts.shuffle(&mut ChaChaRng::from_seed(QUERY_SEED));
-    for i in 0..m.min(pts.len()) {
-        query_pts.push(pts[i].clone());
-    }
-    (pts, query_pts)
+    pts
 }
 
 fn build(criterion: &mut Criterion) {
-    let (pts, _) = world_cities_dataset(0);
+    let pts = world_cities_dataset();
     let mut group = criterion.benchmark_group("build");
 
     // R-tree (https://github.com/tidwall/rtree.rs)
@@ -137,38 +132,33 @@ fn build(criterion: &mut Criterion) {
             let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
             let mut srtree = SRTree::new(2, params);
             for i in 0..pts.len() {
-                srtree.insert(&pts[i]);
+                srtree.insert(&pts[i].to_vec(), i);
             }
         });
     });
 }
 
 fn query(criterion: &mut Criterion) {
-    const N: usize = 10_000; // # of training points
-    const M: usize = 100; // # of search points
-    const K: usize = 100; // # of nearest neighbors to search
-
-    //const D: usize = 9; // dimension of each point
-    //let (pts, query_pts): (Vec<[f64; D]>, Vec<[f64; D]>) = uniform_dataset(N, M);
-
-    const D: usize = 2; // dimension of each point
-    let (pts, query_pts) = world_cities_dataset(M);
+    let pts = world_cities_dataset();
+    let n = black_box(pts.len()); // number of points
+    let k: usize = black_box(5); // number of nearest neighbors
+    let dim: usize = black_box(2); // dimension of each point
 
     let mut group = criterion.benchmark_group("query");
 
     // R-tree (https://github.com/tidwall/rtree.rs)
     let mut rtree = rtree_rs::RTree::new();
-    for i in 0..N {
+    for i in 0..pts.len() {
         rtree.insert(rtree_rs::Rect::new(pts[i], pts[i]), i);
     }
     group.bench_function("rtree", |bencher| {
         bencher.iter(|| {
-            for i in 0..M {
+            for i in 0..pts.len() {
                 let mut count = 0;
-                let target = rtree_rs::Rect::new(query_pts[i], query_pts[i]);
+                let target = rtree_rs::Rect::new(pts[i], pts[i]);
                 while let Some(_) = rtree.nearby(|rect, _| rect.box_dist(&target)).next() {
                     count += 1;
-                    if count == K {
+                    if count == k {
                         break;
                     }
                 }
@@ -183,11 +173,11 @@ fn query(criterion: &mut Criterion) {
     }
     group.bench_function("rstar", |bencher| {
         bencher.iter(|| {
-            for i in 0..M {
+            for i in 0..pts.len() {
                 let mut count = 0;
-                while let Some(_) = rstar.nearest_neighbor_iter(&query_pts[i]).next() {
+                while let Some(_) = rstar.nearest_neighbor_iter(&pts[i]).next() {
                     count += 1;
-                    if count == K {
+                    if count == k {
                         break;
                     }
                 }
@@ -196,15 +186,14 @@ fn query(criterion: &mut Criterion) {
     });
 
     // Ball-tree (https://github.com/petabi/petal-neighbors)
-    let n = black_box(N);
-    let dim = black_box(D);
-    let k = black_box(K);
+    // THIS TAKES ~92 minutes to complete!!! (on MPB 2021 14")
+    /*
     let data: Vec<f64> = pts.clone().into_iter().flatten().collect();
     let array = ArrayView::from_shape((n, dim), &data).unwrap();
     let tree = BallTree::euclidean(array).expect("`array` is not empty");
     group.bench_function("ball-tree", |bencher| {
         bencher.iter(|| {
-            for point in &query_pts {
+            for point in &pts {
                 tree.query(
                     &<ArrayBase<CowRepr<f64>, _> as From<&[f64]>>::from(point),
                     k,
@@ -212,28 +201,31 @@ fn query(criterion: &mut Criterion) {
             }
         })
     });
+    */
 
     // SR-tree
     let max_elements = 21;
     let min_elements = 9;
     let reinsert_count = 7;
     let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-    let mut srtree = SRTree::new(D, params);
-    for point in &pts {
-        srtree.insert(point);
+    let mut srtree = SRTree::new(dim, params);
+    for i in 0..pts.len() {
+        srtree.insert(&pts[i].to_vec(), i);
     }
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
-            for point in &query_pts {
-                srtree.query(point, K);
+            for point in &pts {
+                srtree.query(point, k);
             }
         });
     });
 
     // Exhaustive search
+    // THIS TAKES ~36.7 minutes to complete!!! (on MPB 2021 14")
+    /*
     group.bench_function("exhaustive", |bencher| {
         bencher.iter(|| {
-            for query_point in &query_pts {
+            for query_point in &pts {
                 // iterate through the points and keep the closest K distances:
                 let mut result_heap = BinaryHeap::new();
                 for point in pts.iter() {
@@ -245,6 +237,7 @@ fn query(criterion: &mut Criterion) {
             }
         });
     });
+    */
 }
 
 criterion_group!(benches, build, query);

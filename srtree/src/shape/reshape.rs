@@ -23,10 +23,10 @@ where
     if node.is_leaf() {
         node.points().iter().for_each(|point| {
             for i in 0..node.dimension() {
-                low[i] = low[i].min(point[i]);
-                high[i] = high[i].max(point[i]);
+                low[i] = low[i].min(point.coords[i]);
+                high[i] = high[i].max(point.coords[i]);
             }
-            ds = ds.max(euclidean(&centroid, point));
+            ds = ds.max(euclidean(&centroid, &point.coords));
             dr = ds;
         });
         total_children = node.points().len();
@@ -56,6 +56,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::shape::point::Point;
+
     use super::*;
 
     #[test]
@@ -63,7 +65,8 @@ mod tests {
         let origin = vec![0., 0.];
         let mut leaf = Node::new_leaf(&origin, 5);
         for i in 0..5 {
-            leaf.points_mut().push(vec![0., i as f64]);
+            leaf.points_mut()
+                .push(Point::with_coords(vec![0., i as f64]));
         }
         reshape(&mut leaf);
 
@@ -84,10 +87,10 @@ mod tests {
     pub fn test_reshape_leaf_node_radius() {
         let origin = vec![0., 0.];
         let mut leaf = Node::new_leaf(&origin, 5);
-        leaf.points_mut().push(vec![100., 100.]);
-        leaf.points_mut().push(vec![100., 150.]);
-        leaf.points_mut().push(vec![250., 250.]);
-        leaf.points_mut().push(vec![150., 300.]);
+        leaf.points_mut().push(Point::with_coords(vec![100., 100.]));
+        leaf.points_mut().push(Point::with_coords(vec![100., 150.]));
+        leaf.points_mut().push(Point::with_coords(vec![250., 250.]));
+        leaf.points_mut().push(Point::with_coords(vec![150., 300.]));
         reshape(&mut leaf);
         assert_eq!(leaf.get_sphere().radius, 111.80339887498948);
     }

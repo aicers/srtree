@@ -83,7 +83,8 @@ where
 
     // 2. Sort node points along that axis
     if node.is_leaf() {
-        node.points_mut().sort_by_key(|p| OrderedFloat(p[axis]));
+        node.points_mut()
+            .sort_by_key(|p| OrderedFloat(p.coords[axis]));
     } else {
         node.nodes_mut()
             .sort_by_key(|child| OrderedFloat(child.get_sphere().center[axis]));
@@ -125,6 +126,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::shape::point::Point;
+
     use super::*;
 
     pub fn get_test_points() -> Vec<Vec<f64>> {
@@ -141,8 +144,9 @@ mod tests {
     pub fn test_choose_split_axis() {
         let origin = vec![0., 0.];
         let mut node = Node::new_leaf(&origin, 5);
-        get_test_points().iter().for_each(|point| {
-            node.points_mut().push(point.to_owned());
+        get_test_points().iter().for_each(|point_coords| {
+            node.points_mut()
+                .push(Point::with_coords(point_coords.to_owned()));
         });
 
         let expected_axis = 1;
@@ -154,8 +158,9 @@ mod tests {
     pub fn test_choose_split_index() {
         let origin = vec![0., 0.];
         let mut node = Node::new_leaf(&origin, 5);
-        get_test_points().iter().for_each(|point| {
-            node.points_mut().push(point.to_owned());
+        get_test_points().iter().for_each(|point_coords| {
+            node.points_mut()
+                .push(Point::with_coords(point_coords.to_owned()));
         });
 
         let params = Params::new(1, 3, 1, true).unwrap();
@@ -170,8 +175,9 @@ mod tests {
 
         let origin = vec![0., 0.];
         let mut node = Node::new_leaf(&origin, params.max_number_of_elements);
-        get_test_points().iter().for_each(|point| {
-            node.points_mut().push(point.to_owned());
+        get_test_points().iter().for_each(|point_coords| {
+            node.points_mut()
+                .push(Point::with_coords(point_coords.to_owned()));
         });
 
         let sibling = split(&mut node, &origin, &params);
@@ -185,9 +191,10 @@ mod tests {
 
         let origin = vec![0., 0.];
         let mut node = Node::new_node(&origin, params.max_number_of_elements, 1);
-        get_test_points().iter().for_each(|point| {
-            let mut leaf = Node::new_leaf(point, params.max_number_of_elements);
-            leaf.points_mut().push(point.to_owned());
+        get_test_points().iter().for_each(|point_coords| {
+            let mut leaf = Node::new_leaf(point_coords, params.max_number_of_elements);
+            leaf.points_mut()
+                .push(Point::with_coords(point_coords.to_owned()));
             reshape(&mut leaf);
             node.nodes_mut().push(leaf);
         });
@@ -204,12 +211,12 @@ mod tests {
 
         let origin = vec![0., 10.];
         let mut node = Node::new_leaf(&origin, params.max_number_of_elements);
-        node.points_mut().push(vec![0., 9.]);
-        node.points_mut().push(vec![0., 8.]);
-        node.points_mut().push(vec![0., 7.]);
-        node.points_mut().push(vec![0., 6.]);
-        node.points_mut().push(vec![0., 1.]);
-        node.points_mut().push(vec![0., 2.]);
+        node.points_mut().push(Point::with_coords(vec![0., 9.]));
+        node.points_mut().push(Point::with_coords(vec![0., 8.]));
+        node.points_mut().push(Point::with_coords(vec![0., 7.]));
+        node.points_mut().push(Point::with_coords(vec![0., 6.]));
+        node.points_mut().push(Point::with_coords(vec![0., 1.]));
+        node.points_mut().push(Point::with_coords(vec![0., 2.]));
         reshape(&mut node);
 
         let sibling = split(&mut node, &origin, &params);

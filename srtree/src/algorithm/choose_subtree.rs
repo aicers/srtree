@@ -41,6 +41,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::shape::point::Point;
+
     use super::*;
 
     #[test]
@@ -55,7 +57,7 @@ mod tests {
         }
 
         let expected_index = 9;
-        let search_node = Node::new_point(&vec![100., 0.]);
+        let search_node = Node::new_point(&Point::with_coords(vec![100., 0.]));
         let selected_index = choose_closest_node_index(&node, &search_node);
         assert_eq!(selected_index, expected_index);
     }

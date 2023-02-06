@@ -25,26 +25,26 @@ fn test_with_random_points() {
     let mut rng = rand::thread_rng();
 
     let mut all_points = Vec::new();
-    for _ in 0..number_of_points {
-        let mut point = Vec::new();
+    for i in 0..number_of_points {
+        let mut point_coords = Vec::new();
         for _ in 0..number_of_dimensions {
             let x: f64 = 1000000. * rng.gen::<f64>();
-            point.push(x);
+            point_coords.push(x);
         }
-        tree.insert(&point);
-        all_points.push(point);
+        tree.insert(&point_coords, i);
+        all_points.push((point_coords, i));
     }
 
     let mut points = all_points.clone();
     for p in all_points.iter() {
         // SRTree nearest neighbors
-        let result = tree.query(&p, k);
+        let result = tree.query(&p.0, k);
 
         // Brute-force
-        points.sort_by_key(|a| OrderedFloat(euclidean_squared(a, p)));
+        points.sort_by_key(|a| OrderedFloat(euclidean_squared(&a.0, &p.0)));
 
         for i in 0..k {
-            assert_eq!(result[i], points[i]);
+            assert_eq!(result[i], points[i].1);
         }
     }
 }
