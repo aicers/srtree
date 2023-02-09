@@ -1,6 +1,6 @@
 use crate::{
     measure::distance::euclidean_squared,
-    shape::{rect::Rect, sphere::Sphere},
+    shape::{point::Point, rect::Rect, sphere::Sphere},
 };
 use ordered_float::{Float, OrderedFloat};
 use std::{
@@ -9,7 +9,7 @@ use std::{
 };
 
 pub enum Data<T> {
-    Points(Vec<Vec<T>>),
+    Points(Vec<Point<T>>),
     Nodes(Vec<Node<T>>),
 }
 
@@ -81,13 +81,13 @@ where
         )
     }
 
-    pub fn new_point(point: &[T]) -> Node<T> {
+    pub fn new_point(point: &Point<T>) -> Node<T> {
         Node::new(
-            Rect::from_point(point),
-            Sphere::from_point(point),
+            Rect::from_point(&point.coords),
+            Sphere::from_point(&point.coords),
             Data::Points(Vec::with_capacity(1)),
-            vec![T::zero(); point.len()],
-            0,
+            vec![T::zero(); point.coords.len()],
+            point.index,
             0,
         )
     }
@@ -138,14 +138,14 @@ where
         }
     }
 
-    pub fn points(&self) -> &Vec<Vec<T>> {
+    pub fn points(&self) -> &Vec<Point<T>> {
         match &self.data {
             Data::Points(points) => points,
             Data::Nodes(_) => panic!("not a leaf"),
         }
     }
 
-    pub fn points_mut(&mut self) -> &mut Vec<Vec<T>> {
+    pub fn points_mut(&mut self) -> &mut Vec<Point<T>> {
         match &mut self.data {
             Data::Points(points) => points,
             Data::Nodes(_) => panic!("not a leaf"),
@@ -162,7 +162,7 @@ where
     pub fn child_centroid(&self, i: usize) -> &[T] {
         match &self.data {
             Data::Nodes(_) => &self.nodes()[i].sphere.center,
-            Data::Points(_) => &self.points()[i],
+            Data::Points(_) => &self.points()[i].coords,
         }
     }
 
@@ -199,7 +199,7 @@ where
         let number_of_immediate_children = self.immed_children();
         if self.is_leaf() {
             self.points_mut()
-                .sort_by_key(|p| OrderedFloat(euclidean_squared(&center, p)));
+                .sort_by_key(|p| OrderedFloat(euclidean_squared(&center, &p.coords)));
             self.points_mut()
                 .split_off(number_of_immediate_children - n)
                 .iter()
@@ -233,9 +233,11 @@ mod tests {
     pub fn test_pop_last() {
         let origin = vec![0., 0.];
         let mut leaf_node = Node::new_leaf(&origin, 10);
-        leaf_node.points_mut().push(origin);
+        leaf_node.points_mut().push(Point::with_coords(origin));
         for i in 1..10 {
-            leaf_node.points_mut().push(vec![0., i as f64]);
+            leaf_node
+                .points_mut()
+                .push(Point::with_coords(vec![0., i as f64]));
         }
         reshape(&mut leaf_node);
         assert_eq!(leaf_node.get_sphere().center, vec![0., 4.5]);

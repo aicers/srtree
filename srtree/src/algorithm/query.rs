@@ -13,15 +13,18 @@ where
     T: Float,
 {
     pub distance: OrderedFloat<T>,
-    pub point: Vec<T>,
+    pub point_index: usize,
 }
 
 impl<T> Neighbor<T>
 where
     T: Float,
 {
-    pub fn new(distance: OrderedFloat<T>, point: Vec<T>) -> Neighbor<T> {
-        Neighbor { distance, point }
+    pub fn new(distance: OrderedFloat<T>, point_index: usize) -> Neighbor<T> {
+        Neighbor {
+            distance,
+            point_index,
+        }
     }
 }
 
@@ -57,7 +60,7 @@ where
     }
 }
 
-pub fn nearest_neighbors<T>(node: &Node<T>, point: &[T], k: usize) -> Vec<Vec<T>>
+pub fn nearest_neighbors<T>(node: &Node<T>, point: &[T], k: usize) -> Vec<usize>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -66,7 +69,7 @@ where
     search(node, point, k, &mut neighbors);
     while !neighbors.is_empty() {
         let last = neighbors.pop().unwrap();
-        result.push(last.point);
+        result.push(last.point_index);
     }
     result.reverse();
     result
@@ -79,10 +82,10 @@ where
     if node.is_leaf() {
         // insert all potential neighbors (with their distances) in a leaf node:
         node.points().iter().for_each(|candidate| {
-            let neighbor_distance = euclidean_squared(candidate, point);
+            let neighbor_distance = euclidean_squared(&candidate.coords, point);
             neighbors.push(Neighbor::new(
                 OrderedFloat(neighbor_distance),
-                candidate.clone(),
+                candidate.index,
             ));
 
             // keep only closest k neighbors:
@@ -121,6 +124,7 @@ mod tests {
     use crate::algorithm::insertion::insert_data;
     use crate::node::Node;
     use crate::params::Params;
+    use crate::shape::point::Point;
 
     #[test]
     pub fn test_nearest_neighbors_with_leaf() {
@@ -129,7 +133,7 @@ mod tests {
         let mut leaf_node = Node::new_leaf(&origin, params.max_number_of_elements);
 
         for i in 0..params.max_number_of_elements {
-            let point = vec![i as f64, 0.];
+            let point = Point::new(vec![i as f64, 0.], i);
             insert_data(&mut leaf_node, &point, &params);
         }
 
@@ -137,8 +141,8 @@ mod tests {
         let result = nearest_neighbors(&mut leaf_node, &origin, k);
 
         for i in 0..k {
-            let point = vec![i as f64, 0.];
-            assert!(result.contains(&point));
+            let point = Point::new(vec![i as f64, 0.], i);
+            assert!(result.contains(&point.index));
         }
     }
 }

@@ -27,13 +27,15 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::shape::point::Point;
+
     use super::*;
 
     #[test]
     pub fn test_leaf_mean_calculation() {
         let mut leaf = Node::new_leaf(&vec![0., 0.], 5);
-        leaf.points_mut().push(vec![1., 0.]);
-        leaf.points_mut().push(vec![0., 1.]);
+        leaf.points_mut().push(Point::with_coords(vec![1., 0.]));
+        leaf.points_mut().push(Point::with_coords(vec![0., 1.]));
         let mean = calculate(&leaf, 0, leaf.immed_children());
         assert_eq!(mean, vec![0.5, 0.5]);
     }
@@ -41,12 +43,12 @@ mod tests {
     #[test]
     pub fn test_node_mean_calculation() {
         let mut leaf1 = Node::new_leaf(&vec![0., 1.], 5);
-        leaf1.points_mut().push(vec![0., 0.]);
-        leaf1.points_mut().push(vec![0., 1.]);
-        leaf1.points_mut().push(vec![0., 2.]);
+        leaf1.points_mut().push(Point::with_coords(vec![0., 0.]));
+        leaf1.points_mut().push(Point::with_coords(vec![0., 1.]));
+        leaf1.points_mut().push(Point::with_coords(vec![0., 2.]));
         let mut leaf2 = Node::new_leaf(&vec![0., 4.], 5);
-        leaf2.points_mut().push(vec![0., 3.]);
-        leaf2.points_mut().push(vec![0., 5.]);
+        leaf2.points_mut().push(Point::with_coords(vec![0., 3.]));
+        leaf2.points_mut().push(Point::with_coords(vec![0., 5.]));
 
         let mut node = Node::new_node(&vec![0., 0.], 5, 1);
         node.nodes_mut().push(leaf1);
