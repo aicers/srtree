@@ -44,23 +44,23 @@ where
         }
     }
 
-    pub fn new_node(point: &[T], capacity: usize, height: usize) -> Node<T> {
+    pub fn new_node(point: &Point<T>, capacity: usize, height: usize) -> Node<T> {
         Node::new(
             Rect::from_point(point),
             Sphere::from_point(point),
             Data::Nodes(Vec::with_capacity(capacity)),
-            vec![T::zero(); point.len()],
+            vec![T::zero(); point.dimension()],
             0,
             height,
         )
     }
 
-    pub fn new_leaf(point: &[T], capacity: usize) -> Node<T> {
+    pub fn new_leaf(point: &Point<T>, capacity: usize) -> Node<T> {
         Node::new(
             Rect::from_point(point),
             Sphere::from_point(point),
             Data::Points(Vec::with_capacity(capacity)),
-            vec![T::zero(); point.len()],
+            vec![T::zero(); point.dimension()],
             0,
             1,
         )
@@ -83,11 +83,11 @@ where
 
     pub fn new_point(point: &Point<T>) -> Node<T> {
         Node::new(
-            Rect::from_point(&point.coords),
-            Sphere::from_point(&point.coords),
+            Rect::from_point(point),
+            Sphere::from_point(point),
             Data::Points(Vec::with_capacity(1)),
-            vec![T::zero(); point.coords.len()],
-            point.index,
+            vec![T::zero(); point.dimension()],
+            0,
             0,
         )
     }
@@ -97,7 +97,7 @@ where
     }
 
     pub fn dimension(&self) -> usize {
-        self.sphere.center.len()
+        self.sphere.center.dimension()
     }
 
     pub fn set_rect(&mut self, rect: Rect<T>) {
@@ -159,10 +159,10 @@ where
         }
     }
 
-    pub fn child_centroid(&self, i: usize) -> &[T] {
+    pub fn child_centroid(&self, i: usize) -> &Point<T> {
         match &self.data {
             Data::Nodes(_) => &self.nodes()[i].sphere.center,
-            Data::Points(_) => &self.points()[i].coords,
+            Data::Points(_) => &self.points()[i],
         }
     }
 
@@ -199,7 +199,7 @@ where
         let number_of_immediate_children = self.immed_children();
         if self.is_leaf() {
             self.points_mut()
-                .sort_by_key(|p| OrderedFloat(euclidean_squared(&center, &p.coords)));
+                .sort_by_key(|p| OrderedFloat(euclidean_squared(&center, p)));
             self.points_mut()
                 .split_off(number_of_immediate_children - n)
                 .iter()
@@ -212,7 +212,7 @@ where
         }
     }
 
-    pub fn min_distance(&self, point: &[T]) -> T
+    pub fn min_distance(&self, point: &Point<T>) -> T
     where
         T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
     {
@@ -225,24 +225,23 @@ where
 #[cfg(test)]
 mod tests {
 
-    use crate::shape::reshape::reshape;
-
     use super::*;
+    use crate::shape::reshape::reshape;
 
     #[test]
     pub fn test_pop_last() {
-        let origin = vec![0., 0.];
+        let origin = Point::with_coords(vec![0., 0.]);
         let mut leaf_node = Node::new_leaf(&origin, 10);
-        leaf_node.points_mut().push(Point::with_coords(origin));
+        leaf_node.points_mut().push(origin);
         for i in 1..10 {
             leaf_node
                 .points_mut()
                 .push(Point::with_coords(vec![0., i as f64]));
         }
         reshape(&mut leaf_node);
-        assert_eq!(leaf_node.get_sphere().center, vec![0., 4.5]);
+        assert_eq!(leaf_node.get_sphere().center.coords(), &vec![0., 4.5]);
         let last = leaf_node.pop_last(2);
-        assert_eq!(last[0].get_sphere().center, vec![0., 0.]);
-        assert_eq!(last[1].get_sphere().center, vec![0., 9.]);
+        assert_eq!(last[0].get_sphere().center.coords(), &vec![0., 0.]);
+        assert_eq!(last[1].get_sphere().center.coords(), &vec![0., 9.]);
     }
 }

@@ -1,12 +1,10 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use ndarray::{ArrayBase, ArrayView, CowRepr};
-use ordered_float::OrderedFloat;
+use ndarray::ArrayView;
 use petal_neighbors::BallTree;
 use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
 use rand_chacha::ChaChaRng;
 use srtree::{Params, SRTree};
 use std::{
-    collections::BinaryHeap,
     fs::File,
     io::{BufRead, BufReader},
 };

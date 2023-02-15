@@ -39,7 +39,7 @@ where
         }
         if self.root.is_none() {
             self.root = Some(Node::new_leaf(
-                point_coords,
+                &Point::with_coords(point_coords.clone()),
                 self.params.max_number_of_elements,
             ));
         }
@@ -66,7 +66,7 @@ where
 
     pub fn query(&mut self, point: &[T], k: usize) -> Vec<usize> {
         if let Some(root) = self.root.as_mut() {
-            nearest_neighbors(root, point, k)
+            nearest_neighbors(root, &Point::with_coords(point.to_vec()), k)
         } else {
             Vec::new()
         }
