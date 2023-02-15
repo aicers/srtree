@@ -24,15 +24,18 @@ where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     #[must_use]
-    pub fn new(dimension: usize, params: Params) -> SRTree<T> {
+    pub fn new(params: Params) -> SRTree<T> {
         SRTree {
             root: None,
             params,
-            dimension,
+            dimension: 0,
         }
     }
 
     pub fn insert(&mut self, point_coords: &Vec<T>, index: usize) -> InsertionResult {
+        if self.dimension == 0 {
+            self.dimension = point_coords.len();
+        }
         if self.dimension != point_coords.len() {
             eprintln!("Problem inserting a point: different dimensions");
             return InsertionResult::Failure;
@@ -71,6 +74,14 @@ where
             Vec::new()
         }
     }
+
+    pub fn total_childen(&self) -> usize {
+        if let Some(root) = self.root.as_ref() {
+            root.get_total_children()
+        } else {
+            0
+        }
+    }
 }
 
 #[cfg(test)]
@@ -80,7 +91,7 @@ mod tests {
     #[test]
     pub fn test_insertion_query() {
         let params = Params::new(3, 7, 3, true).unwrap();
-        let mut tree: SRTree<f64> = SRTree::new(2, params);
+        let mut tree: SRTree<f64> = SRTree::new(params);
         let search_point = vec![1.0, 0.0];
         assert!(!tree.query(&search_point, 1).contains(&0)); // not inserted yet
         tree.insert(&search_point, 0);

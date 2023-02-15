@@ -2,7 +2,7 @@ use srtree::{Params, SRTree};
 
 fn main() {
     let params = Params::new(7, 15, 7, true).unwrap();
-    let mut tree: SRTree<f64> = SRTree::new(2, params);
+    let mut tree: SRTree<f64> = SRTree::new(params);
     tree.insert(&vec![0., 0.], 0);
     tree.insert(&vec![1., 1.], 1);
     tree.insert(&vec![2., 2.], 2);

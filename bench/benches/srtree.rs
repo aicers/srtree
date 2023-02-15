@@ -128,7 +128,7 @@ fn build(criterion: &mut Criterion) {
             let min_elements = 9;
             let reinsert_count = 7;
             let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-            let mut srtree = SRTree::new(2, params);
+            let mut srtree = SRTree::new(params);
             for i in 0..pts.len() {
                 srtree.insert(&pts[i].to_vec(), i);
             }
@@ -206,7 +206,7 @@ fn query(criterion: &mut Criterion) {
     let min_elements = 9;
     let reinsert_count = 7;
     let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-    let mut srtree = SRTree::new(dim, params);
+    let mut srtree = SRTree::new(params);
     for i in 0..pts.len() {
         srtree.insert(&pts[i].to_vec(), i);
     }
