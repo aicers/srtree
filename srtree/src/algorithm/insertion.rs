@@ -89,10 +89,8 @@ where
 
     if node.get_height() == target_height {
         if node.is_leaf() {
-            node.points_mut().push(Point::new(
-                insert_node.get_sphere().center.clone(),
-                insert_node.get_total_children(),
-            ));
+            node.points_mut()
+                .push(insert_node.get_sphere().center.clone());
         } else {
             node.nodes_mut().push(insert_node);
         }
@@ -117,7 +115,7 @@ where
 }
 
 fn insert_or_split<T>(
-    parent_centroid: &[T],
+    parent_centroid: &Point<T>,
     node: &mut Node<T>,
     insert_node: Node<T>,
     params: &Params,
@@ -134,10 +132,8 @@ where
 
     if node.get_height() == target_height {
         if node.is_leaf() {
-            node.points_mut().push(Point::new(
-                insert_node.get_sphere().center.clone(),
-                insert_node.get_total_children(),
-            ));
+            node.points_mut()
+                .push(insert_node.get_sphere().center.clone());
         } else {
             node.nodes_mut().push(insert_node);
         }
@@ -179,9 +175,9 @@ mod tests {
     pub fn test_leaf_insertion() {
         let point = Point::with_coords(vec![0., 0.]);
         let params = Params::new(4, 9, 4, true).unwrap();
-        let mut leaf_node = Node::new_leaf(&point.coords, params.max_number_of_elements);
+        let mut leaf_node = Node::new_leaf(&point, params.max_number_of_elements);
         insert_data(&mut leaf_node, &point, &params);
-        assert_eq!(leaf_node.points()[0].coords, point.coords);
+        assert_eq!(leaf_node.points()[0].coords(), point.coords());
     }
 
     #[test]
@@ -190,18 +186,18 @@ mod tests {
 
         // first leaf
         let point = Point::with_coords(vec![0., 0.]);
-        let mut leaf_node1 = Node::new_leaf(&point.coords, params.max_number_of_elements);
+        let mut leaf_node1 = Node::new_leaf(&point, params.max_number_of_elements);
         insert_data(&mut leaf_node1, &point, &params);
         assert_eq!(leaf_node1.points().len(), 1);
 
         // second leaf
         let point = Point::with_coords(vec![0., 10.]);
-        let mut leaf_node2 = Node::new_leaf(&point.coords, params.max_number_of_elements);
+        let mut leaf_node2 = Node::new_leaf(&point, params.max_number_of_elements);
         insert_data(&mut leaf_node2, &point, &params);
         assert_eq!(leaf_node2.points().len(), 1);
 
         // insert the leaves
-        let mut root = Node::new_node(&point.coords, params.max_number_of_elements, 2);
+        let mut root = Node::new_node(&point, params.max_number_of_elements, 2);
         insert(&mut root, leaf_node1, &params);
         insert(&mut root, leaf_node2, &params);
         assert_eq!(root.nodes().len(), 2);
@@ -214,8 +210,8 @@ mod tests {
         let search_node = Node::new_point(&point);
         let leaf = choose_subtree(&mut root, &search_node);
         assert_eq!(leaf.points().len(), 2);
-        assert_eq!(leaf.get_sphere().center, vec![0., 10.5]);
-        assert_eq!(root.get_sphere().center, vec![0., 7.]);
+        assert_eq!(leaf.get_sphere().center.coords(), &vec![0., 10.5]);
+        assert_eq!(root.get_sphere().center.coords(), &vec![0., 7.]);
         assert_eq!(root.get_rect().low, vec![0., 0.]);
         assert_eq!(root.get_rect().high, vec![0., 11.]);
     }
@@ -226,18 +222,18 @@ mod tests {
 
         // first leaf
         let point = Point::with_coords(vec![0., 0.]);
-        let mut leaf_node1 = Node::new_leaf(&point.coords, params.max_number_of_elements);
+        let mut leaf_node1 = Node::new_leaf(&point, params.max_number_of_elements);
         insert_data(&mut leaf_node1, &point, &params);
         assert_eq!(leaf_node1.points().len(), 1);
 
         // second leaf
         let point = Point::with_coords(vec![0., 1.]);
-        let mut leaf_node2 = Node::new_leaf(&point.coords, params.max_number_of_elements);
+        let mut leaf_node2 = Node::new_leaf(&point, params.max_number_of_elements);
         insert_data(&mut leaf_node2, &point, &params);
         assert_eq!(leaf_node2.points().len(), 1);
 
         // insert the leaves
-        let point = vec![0., 0.];
+        let point = Point::with_coords(vec![0., 0.]);
         let mut root = Node::new_node(&point, params.max_number_of_elements, 2);
         insert(&mut root, leaf_node1, &params);
         insert(&mut root, leaf_node2, &params);
@@ -263,30 +259,36 @@ mod tests {
 
         // The first leaf
         let first_leaf_points = vec![vec![1., 1.], vec![3., 1.], vec![1., 3.], vec![3., 3.]];
-        let mut leaf_node1 = Node::new_leaf(&first_leaf_points[0], params.max_number_of_elements);
+        let mut leaf_node1 = Node::new_leaf(
+            &Point::with_coords(first_leaf_points[0].clone()),
+            params.max_number_of_elements,
+        );
         for point_coords in first_leaf_points {
             insert_data(&mut leaf_node1, &Point::with_coords(point_coords), &params);
         }
         assert_eq!(leaf_node1.immed_children(), 4);
         assert_eq!(leaf_node1.get_rect().low, vec![1., 1.]);
         assert_eq!(leaf_node1.get_rect().high, vec![3., 3.]);
-        assert_eq!(leaf_node1.get_sphere().center, vec![2., 2.]);
+        assert_eq!(leaf_node1.get_sphere().center.coords(), &vec![2., 2.]);
         assert_eq!(leaf_node1.get_sphere().radius, (2.0).sqrt());
 
         // The second leaf
         let second_leaf_points = vec![vec![5., 1.], vec![6., 2.]];
-        let mut leaf_node2 = Node::new_leaf(&second_leaf_points[0], params.max_number_of_elements);
+        let mut leaf_node2 = Node::new_leaf(
+            &Point::with_coords(second_leaf_points[0].clone()),
+            params.max_number_of_elements,
+        );
         for point_coords in second_leaf_points {
             insert_data(&mut leaf_node2, &Point::with_coords(point_coords), &params);
         }
         assert_eq!(leaf_node2.immed_children(), 2);
         assert_eq!(leaf_node2.get_rect().low, vec![5., 1.]);
         assert_eq!(leaf_node2.get_rect().high, vec![6., 2.]);
-        assert_eq!(leaf_node2.get_sphere().center, vec![5.5, 1.5]);
+        assert_eq!(leaf_node2.get_sphere().center.coords(), &vec![5.5, 1.5]);
         assert_eq!(leaf_node2.get_sphere().radius, (2.0).sqrt().div(2.));
 
         // Insert the leaves
-        let point = vec![0., 0.];
+        let point = Point::with_coords(vec![0., 0.]);
         let mut root = Node::new_node(&point, params.max_number_of_elements, 2);
         insert(&mut root, leaf_node1, &params);
         insert(&mut root, leaf_node2, &params);
@@ -295,8 +297,8 @@ mod tests {
         assert_eq!(root.get_rect().low, vec![1., 1.]);
         assert_eq!(root.get_rect().high, vec![6., 3.]);
         assert_eq!(
-            root.get_sphere().center,
-            vec![3.1666666666666665, 1.8333333333333333]
+            root.get_sphere().center.coords(),
+            &vec![3.1666666666666665, 1.8333333333333333]
         );
         assert_eq!(root.get_sphere().radius, 2.953340857778225);
 
@@ -313,7 +315,10 @@ mod tests {
         assert_eq!(root.nodes()[1].immed_children(), 4);
         assert_eq!(root.nodes()[1].get_rect().low, vec![5., 1.]);
         assert_eq!(root.nodes()[1].get_rect().high, vec![8., 4.]);
-        assert_eq!(root.nodes()[1].get_sphere().center, vec![6.5, 2.5]);
+        assert_eq!(
+            root.nodes()[1].get_sphere().center.coords(),
+            &vec![6.5, 2.5]
+        );
         assert_eq!(root.nodes()[1].get_sphere().radius, (18.0).sqrt().div(2.));
 
         // This insertion causes reinsert and split:

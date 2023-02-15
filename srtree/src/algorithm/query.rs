@@ -1,5 +1,5 @@
-use crate::measure::distance::euclidean_squared;
 use crate::node::Node;
+use crate::{measure::distance::euclidean_squared, shape::point::Point};
 use ordered_float::{Float, OrderedFloat};
 use std::{
     cmp::Ordering,
@@ -60,7 +60,7 @@ where
     }
 }
 
-pub fn nearest_neighbors<T>(node: &Node<T>, point: &[T], k: usize) -> Vec<usize>
+pub fn nearest_neighbors<T>(node: &Node<T>, point: &Point<T>, k: usize) -> Vec<usize>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -75,14 +75,14 @@ where
     result
 }
 
-fn search<T>(node: &Node<T>, point: &[T], k: usize, neighbors: &mut BinaryHeap<Neighbor<T>>)
+fn search<T>(node: &Node<T>, point: &Point<T>, k: usize, neighbors: &mut BinaryHeap<Neighbor<T>>)
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.is_leaf() {
         // insert all potential neighbors (with their distances) in a leaf node:
         node.points().iter().for_each(|candidate| {
-            let neighbor_distance = euclidean_squared(&candidate.coords, point);
+            let neighbor_distance = euclidean_squared(candidate, point);
             neighbors.push(Neighbor::new(
                 OrderedFloat(neighbor_distance),
                 candidate.index,
@@ -129,7 +129,7 @@ mod tests {
     #[test]
     pub fn test_nearest_neighbors_with_leaf() {
         let params = Params::new(4, 9, 4, true).unwrap();
-        let origin = vec![0., 0.];
+        let origin = Point::with_coords(vec![0., 0.]);
         let mut leaf_node = Node::new_leaf(&origin, params.max_number_of_elements);
 
         for i in 0..params.max_number_of_elements {

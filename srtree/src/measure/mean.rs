@@ -15,7 +15,7 @@ where
         let child_number_of_entries =
             T::from(node.child_immed_children(child_index)).unwrap_or_else(T::one);
         for (axis_index, m) in mean.iter_mut().enumerate() {
-            *m += node.child_centroid(child_index)[axis_index] * child_number_of_entries;
+            *m += node.child_centroid(child_index).coord_at(axis_index) * child_number_of_entries;
         }
         number_of_entries += child_number_of_entries;
     }
@@ -33,7 +33,7 @@ mod tests {
 
     #[test]
     pub fn test_leaf_mean_calculation() {
-        let mut leaf = Node::new_leaf(&vec![0., 0.], 5);
+        let mut leaf = Node::new_leaf(&Point::with_coords(vec![0., 0.]), 5);
         leaf.points_mut().push(Point::with_coords(vec![1., 0.]));
         leaf.points_mut().push(Point::with_coords(vec![0., 1.]));
         let mean = calculate(&leaf, 0, leaf.immed_children());
@@ -42,15 +42,15 @@ mod tests {
 
     #[test]
     pub fn test_node_mean_calculation() {
-        let mut leaf1 = Node::new_leaf(&vec![0., 1.], 5);
+        let mut leaf1 = Node::new_leaf(&Point::with_coords(vec![0., 1.]), 5);
         leaf1.points_mut().push(Point::with_coords(vec![0., 0.]));
         leaf1.points_mut().push(Point::with_coords(vec![0., 1.]));
         leaf1.points_mut().push(Point::with_coords(vec![0., 2.]));
-        let mut leaf2 = Node::new_leaf(&vec![0., 4.], 5);
+        let mut leaf2 = Node::new_leaf(&Point::with_coords(vec![0., 4.]), 5);
         leaf2.points_mut().push(Point::with_coords(vec![0., 3.]));
         leaf2.points_mut().push(Point::with_coords(vec![0., 5.]));
 
-        let mut node = Node::new_node(&vec![0., 0.], 5, 1);
+        let mut node = Node::new_node(&Point::with_coords(vec![0., 0.]), 5, 1);
         node.nodes_mut().push(leaf1);
         node.nodes_mut().push(leaf2);
 

@@ -47,11 +47,11 @@ mod tests {
 
     #[test]
     pub fn test_closest_node_selection() {
-        let origin = vec![0., 0.];
+        let origin = Point::with_coords(vec![0., 0.]);
         let mut node = Node::new_node(&origin, 10, 1);
 
         for i in 0..10 {
-            let point = vec![i as f64, 0.];
+            let point = Point::with_coords(vec![i as f64, 0.]);
             let child = Node::new_leaf(&point, 10);
             node.nodes_mut().push(child);
         }

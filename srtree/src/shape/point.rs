@@ -4,8 +4,9 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
+#[derive(Debug, Clone)]
 pub struct Point<T> {
-    pub coords: Vec<T>,
+    coords: Vec<T>,
     pub index: usize,
 }
 
@@ -20,5 +21,21 @@ where
     #[allow(dead_code)]
     pub fn with_coords(coords: Vec<T>) -> Point<T> {
         Point { coords, index: 0 }
+    }
+
+    pub fn dimension(&self) -> usize {
+        self.coords.len()
+    }
+
+    pub fn coord_at(&self, index: usize) -> T {
+        self.coords[index]
+    }
+
+    pub fn set_coord_at(&mut self, index: usize, value: T) {
+        self.coords[index] = value;
+    }
+
+    pub fn coords(&self) -> &Vec<T> {
+        &self.coords
     }
 }

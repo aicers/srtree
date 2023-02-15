@@ -1,6 +1,7 @@
 use crate::measure::distance::euclidean_squared;
 use crate::measure::mean;
 use crate::node::Node;
+use crate::shape::point::Point;
 use crate::shape::reshape::reshape;
 use crate::{measure::variance::calculate, params::Params};
 use ordered_float::{Float, OrderedFloat};
@@ -69,7 +70,7 @@ where
     selected_index
 }
 
-pub fn split<T>(node: &mut Node<T>, parent_centroid: &[T], params: &Params) -> Node<T>
+pub fn split<T>(node: &mut Node<T>, parent_centroid: &Point<T>, params: &Params) -> Node<T>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -84,19 +85,19 @@ where
     // 2. Sort node points along that axis
     if node.is_leaf() {
         node.points_mut()
-            .sort_by_key(|p| OrderedFloat(p.coords[axis]));
+            .sort_by_key(|p| OrderedFloat(p.coord_at(axis)));
     } else {
         node.nodes_mut()
-            .sort_by_key(|child| OrderedFloat(child.get_sphere().center[axis]));
+            .sort_by_key(|child| OrderedFloat(child.get_sphere().center.coord_at(axis)));
     }
 
     // 3. Choose the split index along this axis
     let mut index = choose_split_index(node, params);
 
-    let node_centroid = mean::calculate(node, 0, index);
+    let node_centroid = Point::with_coords(mean::calculate(node, 0, index));
     let node_distance = euclidean_squared(parent_centroid, &node_centroid);
 
-    let sibling_centroid = mean::calculate(node, index, node.immed_children());
+    let sibling_centroid = Point::with_coords(mean::calculate(node, index, node.immed_children()));
     let sibling_distance = euclidean_squared(parent_centroid, &sibling_centroid);
 
     if node_distance > sibling_distance {
@@ -142,7 +143,7 @@ mod tests {
 
     #[test]
     pub fn test_choose_split_axis() {
-        let origin = vec![0., 0.];
+        let origin = Point::with_coords(vec![0., 0.]);
         let mut node = Node::new_leaf(&origin, 5);
         get_test_points().iter().for_each(|point_coords| {
             node.points_mut()
@@ -156,7 +157,7 @@ mod tests {
 
     #[test]
     pub fn test_choose_split_index() {
-        let origin = vec![0., 0.];
+        let origin = Point::with_coords(vec![0., 0.]);
         let mut node = Node::new_leaf(&origin, 5);
         get_test_points().iter().for_each(|point_coords| {
             node.points_mut()
@@ -173,7 +174,7 @@ mod tests {
     pub fn test_split_leaf_node() {
         let params = Params::new(2, 5, 2, true).unwrap();
 
-        let origin = vec![0., 0.];
+        let origin = Point::with_coords(vec![0., 0.]);
         let mut node = Node::new_leaf(&origin, params.max_number_of_elements);
         get_test_points().iter().for_each(|point_coords| {
             node.points_mut()
@@ -189,10 +190,13 @@ mod tests {
     pub fn test_split_node() {
         let params = Params::new(2, 5, 2, true).unwrap();
 
-        let origin = vec![0., 0.];
+        let origin = Point::with_coords(vec![0., 0.]);
         let mut node = Node::new_node(&origin, params.max_number_of_elements, 1);
         get_test_points().iter().for_each(|point_coords| {
-            let mut leaf = Node::new_leaf(point_coords, params.max_number_of_elements);
+            let mut leaf = Node::new_leaf(
+                &Point::with_coords(point_coords.clone()),
+                params.max_number_of_elements,
+            );
             leaf.points_mut()
                 .push(Point::with_coords(point_coords.to_owned()));
             reshape(&mut leaf);
@@ -209,7 +213,7 @@ mod tests {
     pub fn test_split_node_with_parent() {
         let params = Params::new(2, 5, 2, true).unwrap();
 
-        let origin = vec![0., 10.];
+        let origin = Point::with_coords(vec![0., 10.]);
         let mut node = Node::new_leaf(&origin, params.max_number_of_elements);
         node.points_mut().push(Point::with_coords(vec![0., 9.]));
         node.points_mut().push(Point::with_coords(vec![0., 8.]));
