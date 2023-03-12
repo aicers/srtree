@@ -87,12 +87,12 @@ fn world_cities_dataset() -> Vec<[f64; 2]> {
 }
 
 fn build(criterion: &mut Criterion) {
-    let pts = world_cities_dataset();
     let mut group = criterion.benchmark_group("build");
 
     // R-tree (https://github.com/tidwall/rtree.rs)
     group.bench_function("rtree", |bencher| {
         bencher.iter(|| {
+            let pts = world_cities_dataset();
             let mut rtree = rtree_rs::RTree::new();
             for i in 0..pts.len() {
                 rtree.insert(rtree_rs::Rect::new(pts[i], pts[i]), i);
@@ -103,6 +103,7 @@ fn build(criterion: &mut Criterion) {
     // R*tree (https://github.com/georust/rstar)
     group.bench_function("rstar", |bencher| {
         bencher.iter(|| {
+            let pts = world_cities_dataset();
             let mut rstar = rstar::RTree::new();
             for i in 0..pts.len() {
                 rstar.insert(pts[i]);
@@ -111,12 +112,13 @@ fn build(criterion: &mut Criterion) {
     });
 
     // Ball-tree (https://github.com/petabi/petal-neighbors)
-    let n = black_box(pts.len());
-    let dim = black_box(2);
-    let data: Vec<f64> = pts.clone().into_iter().flatten().collect();
-    let array = ArrayView::from_shape((n, dim), &data).unwrap();
     group.bench_function("ball-tree", |bencher| {
         bencher.iter(|| {
+            let pts = world_cities_dataset();
+            let n = black_box(pts.len());
+            let dim = black_box(2);
+            let data: Vec<f64> = pts.clone().into_iter().flatten().collect();
+            let array = ArrayView::from_shape((n, dim), &data).unwrap();
             BallTree::euclidean(array).expect("`array` is not empty");
         });
     });
@@ -124,6 +126,7 @@ fn build(criterion: &mut Criterion) {
     // SR-tree
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
+            let pts = world_cities_dataset();
             let max_elements = 21;
             let min_elements = 9;
             let reinsert_count = 7;
@@ -154,7 +157,8 @@ fn query(criterion: &mut Criterion) {
             for i in 0..pts.len() {
                 let mut count = 0;
                 let target = rtree_rs::Rect::new(pts[i], pts[i]);
-                while let Some(_) = rtree.nearby(|rect, _| rect.box_dist(&target)).next() {
+                let mut iter = rtree.nearby(|rect, _| rect.box_dist(&target));
+                while let Some(_) = iter.next() {
                     count += 1;
                     if count == k {
                         break;
@@ -173,7 +177,8 @@ fn query(criterion: &mut Criterion) {
         bencher.iter(|| {
             for i in 0..pts.len() {
                 let mut count = 0;
-                while let Some(_) = rstar.nearest_neighbor_iter(&pts[i]).next() {
+                let mut iter = rstar.nearest_neighbor_iter(&pts[i]);
+                while let Some(_) = iter.next() {
                     count += 1;
                     if count == k {
                         break;

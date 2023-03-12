@@ -39,15 +39,18 @@ where
     );
 
     // Minimize the sum of variances for two groups of node.points
-    let mut selected_index = params.min_number_of_elements;
-    let mut min_variance = T::infinity();
+    let mut selected_index = params.min_number_of_elements.max(node.immed_children() / 2);
+    let mut min_variance = T::zero();
+    for var in &calculate(node, 0, selected_index) {
+        min_variance += *var;
+    }
+    for var in &calculate(node, selected_index, node.immed_children()) {
+        min_variance += *var;
+    }
 
     let number_of_entries = node.immed_children();
     let start = params.min_number_of_elements;
-    let end = params
-        .max_number_of_elements
-        .min(number_of_entries - params.min_number_of_elements)
-        + 1;
+    let end = number_of_entries - params.min_number_of_elements + 1;
 
     for i in start..end {
         let mut current_variance = T::zero();
