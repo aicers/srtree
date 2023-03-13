@@ -198,16 +198,21 @@ where
         let center = self.get_sphere().center.clone();
         let number_of_immediate_children = self.immed_children();
         if self.is_leaf() {
-            self.points_mut()
-                .sort_by_key(|p| OrderedFloat(euclidean_squared(&center, p)));
+            self.points_mut().select_nth_unstable_by(n, |a, b| {
+                OrderedFloat(euclidean_squared(&center, a))
+                    .cmp(&OrderedFloat(euclidean_squared(&center, b)))
+            });
             self.points_mut()
                 .split_off(number_of_immediate_children - n)
                 .iter()
                 .map(|p| Node::new_point(p))
                 .collect()
         } else {
-            self.nodes_mut()
-                .sort_by_key(|node| OrderedFloat(euclidean_squared(&center, &node.sphere.center)));
+            self.nodes_mut().select_nth_unstable_by(n, |a, b| {
+                OrderedFloat(euclidean_squared(&center, &a.get_sphere().center)).cmp(&OrderedFloat(
+                    euclidean_squared(&center, &b.get_sphere().center),
+                ))
+            });
             self.nodes_mut().split_off(number_of_immediate_children - n)
         }
     }
