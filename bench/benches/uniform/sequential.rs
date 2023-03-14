@@ -1,15 +1,16 @@
 use std::collections::BinaryHeap;
 use criterion::{black_box, Criterion};
 use ordered_float::OrderedFloat;
-use srtree::{Params, SRTree};
+use srtree::SRTree;
 
 use crate::uniform::utils::{uniform_dataset, euclidean_squared};
 
+
 // Note:
 // Ball-tree (https://github.com/petabi/petal-neighbors) does not support dynamic insertions
+const D: usize = 9; // dimension
 
 fn build(criterion: &mut Criterion) {
-    const D: usize = 2; // dimension
     let n: usize = black_box(2000); // number of points
     let mut group = criterion.benchmark_group("build");
 
@@ -39,11 +40,7 @@ fn build(criterion: &mut Criterion) {
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
             let pts: Vec<[f64; D]> = uniform_dataset(n);
-            let max_elements = 21;
-            let min_elements = 9;
-            let reinsert_count = 7;
-            let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-            let mut srtree = SRTree::new(params);
+            let mut srtree = SRTree::new();
             for i in 0..pts.len() {
                 srtree.insert(&pts[i].to_vec(), i);
             }
@@ -52,7 +49,6 @@ fn build(criterion: &mut Criterion) {
 }
 
 fn query(criterion: &mut Criterion) {
-    const D: usize = 2; // dimension
     let n: usize = black_box(2000); // number of points
     let k: usize = black_box(15); // number of nearest neighbors
     let pts: Vec<[f64; D]> = uniform_dataset(n);
@@ -100,11 +96,7 @@ fn query(criterion: &mut Criterion) {
     });
 
     // SR-tree
-    let max_elements = 21;
-    let min_elements = 9;
-    let reinsert_count = 7;
-    let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-    let mut srtree = SRTree::new(params);
+    let mut srtree = SRTree::new();
     for i in 0..pts.len() {
         srtree.insert(&pts[i].to_vec(), i);
     }

@@ -9,9 +9,9 @@ use crate::uniform::utils::{uniform_dataset, euclidean_squared};
 
 // Note:
 // R-tree (https://github.com/tidwall/rtree.rs) does not support bulk loading
+const D: usize = 9; // dimension
 
 fn build(criterion: &mut Criterion) {
-    const D: usize = 2; // dimension
     let n: usize = black_box(2000); // number of points
     let mut group = criterion.benchmark_group("build");
 
@@ -39,20 +39,13 @@ fn build(criterion: &mut Criterion) {
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
             let pts: Vec<[f64; D]> = uniform_dataset(n);
-            let max_elements = 21;
-            let min_elements = 9;
-            let reinsert_count = 7;
-            let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-            let mut srtree = SRTree::new(params);
-            for i in 0..pts.len() {
-                srtree.insert(&pts[i].to_vec(), i);
-            }
+            let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
+            SRTree::bulk_load(&pts, Params::default_params())
         });
     });
 }
 
 fn query(criterion: &mut Criterion) {
-    const D: usize = 2; // dimension
     let n: usize = black_box(2000); // number of points
     let k: usize = black_box(15); // number of nearest neighbors
     let pts: Vec<[f64; D]> = uniform_dataset(n);
@@ -91,16 +84,12 @@ fn query(criterion: &mut Criterion) {
     });
 
     // SR-tree
+    let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
+    let srtree = SRTree::bulk_load(&pts, Params::default_params());
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
-            let pts: Vec<[f64; D]> = uniform_dataset(n);
-            let max_elements = 21;
-            let min_elements = 9;
-            let reinsert_count = 7;
-            let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-            let mut srtree = SRTree::new(params);
-            for i in 0..pts.len() {
-                srtree.insert(&pts[i].to_vec(), i);
+            for point in &pts {
+                srtree.query(point, k);
             }
         });
     });

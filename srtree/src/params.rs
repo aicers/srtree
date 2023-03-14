@@ -1,3 +1,4 @@
+#[derive(Clone, Copy)]
 pub struct Params {
     pub min_number_of_elements: usize,
     pub max_number_of_elements: usize,
