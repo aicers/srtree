@@ -7,6 +7,7 @@ use crate::shape::point::Point;
 use ordered_float::Float;
 use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
+use std::usize;
 
 pub enum InsertionResult {
     Success,
@@ -37,7 +38,13 @@ where
         }
     }
 
-    pub fn insert(&mut self, point_coords: &Vec<T>, index: usize) -> InsertionResult {
+    #[must_use]
+    pub fn bulk_load(pts: &Vec<Vec<T>>, params: Params) -> SRTree<T> {
+        // Todo: implement bulk loading
+        SRTree::new()
+    }
+
+    pub fn insert(&mut self, point_coords: &[T], index: usize) -> InsertionResult {
         if self.dimension == 0 {
             self.dimension = point_coords.len();
         }
@@ -47,13 +54,13 @@ where
         }
         if self.root.is_none() {
             self.root = Some(Node::new_leaf(
-                &Point::with_coords(point_coords.clone()),
+                &Point::with_coords(point_coords.to_vec()),
                 self.params.max_number_of_elements,
             ));
         }
 
         if let Some(root) = self.root.as_mut() {
-            insert_data(root, &Point::new(point_coords.clone(), index), &self.params);
+            insert_data(root, &Point::new(point_coords.to_vec(), index), &self.params);
 
             if root.immed_children() > self.params.max_number_of_elements {
                 let sibling = split(root, &root.get_sphere().center.clone(), &self.params);
@@ -72,8 +79,8 @@ where
         InsertionResult::Success
     }
 
-    pub fn query(&mut self, point: &[T], k: usize) -> Vec<usize> {
-        if let Some(root) = self.root.as_mut() {
+    pub fn query(&self, point: &[T], k: usize) -> Vec<usize> {
+        if let Some(root) = self.root.as_ref() {
             nearest_neighbors(root, &Point::with_coords(point.to_vec()), k)
         } else {
             Vec::new()
