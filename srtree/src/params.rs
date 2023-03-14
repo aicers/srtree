@@ -25,6 +25,16 @@ impl Params {
             prefer_close_reinsert,
         })
     }
+
+    #[must_use]
+    pub fn default_params() -> Params {
+        Params {
+            min_number_of_elements: 9,
+            max_number_of_elements: 21,
+            reinsert_count: 7,
+            prefer_close_reinsert: true,
+        }
+    }
 }
 
 #[cfg(test)]

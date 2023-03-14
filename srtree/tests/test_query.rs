@@ -20,7 +20,7 @@ fn test_with_random_points() {
     let k = 10;
 
     let params = Params::new(3, 7, 3, true).unwrap();
-    let mut tree: SRTree<f64> = SRTree::new(params);
+    let mut tree: SRTree<f64> = SRTree::with_params(params);
 
     let mut rng = rand::thread_rng();
 

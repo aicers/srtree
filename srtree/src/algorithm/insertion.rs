@@ -166,8 +166,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{ops::Div, sync::Arc};
-
     use super::*;
     use crate::algorithm::choose_subtree::choose_subtree;
 
@@ -285,7 +283,7 @@ mod tests {
         assert_eq!(leaf_node2.get_rect().low, vec![5., 1.]);
         assert_eq!(leaf_node2.get_rect().high, vec![6., 2.]);
         assert_eq!(leaf_node2.get_sphere().center.coords(), &vec![5.5, 1.5]);
-        assert_eq!(leaf_node2.get_sphere().radius, (2.0).sqrt().div(2.));
+        assert_eq!(leaf_node2.get_sphere().radius, (2.0).sqrt() / 2.);
 
         // Insert the leaves
         let point = Point::with_coords(vec![0., 0.]);
@@ -319,7 +317,7 @@ mod tests {
             root.nodes()[1].get_sphere().center.coords(),
             &vec![6.5, 2.5]
         );
-        assert_eq!(root.nodes()[1].get_sphere().radius, (18.0).sqrt().div(2.));
+        assert_eq!(root.nodes()[1].get_sphere().radius, (18.0).sqrt() / 2.);
 
         // This insertion causes reinsert and split:
         let new_point = Point::with_coords(vec![9., 5.]);
