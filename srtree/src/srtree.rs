@@ -26,7 +26,11 @@ where
 {
     #[must_use]
     pub fn with_params(params: Params) -> SRTree<T> {
-        SRTree { dimension: 0, root: None, params }
+        SRTree {
+            dimension: 0,
+            root: None,
+            params,
+        }
     }
 
     #[must_use]
@@ -39,7 +43,7 @@ where
     }
 
     #[must_use]
-    pub fn bulk_load(pts: &Vec<Vec<T>>, params: Params) -> SRTree<T> {
+    pub fn bulk_load(pts: &[Vec<T>], params: Params) -> SRTree<T> {
         // Todo: implement bulk loading
         SRTree::new()
     }
@@ -60,7 +64,11 @@ where
         }
 
         if let Some(root) = self.root.as_mut() {
-            insert_data(root, &Point::new(point_coords.to_vec(), index), &self.params);
+            insert_data(
+                root,
+                &Point::new(point_coords.to_vec(), index),
+                &self.params,
+            );
 
             if root.immed_children() > self.params.max_number_of_elements {
                 let sibling = split(root, &root.get_sphere().center.clone(), &self.params);
@@ -93,6 +101,15 @@ where
         } else {
             0
         }
+    }
+}
+
+impl<T> Default for SRTree<T>
+where
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
+    fn default() -> Self {
+        Self::new()
     }
 }
 

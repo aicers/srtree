@@ -34,10 +34,8 @@ fn build(criterion: &mut Criterion) {
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
             let pts = world_cities_dataset();
-            let mut srtree = SRTree::new();
-            for i in 0..pts.len() {
-                srtree.insert(&pts[i].to_vec(), i);
-            }
+            let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
+            SRTree::bulk_load(&pts, Params::default_params())
         });
     });
 }
@@ -82,10 +80,8 @@ fn query(criterion: &mut Criterion) {
     });
 
     // SR-tree
-    let mut srtree = SRTree::new();
-    for i in 0..pts.len() {
-        srtree.insert(&pts[i].to_vec(), i);
-    }
+    let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
+    let srtree = SRTree::bulk_load(&pts, Params::default_params());
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
             for point in &pts {

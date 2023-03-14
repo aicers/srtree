@@ -1,6 +1,6 @@
 use super::data::world_cities_dataset;
 use criterion::{black_box, Criterion};
-use srtree::{Params, SRTree};
+use srtree::SRTree;
 
 // Note:
 // 1. Ball-tree (https://github.com/petabi/petal-neighbors) does not support sequential (dynamic) insertions

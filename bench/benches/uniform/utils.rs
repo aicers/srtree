@@ -1,8 +1,6 @@
-use rand::{rngs::StdRng, seq::SliceRandom, Rng, SeedableRng};
-use rand_chacha::ChaChaRng;
+use rand::{rngs::StdRng, Rng, SeedableRng};
 
 const INPUT_SEED: [u8; 32] = *b"PiH6Xi3GBBXhTK6UsXJYngHaF3fx4aYS";
-const QUERY_SEED: [u8; 32] = *b"H4NNoe0r5BDtWChfJEgXpXCNaS5IfVxC";
 
 pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
     if point1.len() != point2.len() {

@@ -13,7 +13,6 @@ pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
     distance
 }
 
-
 #[test]
 fn test_with_random_points() {
     const DIMENSION: usize = 2;
