@@ -3,7 +3,7 @@ use srtree::{InsertionResult, Params, SRTree};
 #[test]
 pub fn test_insertion_invalid_dimensions() {
     let params = Params::new(3, 7, 3, true).unwrap();
-    let mut tree = SRTree::new(params);
+    let mut tree = SRTree::with_params(params);
 
     let result = tree.insert(&vec![0., 1.], 0); // valid insertion
     assert!(matches!(result, InsertionResult::Success));

@@ -36,11 +36,7 @@ fn build(criterion: &mut Criterion) {
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
             let pts = world_cities_dataset();
-            let max_elements = 21;
-            let min_elements = 9;
-            let reinsert_count = 7;
-            let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-            let mut srtree = SRTree::new(params);
+            let mut srtree = SRTree::new();
             for i in 0..pts.len() {
                 srtree.insert(&pts[i].to_vec(), i);
             }
@@ -95,11 +91,7 @@ fn query(criterion: &mut Criterion) {
     });
 
     // SR-tree
-    let max_elements = 21;
-    let min_elements = 9;
-    let reinsert_count = 7;
-    let params = Params::new(min_elements, max_elements, reinsert_count, true).unwrap();
-    let mut srtree = SRTree::new(params);
+    let mut srtree = SRTree::new();
     for i in 0..pts.len() {
         srtree.insert(&pts[i].to_vec(), i);
     }

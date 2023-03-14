@@ -24,11 +24,16 @@ where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     #[must_use]
-    pub fn new(params: Params) -> SRTree<T> {
+    pub fn with_params(params: Params) -> SRTree<T> {
+        SRTree { dimension: 0, root: None, params }
+    }
+
+    #[must_use]
+    pub fn new() -> SRTree<T> {
         SRTree {
-            root: None,
-            params,
             dimension: 0,
+            root: None,
+            params: Params::default_params(),
         }
     }
 
@@ -91,7 +96,7 @@ mod tests {
     #[test]
     pub fn test_insertion_query() {
         let params = Params::new(3, 7, 3, true).unwrap();
-        let mut tree: SRTree<f64> = SRTree::new(params);
+        let mut tree: SRTree<f64> = SRTree::with_params(params);
         let search_point = vec![1.0, 0.0];
         assert!(!tree.query(&search_point, 1).contains(&0)); // not inserted yet
         tree.insert(&search_point, 0);
