@@ -1,3 +1,4 @@
+use crate::algorithm::bulk_loading_omt::bulk_load;
 use crate::algorithm::insertion::{insert_data, insert_node};
 use crate::algorithm::query::nearest_neighbors;
 use crate::algorithm::split::split;
@@ -15,7 +16,6 @@ pub enum InsertionResult {
 }
 
 pub struct SRTree<T> {
-    dimension: usize,
     root: Option<Node<T>>,
     params: Params,
 }
@@ -26,33 +26,37 @@ where
 {
     #[must_use]
     pub fn with_params(params: Params) -> SRTree<T> {
-        SRTree {
-            dimension: 0,
-            root: None,
-            params,
-        }
+        SRTree { root: None, params }
     }
 
     #[must_use]
     pub fn new() -> SRTree<T> {
         SRTree {
-            dimension: 0,
             root: None,
             params: Params::default_params(),
         }
     }
 
     #[must_use]
-    pub fn bulk_load(pts: &[Vec<T>], params: Params) -> SRTree<T> {
-        // Todo: implement bulk loading
-        SRTree::new()
+    pub fn bulk_load(pts: &[Vec<T>], mut params: Params) -> SRTree<T> {
+        let points: Vec<Point<T>> = pts
+            .iter()
+            .enumerate()
+            .map(|(i, p)| Point::new(p.clone(), i))
+            .collect();
+        params.dimension = points[0].dimension();
+        let root = bulk_load(points, &params);
+        SRTree {
+            root: Some(root),
+            params,
+        }
     }
 
     pub fn insert(&mut self, point_coords: &[T], index: usize) -> InsertionResult {
-        if self.dimension == 0 {
-            self.dimension = point_coords.len();
+        if self.params.dimension == 0 {
+            self.params.dimension = point_coords.len();
         }
-        if self.dimension != point_coords.len() {
+        if self.params.dimension != point_coords.len() {
             eprintln!("Problem inserting a point: different dimensions");
             return InsertionResult::Failure;
         }

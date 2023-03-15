@@ -4,6 +4,7 @@ pub struct Params {
     pub max_number_of_elements: usize,
     pub reinsert_count: usize,
     pub prefer_close_reinsert: bool,
+    pub dimension: usize,
 }
 
 impl Params {
@@ -24,6 +25,7 @@ impl Params {
             max_number_of_elements,
             reinsert_count,
             prefer_close_reinsert,
+            dimension: 0,
         })
     }
 
@@ -34,6 +36,7 @@ impl Params {
             max_number_of_elements: 21,
             reinsert_count: 7,
             prefer_close_reinsert: true,
+            dimension: 0,
         }
     }
 }

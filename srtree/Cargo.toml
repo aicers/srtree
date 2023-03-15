@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 ordered-float = "3.4.0"
+num-traits = "0.2.15"
 
 [dev-dependencies]
 rand = "0.8.5"

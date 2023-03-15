@@ -1,6 +1,6 @@
 use crate::{
     measure::distance::euclidean_squared,
-    shape::{point::Point, rect::Rect, sphere::Sphere},
+    shape::{point::Point, rect::Rect, reshape::reshape, sphere::Sphere},
 };
 use ordered_float::{Float, OrderedFloat};
 use std::{
@@ -90,6 +90,24 @@ where
             0,
             0,
         )
+    }
+
+    pub fn create_leaf(points: Vec<Point<T>>) -> Node<T> {
+        let mut node = Node::new_leaf(&points[0], points.len());
+        node.points_mut().extend(points);
+        reshape(&mut node);
+        node
+    }
+
+    pub fn create_parent(nodes: Vec<Node<T>>) -> Node<T> {
+        let mut parent = Node::new_node(
+            &nodes[0].get_sphere().center,
+            nodes.len(),
+            nodes[0].get_height() + 1,
+        );
+        parent.nodes_mut().extend(nodes);
+        reshape(&mut parent);
+        parent
     }
 
     pub fn is_leaf(&self) -> bool {
