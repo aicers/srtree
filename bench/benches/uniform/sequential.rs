@@ -1,15 +1,15 @@
-use std::collections::BinaryHeap;
 use criterion::{black_box, Criterion};
 use ordered_float::OrderedFloat;
+use priority_queue::PriorityQueue;
 use srtree::SRTree;
+use std::collections::BinaryHeap;
 
-use crate::uniform::utils::{uniform_dataset, euclidean_squared};
-
+use crate::uniform::utils::{euclidean_squared, uniform_dataset};
 
 // Note:
 // Ball-tree (https://github.com/petabi/petal-neighbors) does not support dynamic insertions
-const N: usize = 10000; // number of points
-const D: usize = 9; // dimension
+const N: usize = 5000; // number of points
+const D: usize = 2; // dimension
 
 fn build(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("build");
@@ -95,9 +95,10 @@ fn query(criterion: &mut Criterion) {
     });
 
     // SR-tree
+    let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
     let mut srtree = SRTree::new();
     for i in 0..pts.len() {
-        srtree.insert(&pts[i].to_vec(), i);
+        srtree.insert(&pts[i], i);
     }
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
@@ -108,11 +109,17 @@ fn query(criterion: &mut Criterion) {
     });
 
     // Linear scan
-    let mut pts_clone = pts.clone();
     group.bench_function("exhaustive", |bencher| {
         bencher.iter(|| {
-            for query_point in &pts {
-                pts_clone.select_nth_unstable_by_key(k, |point| OrderedFloat(euclidean_squared(query_point, point)));
+            for i in 0..pts.len() {
+                let mut queue = PriorityQueue::new();
+                for j in 0..pts.len() {
+                    let dist = euclidean_squared(&pts[i], &pts[j]);
+                    queue.push(j, OrderedFloat(dist));
+                    if queue.len() > k {
+                        queue.pop();
+                    }
+                }
             }
         });
     });

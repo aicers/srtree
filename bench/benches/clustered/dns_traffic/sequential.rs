@@ -108,8 +108,15 @@ fn query(criterion: &mut Criterion) {
     let mut pts_clone = pts.clone();
     group.bench_function("exhaustive", |bencher| {
         bencher.iter(|| {
-            for query_point in &pts {
-                pts_clone.select_nth_unstable_by_key(k, |point| OrderedFloat(euclidean_squared(query_point, point)));
+            for i in 0..pts.len() {
+                let mut queue = PriorityQueue::new();
+                for j in 0..pts.len() {
+                    let dist = euclidean_squared(&pts[i], &pts[j]);
+                    queue.push(j, OrderedFloat(dist));
+                    if queue.len() > k {
+                        queue.pop();
+                    }
+                }
             }
         });
     });
