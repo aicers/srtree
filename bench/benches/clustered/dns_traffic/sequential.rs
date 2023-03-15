@@ -1,15 +1,12 @@
 use std::collections::BinaryHeap;
+
+use super::data::{dns_traffic_dataset, euclidean_squared};
 use criterion::{black_box, Criterion};
 use ordered_float::OrderedFloat;
 use srtree::SRTree;
 
-use crate::uniform::utils::{uniform_dataset, euclidean_squared};
-
-
 // Note:
-// Ball-tree (https://github.com/petabi/petal-neighbors) does not support dynamic insertions
-const N: usize = 10000; // number of points
-const D: usize = 9; // dimension
+// Ball-tree (https://github.com/petabi/petal-neighbors) does not support sequential (dynamic) insertions
 
 fn build(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("build");
@@ -17,7 +14,7 @@ fn build(criterion: &mut Criterion) {
     // R-tree (https://github.com/tidwall/rtree.rs)
     group.bench_function("rtree", |bencher| {
         bencher.iter(|| {
-            let pts: Vec<[f64; D]> = uniform_dataset(N);
+            let pts = dns_traffic_dataset();
             let mut rtree = rtree_rs::RTree::new();
             for i in 0..pts.len() {
                 rtree.insert(rtree_rs::Rect::new(pts[i], pts[i]), i);
@@ -28,7 +25,7 @@ fn build(criterion: &mut Criterion) {
     // R*tree (https://github.com/georust/rstar)
     group.bench_function("rstar", |bencher| {
         bencher.iter(|| {
-            let pts: Vec<[f64; D]> = uniform_dataset(N);
+            let pts = dns_traffic_dataset();
             let mut rstar = rstar::RTree::new();
             for i in 0..pts.len() {
                 rstar.insert(pts[i]);
@@ -39,7 +36,7 @@ fn build(criterion: &mut Criterion) {
     // SR-tree
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
-            let pts: Vec<[f64; D]> = uniform_dataset(N);
+            let pts = dns_traffic_dataset();
             let mut srtree = SRTree::new();
             for i in 0..pts.len() {
                 srtree.insert(&pts[i].to_vec(), i);
@@ -49,7 +46,7 @@ fn build(criterion: &mut Criterion) {
 }
 
 fn query(criterion: &mut Criterion) {
-    let pts: Vec<[f64; D]> = uniform_dataset(N);
+    let pts = dns_traffic_dataset();
     let k: usize = black_box(15); // number of nearest neighbors
     let mut group = criterion.benchmark_group("query");
 
@@ -118,7 +115,7 @@ fn query(criterion: &mut Criterion) {
     });
 }
 
-pub fn sequential_benchmark(criterion: &mut Criterion) {
+pub fn dns_traffic_benchmark(criterion: &mut Criterion) {
     build(criterion);
     query(criterion);
 }
