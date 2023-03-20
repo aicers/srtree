@@ -1,11 +1,13 @@
+use crate::{
+    neighbor::Neighbor,
+    uniform::utils::{euclidean_squared, uniform_dataset},
+};
 use criterion::{black_box, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
 use ordered_float::OrderedFloat;
 use petal_neighbors::BallTree;
-use priority_queue::PriorityQueue;
 use srtree::{Params, SRTree};
-
-use crate::uniform::utils::{euclidean_squared, uniform_dataset};
+use std::collections::BinaryHeap;
 
 // Note:
 // R-tree (https://github.com/tidwall/rtree.rs) does not support bulk loading
@@ -14,8 +16,7 @@ const D: usize = 8; // dimension
 const k: usize = 15; // number of nearest neighbors
 
 fn build_and_query(criterion: &mut Criterion) {
-    let pts: Vec<[f64; D]> = uniform_dataset(N);
-    let mut group = criterion.benchmark_group("combined");
+    let mut group = criterion.benchmark_group("uniform");
 
     // R*tree (https://github.com/georust/rstar)
     group.bench_function("rstar", |bencher| {
@@ -68,13 +69,17 @@ fn build_and_query(criterion: &mut Criterion) {
     // Linear scan
     group.bench_function("exhaustive", |bencher| {
         bencher.iter(|| {
+            let pts: Vec<[f64; D]> = uniform_dataset(N);
             for i in 0..pts.len() {
-                let mut queue = PriorityQueue::new();
+                // iterate through the points and keep the closest K distances:
+                let mut result_heap = BinaryHeap::new();
                 for j in 0..pts.len() {
-                    let dist = euclidean_squared(&pts[i], &pts[j]);
-                    queue.push(j, OrderedFloat(dist));
-                    if queue.len() > k {
-                        queue.pop();
+                    result_heap.push(Neighbor::new(
+                        OrderedFloat(euclidean_squared(&pts[i], &pts[j])),
+                        j,
+                    ));
+                    if result_heap.len() > k {
+                        result_heap.pop();
                     }
                 }
             }

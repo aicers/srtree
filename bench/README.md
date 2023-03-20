@@ -26,20 +26,28 @@ implement_point_for_array!(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
 ```
 
 ## Performance
-We measured the performance of the indexing structures on MBP 14" (2021, M1 Pro, charger plugged in). Uniform datasets (at varying dimensions) were randomly generated with the same seed. These results were obtained [Criterion](https://github.com/bheisler/criterion.rs)'s best estimate of execution time from 100 benchmark rounds:
+
+### Uniform dataset
+We measured the performance of the indexing structures on MBP 14" (2021, M1 Pro, charger plugged in). 2000 points (at varying dimensions) were randomly generated with the same seed. These results were obtained [Criterion](https://github.com/bheisler/criterion.rs)'s best estimate of execution time from 100 benchmark rounds:
 
 | Dimension      | [R*-tree](https://github.com/georust/rstar) | [Ball-tree](https://github.com/petabi/petal-neighbors) | [SR-tree](https://github.com/aicers/srtree)       | Linear scan    |
-| :---           | :---                                        | :---                                                   | :---          | :---      |
-| 2              | **4.2677 ms**                               | 84.227 ms                                              | 8.0524 ms     | 191.60 ms |
-| 4              | **11.862 ms**                               | 100.26 ms                                              | 19.597 ms     | 193.33 ms |
-| 8              | **42.211 ms**                               | 133.91 ms                                              | 77.242 ms     | 198.53 ms |
-| 16             | 187.53 ms                                   | 192.28 ms                                              | **157.77 ms** | 210.66 ms |
-| 32             | 250.49 ms                                   | 316.91 ms                                              | **187.94 ms** | 232.78 ms |
-| 64             | 455.50 ms                                   | 640.49 ms                                              | **266.66 ms** | 314.63 ms |
-| 96             | 667.66 ms                                   | 957.28 ms                                              | **369.25 ms** | 433.5 ms  |
-| 124            | 857.98 ms                                   | 1.2197 s                                               | **468.42 ms** | 536.31 ms |
-| 200            | -                                           | 2.0785 s                                               | **716.91 ms** | 816.75 ms |
-| 300            | -                                           | 3.2570 s                                               | 1.2011 s      | **1.1899 s** |
+| :---           | :---                                         | :---                                                   | :---          | :---      |
+| 2              | 4.2677 ms                                    | 84.227 ms                                              | 8.0524 ms     | 115.93 ms |
+| 4              | 11.862 ms                                    | 100.26 ms                                              | 19.597 ms     | 114.90 ms |
+| 8              | 42.211 ms                                    | 133.91 ms                                              | 77.242 ms     | 117.22 ms |
+| 16             | 187.53 ms                                    | 192.28 ms                                              | 157.77 ms     | 123.39 ms |
+| 32             | 250.49 ms                                    | 316.91 ms                                              | 187.94 ms     | 145.02 ms |
+| 64             | 455.50 ms                                    | 640.49 ms                                              | 266.66 ms     | 170.40 ms |
+| 96             | 667.66 ms                                    | 957.28 ms                                              | 369.25 ms     | 237.64 ms |
+| 124            | 857.98 ms                                    | 1.2197 s                                               | 468.42 ms     | 310.74 ms |
+| 200            | -                                            | 2.0785 s                                               | 716.91 ms     | 485.11 ms |
+| 300            | -                                            | 3.2570 s                                               | 1.2011 s      | 813.61 ms |
 
 - Linear scan - a brute force solution to query k nearest neighbors by linearly scanning all points.    
 - R*-tree can't be compiled for dimensions >= 128. 
+
+### Clustered dataset
+Benchmark results for DNS-traffic dataset (24 dimensional 430 points):
+| Dimension      | [R*-tree](https://github.com/georust/rstar) | [Ball-tree](https://github.com/petabi/petal-neighbors) | [SR-tree](https://github.com/aicers/srtree)       | Linear scan    |
+| :---           | :---                                         | :---                                                   | :---          | :---      |
+| 24             | 10.083 ms                                    | 15.689 ms                                              | 4.5430 ms     | 5.5778 ms |

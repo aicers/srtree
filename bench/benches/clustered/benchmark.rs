@@ -1,10 +1,10 @@
+use std::collections::BinaryHeap;
 use criterion::{black_box, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
 use ordered_float::OrderedFloat;
 use petal_neighbors::BallTree;
-use priority_queue::PriorityQueue;
 use srtree::{Params, SRTree};
-
+use crate::neighbor::Neighbor;
 use super::utils::{clustered_dataset, euclidean_squared};
 
 // Note:
@@ -67,12 +67,12 @@ pub fn build_and_query(criterion: &mut Criterion) {
         bencher.iter(|| {
             let pts: Vec<[f64; 24]> = clustered_dataset();
             for i in 0..pts.len() {
-                let mut queue = PriorityQueue::new();
+                // iterate through the points and keep the closest K distances:
+                let mut result_heap = BinaryHeap::new();
                 for j in 0..pts.len() {
-                    let dist = euclidean_squared(&pts[i], &pts[j]);
-                    queue.push(j, OrderedFloat(dist));
-                    if queue.len() > k {
-                        queue.pop();
+                    result_heap.push(Neighbor::new(OrderedFloat(euclidean_squared(&pts[i], &pts[j])), j));
+                    if result_heap.len() > k {
+                        result_heap.pop();
                     }
                 }
             }
