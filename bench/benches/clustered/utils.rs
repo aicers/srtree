@@ -16,7 +16,7 @@ pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
 
 pub fn clustered_dataset() -> Vec<[f64; 24]> {
     let mut pts = Vec::new();
-    let file = File::open("dns_timeseries.csv");
+    let file = File::open("benches/clustered/dns.csv");
     if file.is_err() {
         return pts;
     }
