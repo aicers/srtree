@@ -26,9 +26,10 @@ implement_point_for_array!(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
 ```
 
 ## Performance
+We measured the performance of the indexing structures on MBP 14" (2021, M1 Pro, charger plugged in). These results were obtained [Criterion](https://github.com/bheisler/criterion.rs)'s best estimate of execution time from 100 benchmark rounds.
 
 ### Uniform dataset
-We measured the performance of the indexing structures on MBP 14" (2021, M1 Pro, charger plugged in). 2000 points (at varying dimensions) were randomly generated with the same seed. These results were obtained [Criterion](https://github.com/bheisler/criterion.rs)'s best estimate of execution time from 100 benchmark rounds:
+ 2000 points (at varying dimensions) were randomly generated with the same seed:
 
 | Dimension      | [R*-tree](https://github.com/georust/rstar) | [Ball-tree](https://github.com/petabi/petal-neighbors) | [SR-tree](https://github.com/aicers/srtree)       | Linear scan    |
 | :---           | :---                                         | :---                                                   | :---          | :---      |
