@@ -53,7 +53,8 @@ Benchmark results for DNS-traffic dataset (24 dimensional 430 points):
 | :---           | :---                                         | :---                                                   | :---          | :---      |
 | 24             | 10.083 ms                                    | 15.689 ms                                              | 4.5430 ms     | 5.5778 ms |
 
-Benchmark results for audio dataset (40 dimensional 3980 points):
-| Dimension      | [R*-tree](https://github.com/georust/rstar) | [Ball-tree](https://github.com/petabi/petal-neighbors) | [SR-tree](https://github.com/aicers/srtree)       | Linear scan    |
-| :---           | :---                                         | :---                                                   | :---          | :---      |
-| 40             | 1.0812 s                                    | 1.5785 s                                             | 372.81 ms     | 567.86 ms |
+Benchmark results for audio dataset:
+| Dataset size      | Dimension      | [R*-tree](https://github.com/georust/rstar) | [Ball-tree](https://github.com/petabi/petal-neighbors) | [SR-tree](https://github.com/aicers/srtree)       | Linear scan    |
+| :---           | :---           | :---                                         | :---                                                   | :---          | :---      |
+| 3980             | 40             | 1.0812 s                                    | 1.5785 s                                             | 372.81 ms     | 567.86 ms |
+| 14932             | 40             | 16.284 s                                    | 24.630 s                                             | 6.0367 s     | 7.6338 s |
