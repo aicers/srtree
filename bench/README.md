@@ -47,8 +47,13 @@ We measured the performance of the indexing structures on MBP 14" (2021, M1 Pro,
 - Linear scan - a brute force solution to query k nearest neighbors by linearly scanning all points.    
 - R*-tree can't be compiled for dimensions >= 128. 
 
-### Clustered dataset
+### Clustered datasets
 Benchmark results for DNS-traffic dataset (24 dimensional 430 points):
 | Dimension      | [R*-tree](https://github.com/georust/rstar) | [Ball-tree](https://github.com/petabi/petal-neighbors) | [SR-tree](https://github.com/aicers/srtree)       | Linear scan    |
 | :---           | :---                                         | :---                                                   | :---          | :---      |
 | 24             | 10.083 ms                                    | 15.689 ms                                              | 4.5430 ms     | 5.5778 ms |
+
+Benchmark results for audio dataset (40 dimensional 3980 points):
+| Dimension      | [R*-tree](https://github.com/georust/rstar) | [Ball-tree](https://github.com/petabi/petal-neighbors) | [SR-tree](https://github.com/aicers/srtree)       | Linear scan    |
+| :---           | :---                                         | :---                                                   | :---          | :---      |
+| 40             | 1.0812 s                                    | 1.5785 s                                             | 372.81 ms     | 567.86 ms |
