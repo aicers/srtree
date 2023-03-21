@@ -10,10 +10,9 @@ The following list of indexing trees were benchmarked for build and query perfor
 | R*-tree    | [rstar](https://github.com/georust/rstar)                        | &check;             | &check;       | &cross;  |
 | SR-tree.   | [srtree](https://github.com/aicers/srtree)                       | &check;             | &check;       | &check;  |
 
-In this context, constructing the tree by inserting points one by one is referred to as sequential build, 
-while packing and loading points to build the tree is known as bulk-loading. Additionally, 
-if the dimension of the tree can be set during program execution, it is referred to as runtime dimensions, 
-as opposed to compile-time dimensions which are set during compilation ([const-generics](https://blog.rust-lang.org/2021/02/26/const-generics-mvp-beta.html#what-are-const-generics)).
+- Sequential build - constructing the tree by inserting points one by one
+- Bulk-loading - packing and loading points at once to build the tree
+- Runtime dimensions - the dimension of the tree can be set during program execution (point coordinates are represented using `Vector`s), as opposed to compile-time dimensions which are set during compilation ([const-generics](https://blog.rust-lang.org/2021/02/26/const-generics-mvp-beta.html#what-are-const-generics)).
 
 
 ## Benchmark
