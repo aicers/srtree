@@ -1,5 +1,6 @@
 use criterion::{criterion_group, criterion_main};
 mod uniform;
+use uniform::srtree_uniform_benchmark;
 use uniform::uniform_benchmark;
 mod neighbor;
 
