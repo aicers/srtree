@@ -16,7 +16,7 @@ The following list of indexing trees were benchmarked for build and query perfor
 
 
 ## Benchmark
-A benchmark consists of two rounds: `build` to construct the tree (sequentially or bulk-loading) and `query` to find k nearest neighbors for each point in the tree.
+A benchmark round consists of two tasks: `build` to construct the tree (sequentially or bulk-loading) and `query` to find k nearest neighbors for each point in the tree.
 
 ## Requirements
 [R*-tree](https://github.com/georust/rstar) supports maximum 9-dimensions. To run the benchmarks at high dimensions, R*-tree should [implement point for arrays](https://github.com/georust/rstar/blob/27f74beaf2a79dff11fd4e7f1c6fc97f8b54b367/rstar/src/point.rs#L348), for example (16-dimensions):
