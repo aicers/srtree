@@ -106,6 +106,14 @@ where
             0
         }
     }
+
+    pub fn leaf_count(&self) -> usize {
+        if let Some(root) = self.root.as_ref() {
+            root.leaf_count()
+        } else {
+            0
+        }
+    }
 }
 
 impl<T> Default for SRTree<T>
