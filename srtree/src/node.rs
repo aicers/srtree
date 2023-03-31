@@ -243,6 +243,13 @@ where
         let dr = self.get_rect().min_distance(point);
         ds.max(dr)
     }
+
+    pub fn leaf_count(&self) -> usize {
+        match &self.data {
+            Data::Nodes(nodes) => nodes.iter().map(|n| n.leaf_count()).sum(),
+            Data::Points(_) => 1,
+        }
+    }
 }
 
 #[cfg(test)]

@@ -4,6 +4,7 @@ mod node;
 mod params;
 mod shape;
 mod srtree;
+mod stats;
 pub use crate::params::Params;
 pub use crate::srtree::InsertionResult;
 pub use crate::srtree::SRTree;
