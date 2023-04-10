@@ -17,6 +17,7 @@ const k: usize = 15; // number of nearest neighbors
 
 fn build_and_query(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("uniform");
+    group.sample_size(10);
 
     // R*tree (https://github.com/georust/rstar)
     group.bench_function("rstar", |bencher| {

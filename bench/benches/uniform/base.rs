@@ -10,6 +10,7 @@ const k: usize = 15; // number of nearest neighbors
 
 fn build(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("build");
+    group.sample_size(10);
 
     // benchmark build performance of sequential building
     group.bench_function("sequential", |bencher| {
@@ -35,6 +36,7 @@ fn build(criterion: &mut Criterion) {
 
 fn query(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("query");
+    group.sample_size(10);
 
     // benchmark query performance of sequantially-built tree
     let pts: Vec<[f64; D]> = uniform_dataset(N);
