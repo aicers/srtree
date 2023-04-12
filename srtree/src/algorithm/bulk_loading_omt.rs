@@ -121,8 +121,8 @@ pub fn calculate_num_slices(n: usize, n_subtree: usize, dim: usize) -> usize {
     let n_subtree: f64 = cast(n_subtree).unwrap();
     let dim: f64 = cast(dim).unwrap();
 
-    let s = (n / n_subtree).powf(1. / dim).round();
-    cast(s).unwrap_or(2).max(2)
+    let s = (n / n_subtree).powf(1. / dim).floor();
+    cast(s).unwrap_or(2).max(2) // the number of slices must be at least 2
 }
 
 pub fn calculate_partition_size(n: usize, num_slices: usize) -> usize {
