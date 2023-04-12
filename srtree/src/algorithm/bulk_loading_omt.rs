@@ -18,11 +18,7 @@ where
     }
     let height = calculate_height(points.len(), params.max_number_of_elements);
     let n_subtree = calculate_n_subtree(params.max_number_of_elements, height);
-    let num_slices = calculate_num_slices(
-        points.len(),
-        n_subtree,
-        params.dimension,
-    );
+    let num_slices = calculate_num_slices(points.len(), n_subtree, params.dimension);
     if num_slices <= 1 {
         return Node::create_leaf(points);
     }
@@ -69,7 +65,7 @@ pub fn calculate_height(n: usize, m: usize) -> usize {
     let n: f64 = cast(n).unwrap();
     let m: f64 = cast(m).unwrap();
 
-    let height = n.log(m).ceil(); 
+    let height = n.log(m).ceil();
     cast(height).unwrap_or(1).max(1) // the height must be at least 1
 }
 
@@ -79,7 +75,7 @@ pub fn calculate_n_subtree(m: usize, height: usize) -> usize {
     let height: f64 = cast(height).unwrap();
 
     let n_subtree = m.powf(height - 1.);
-    cast(n_subtree).unwrap_or(2).max(2) // the number of nodes in a subtree must be at least 2
+    cast(n_subtree).unwrap_or(1)
 }
 
 // OMT Eq. 3
@@ -89,7 +85,7 @@ pub fn calculate_num_slices(n: usize, n_subtree: usize, dim: usize) -> usize {
     let dim: f64 = cast(dim).unwrap();
 
     let s = (n / n_subtree).powf(1. / dim).floor();
-    cast(s).unwrap_or(1)
+    cast(s).unwrap_or(2).max(2)
 }
 
 pub fn calculate_partition_size(n: usize, num_slices: usize) -> usize {
@@ -108,18 +104,19 @@ mod tests {
 
     #[test]
     pub fn test_bulk_load() {
-        let mut pts = Vec::new();
         let mut rng = StdRng::from_seed(*b"PiH6Xi3GBBXhTK6UsXJYngHaF3fx4aYS");
-        for _ in 0..100 {
-            let mut point = [0.; 2];
-            for item in point.iter_mut().take(2) {
+        const D: usize = 2; // dimension
+        const N: usize = 10000; // number of points
+        let mut pts = Vec::new();
+        for _ in 0..N {
+            let mut point = [0.; D];
+            for item in point.iter_mut().take(D) {
                 *item = (rng.gen::<f64>() * 100.).floor();
             }
             pts.push(point);
         }
-        let params = Params::new(2, 5, 2, true).unwrap();
         let pts: Vec<Vec<f64>> = pts.iter().map(|p| p.to_vec()).collect();
-        let tree = SRTree::bulk_load(&pts, params);
-        assert_eq!(tree.total_childen(), pts.len());
+        let tree = SRTree::bulk_load(&pts, Params::default_params());
+        tree.query(&pts[0], 15);
     }
 }

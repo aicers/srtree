@@ -18,7 +18,6 @@ where
 
     let mut low = centroid.coords().clone();
     let mut high = centroid.coords().clone();
-    let mut total_children = 0;
     if node.is_leaf() {
         node.points().iter().for_each(|point| {
             for i in 0..node.dimension() {
@@ -28,7 +27,6 @@ where
             ds = ds.max(euclidean(&centroid, point));
             dr = ds;
         });
-        total_children = node.points().len();
     } else {
         node.nodes().iter().for_each(|child| {
             for i in 0..child.dimension() {
@@ -41,7 +39,6 @@ where
                 &centroid,
                 &child.get_rect().farthest_point_to(&centroid),
             ));
-            total_children += child.get_total_children();
         });
     }
     let rect = Rect::new(low, high);
@@ -49,8 +46,6 @@ where
 
     let radius = ds.min(dr);
     node.set_sphere(Sphere::new(centroid, radius));
-
-    node.set_total_children(total_children);
 }
 
 #[cfg(test)]

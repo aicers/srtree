@@ -291,7 +291,6 @@ mod tests {
         insert(&mut root, leaf_node1, &params);
         insert(&mut root, leaf_node2, &params);
         assert_eq!(root.immed_children(), 2);
-        assert_eq!(root.get_total_children(), 6);
         assert_eq!(root.get_rect().low, vec![1., 1.]);
         assert_eq!(root.get_rect().high, vec![6., 3.]);
         assert_eq!(
@@ -307,7 +306,6 @@ mod tests {
         }
 
         assert_eq!(root.immed_children(), 2);
-        assert_eq!(root.get_total_children(), 8);
         assert_eq!(root.get_rect().low, vec![1., 1.]);
         assert_eq!(root.get_rect().high, vec![8., 4.]);
         assert_eq!(root.nodes()[1].immed_children(), 4);
@@ -324,7 +322,6 @@ mod tests {
         insert_data(&mut root, &new_point, &params);
 
         assert_eq!(root.immed_children(), 3);
-        assert_eq!(root.get_total_children(), 9);
         assert_eq!(root.get_rect().low, vec![1., 1.]);
         assert_eq!(root.get_rect().high, vec![9., 5.]);
     }

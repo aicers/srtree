@@ -99,9 +99,9 @@ where
         }
     }
 
-    pub fn total_childen(&self) -> usize {
+    pub fn node_count(&self) -> usize {
         if let Some(root) = self.root.as_ref() {
-            root.get_total_children()
+            root.node_count()
         } else {
             0
         }

@@ -1,4 +1,5 @@
 use crate::node::Node;
+use crate::stats::{inc_compared_leaves, inc_compared_nodes, inc_visited_leaves, inc_visited_nodes, print_stats, reset_stats};
 use crate::{measure::distance::euclidean_squared, shape::point::Point};
 use ordered_float::{Float, OrderedFloat};
 use std::{
@@ -64,6 +65,8 @@ pub fn nearest_neighbors<T>(node: &Node<T>, point: &Point<T>, k: usize) -> Vec<u
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
+    reset_stats();
+
     let mut result = Vec::new();
     let mut neighbors = BinaryHeap::new();
     search(node, point, k, &mut neighbors);
@@ -72,6 +75,8 @@ where
         result.push(last.point_index);
     }
     result.reverse();
+
+    print_stats(node);
     result
 }
 
@@ -80,6 +85,8 @@ where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.is_leaf() {
+        inc_visited_leaves();
+
         // insert all potential neighbors (with their distances) in a leaf node:
         node.points().iter().for_each(|candidate| {
             let neighbor_distance = euclidean_squared(candidate, point);
@@ -94,6 +101,8 @@ where
             }
         });
     } else {
+        inc_visited_nodes();
+
         let mut to_visit = Vec::new();
         for (child_index, child) in node.nodes().iter().enumerate() {
             let distance = child.min_distance(point);
@@ -102,6 +111,12 @@ where
         to_visit.sort();
 
         for (child_distance, child_index) in to_visit {
+            if node.nodes()[child_index].is_leaf() {
+                inc_compared_leaves();
+            } else {
+                inc_compared_nodes();
+            }
+            
             // if k neighbors were already sampled, then the target distance is kth closest distance:
             let mut target_distance = OrderedFloat(T::infinity());
             if neighbors.len() == k {
