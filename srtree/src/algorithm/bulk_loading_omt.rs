@@ -6,6 +6,8 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
+use super::split;
+
 // Overlap Minimizing Top-Down (OMT) Bulk-loading Algorithm for R-trees
 // Read more here: https://ceur-ws.org/Vol-74/files/FORUM_18.pdf
 
@@ -27,6 +29,7 @@ where
         .into_iter()
         .map(|group| bulk_load(group, params))
         .collect();
+    let children = partition_groups(children, 0, num_slices, params);
     Node::create_parent(children)
 }
 
@@ -39,16 +42,17 @@ pub fn partition_points<T>(
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if split_dim == params.dimension || points.len() <= params.max_number_of_elements {
+    if points.len() <= params.max_number_of_elements {
         return vec![points];
     }
+    let split_dim = split_dim % params.dimension;
     let partition_size = calculate_partition_size(points.len(), num_slices);
 
     // Partition the points along this dimension into groups
     // and recursively partition each of the groups along the next dimension
     let mut entries = Vec::new();
     while !points.is_empty() {
-        let remaining = points.len().saturating_sub(partition_size);
+        let mut remaining = points.len().saturating_sub(partition_size);
         points.select_nth_unstable_by(remaining, |a, b| {
             a.coord_at(split_dim)
                 .partial_cmp(&b.coord_at(split_dim))
@@ -56,6 +60,39 @@ where
         });
         let slice = points.split_off(remaining);
         entries.extend(partition_points(slice, split_dim + 1, num_slices, params));
+    }
+    entries
+}
+
+pub fn partition_groups<T>(
+    mut groups: Vec<Node<T>>,
+    split_dim: usize,
+    num_slices: usize,
+    params: &Params,
+) -> Vec<Node<T>>
+where
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
+    if groups.len() <= params.max_number_of_elements {
+        return groups;
+    }
+    let split_dim = split_dim % params.dimension;
+    let partition_size = calculate_partition_size(groups.len(), num_slices);
+    let mut entries = Vec::new();
+    while !groups.is_empty() {
+        let mut remaining = groups.len().saturating_sub(partition_size);
+        groups.select_nth_unstable_by(remaining, |a, b| {
+            a.get_sphere().center.coord_at(split_dim)
+                .partial_cmp(&b.get_sphere().center.coord_at(split_dim))
+                .unwrap()
+        });
+        let slice = groups.split_off(remaining);
+        let partitions = partition_groups(slice, split_dim + 1, num_slices, params);
+        if partitions.len() == 1 {
+            entries.extend(partitions);
+        } else {
+            entries.push(Node::create_parent(partitions));
+        }
     }
     entries
 }
@@ -84,7 +121,7 @@ pub fn calculate_num_slices(n: usize, n_subtree: usize, dim: usize) -> usize {
     let n_subtree: f64 = cast(n_subtree).unwrap();
     let dim: f64 = cast(dim).unwrap();
 
-    let s = (n / n_subtree).powf(1. / dim).floor();
+    let s = (n / n_subtree).powf(1. / dim).round();
     cast(s).unwrap_or(2).max(2)
 }
 
@@ -99,24 +136,29 @@ pub fn calculate_partition_size(n: usize, num_slices: usize) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::SRTree;
-    use rand::{rngs::StdRng, Rng, SeedableRng};
 
     #[test]
-    pub fn test_bulk_load() {
-        let mut rng = StdRng::from_seed(*b"PiH6Xi3GBBXhTK6UsXJYngHaF3fx4aYS");
-        const D: usize = 2; // dimension
-        const N: usize = 10000; // number of points
-        let mut pts = Vec::new();
-        for _ in 0..N {
-            let mut point = [0.; D];
-            for item in point.iter_mut().take(D) {
-                *item = (rng.gen::<f64>() * 100.).floor();
-            }
-            pts.push(point);
-        }
-        let pts: Vec<Vec<f64>> = pts.iter().map(|p| p.to_vec()).collect();
-        let tree = SRTree::bulk_load(&pts, Params::default_params());
-        tree.query(&pts[0], 15);
+    pub fn test_calculate_height() {
+        let n = 101;
+        let m = 10;
+        let height = calculate_height(n, m);
+        assert_eq!(height, 3);
+    }
+
+    #[test]
+    pub fn test_calculate_n_subtree() {
+        let m = 10;
+        let height = 2;
+        let n_subtree = calculate_n_subtree(m, height);
+        assert_eq!(n_subtree, 10);
+    }
+
+    #[test]
+    pub fn test_calculate_num_slices() {
+        let n = 101;
+        let n_subtree = 100;
+        let dim = 2;
+        let num_slices = calculate_num_slices(n, n_subtree, dim);
+        assert_eq!(num_slices, 2);
     }
 }
