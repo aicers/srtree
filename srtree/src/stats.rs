@@ -1,8 +1,8 @@
+use num_traits::Float;
 use std::{
     fmt::Debug,
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
-use num_traits::Float;
 
 use crate::node::Node;
 
@@ -53,7 +53,8 @@ pub fn inc_visited_nodes() {
 }
 
 pub fn print_stats<T>(root: &Node<T>)
-where T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy
+where
+    T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy,
 {
     if STATS_ENABLED {
         unsafe {
@@ -63,7 +64,10 @@ where T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy
             println!("Visited nodes:   {}", num_visited_nodes);
             println!("Compared nodes:  {}", num_compared_nodes);
             println!("Total leaves:    {}", root.leaf_count());
-            println!("Total nodes:     {} (including leaf nodes)", root.node_count());
+            println!(
+                "Total nodes:     {} (including leaf nodes)",
+                root.node_count()
+            );
             println!("Tree height:     {}", root.get_height());
             println!("----------------------");
             print_node(&root);
@@ -72,18 +76,20 @@ where T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy
 }
 
 pub fn print_node<T>(node: &Node<T>)
-where T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy
+where
+    T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy,
 {
     if STATS_ENABLED {
-        if node.is_leaf() {
-            // println!("Leaf size: {:?}", node.points().len());
-        } else {
-            println!("Node: {:?}, size = {:?}", node.get_height(), node.nodes().len());
+        if !node.is_leaf() {
+            println!(
+                "Node: {:?}, size = {:?}",
+                node.get_height(),
+                node.nodes().len()
+            );
             for child in node.nodes() {
                 print_node(child);
             }
         }
-        
     }
 }
 
@@ -92,7 +98,7 @@ const STATS_ENABLED: bool = false;
 
 #[cfg(test)]
 mod tests {
-    use crate::{SRTree, Params};
+    use crate::{Params, SRTree};
     use rand::{rngs::StdRng, Rng, SeedableRng};
 
     fn generate_uniform_dataset(n: usize, dim: usize) -> Vec<Vec<f64>> {

@@ -234,7 +234,7 @@ where
             Data::Nodes(nodes) => {
                 let node_count: usize = nodes.iter().map(|n| n.node_count()).sum();
                 node_count + self.nodes().len()
-            },
+            }
             Data::Points(_) => 0,
         }
     }

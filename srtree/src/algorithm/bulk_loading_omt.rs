@@ -6,8 +6,6 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-use super::split;
-
 // Overlap Minimizing Top-Down (OMT) Bulk-loading Algorithm for R-trees
 // Read more here: https://ceur-ws.org/Vol-74/files/FORUM_18.pdf
 
@@ -52,7 +50,7 @@ where
     // and recursively partition each of the groups along the next dimension
     let mut entries = Vec::new();
     while !points.is_empty() {
-        let mut remaining = points.len().saturating_sub(partition_size);
+        let remaining = points.len().saturating_sub(partition_size);
         points.select_nth_unstable_by(remaining, |a, b| {
             a.coord_at(split_dim)
                 .partial_cmp(&b.coord_at(split_dim))
@@ -80,9 +78,11 @@ where
     let partition_size = calculate_partition_size(groups.len(), num_slices);
     let mut entries = Vec::new();
     while !groups.is_empty() {
-        let mut remaining = groups.len().saturating_sub(partition_size);
+        let remaining = groups.len().saturating_sub(partition_size);
         groups.select_nth_unstable_by(remaining, |a, b| {
-            a.get_sphere().center.coord_at(split_dim)
+            a.get_sphere()
+                .center
+                .coord_at(split_dim)
                 .partial_cmp(&b.get_sphere().center.coord_at(split_dim))
                 .unwrap()
         });

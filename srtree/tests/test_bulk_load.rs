@@ -23,7 +23,7 @@ fn test_with_random_points() {
     let mut pts = Vec::new();
     for _ in 0..number_of_points {
         let mut point_coords = Vec::new();
-        for i in 0..DIMENSION {
+        for _ in 0..DIMENSION {
             let x: f64 = rng.gen::<f64>();
             point_coords.push(x);
         }

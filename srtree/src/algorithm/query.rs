@@ -1,5 +1,8 @@
 use crate::node::Node;
-use crate::stats::{inc_compared_leaves, inc_compared_nodes, inc_visited_leaves, inc_visited_nodes, print_stats, reset_stats};
+use crate::stats::{
+    inc_compared_leaves, inc_compared_nodes, inc_visited_leaves, inc_visited_nodes, print_stats,
+    reset_stats,
+};
 use crate::{measure::distance::euclidean_squared, shape::point::Point};
 use ordered_float::{Float, OrderedFloat};
 use std::{
@@ -116,7 +119,7 @@ where
             } else {
                 inc_compared_nodes();
             }
-            
+
             // if k neighbors were already sampled, then the target distance is kth closest distance:
             let mut target_distance = OrderedFloat(T::infinity());
             if neighbors.len() == k {
