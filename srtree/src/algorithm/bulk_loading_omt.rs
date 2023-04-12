@@ -16,11 +16,16 @@ where
     if points.len() <= params.max_number_of_elements {
         return Node::create_leaf(points);
     }
+    let height = calculate_height(points.len(), params.max_number_of_elements);
+    let n_subtree = calculate_n_subtree(params.max_number_of_elements, height);
     let num_slices = calculate_num_slices(
         points.len(),
-        params.max_number_of_elements,
+        n_subtree,
         params.dimension,
     );
+    if num_slices <= 1 {
+        return Node::create_leaf(points);
+    }
     let groups = partition_points(points, 0, num_slices, params);
     let children = groups
         .into_iter()
@@ -59,16 +64,32 @@ where
     entries
 }
 
-pub fn calculate_num_slices(n: usize, m: usize, dim: usize) -> usize {
+// OMT Eq. 1
+pub fn calculate_height(n: usize, m: usize) -> usize {
     let n: f64 = cast(n).unwrap();
     let m: f64 = cast(m).unwrap();
+
+    let height = n.log(m).ceil(); 
+    cast(height).unwrap_or(1).max(1) // the height must be at least 1
+}
+
+// OMT Eq. 2
+pub fn calculate_n_subtree(m: usize, height: usize) -> usize {
+    let m: f64 = cast(m).unwrap();
+    let height: f64 = cast(height).unwrap();
+
+    let n_subtree = m.powf(height - 1.);
+    cast(n_subtree).unwrap_or(2).max(2) // the number of nodes in a subtree must be at least 2
+}
+
+// OMT Eq. 3
+pub fn calculate_num_slices(n: usize, n_subtree: usize, dim: usize) -> usize {
+    let n: f64 = cast(n).unwrap();
+    let n_subtree: f64 = cast(n_subtree).unwrap();
     let dim: f64 = cast(dim).unwrap();
 
-    let height = n.log(m).ceil(); // OMT Eq. 1
-    let n_subtree = m.powf(height - 1.); // OMT Eq. 2
-    let s = (n / n_subtree).powf(1. / dim).round(); // OMT Eq. 3: using round() instead of floor() to get more slices if possible
-
-    cast(s).unwrap_or(2).max(2) // the number of slices must be at least 2
+    let s = (n / n_subtree).powf(1. / dim).floor();
+    cast(s).unwrap_or(1)
 }
 
 pub fn calculate_partition_size(n: usize, num_slices: usize) -> usize {
