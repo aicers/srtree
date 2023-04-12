@@ -65,31 +65,55 @@ where T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy
             println!("Total leaves:    {}", root.leaf_count());
             println!("Total nodes:     {} (including leaf nodes)", root.node_count());
             println!("Tree height:     {}", root.get_height());
+            println!("----------------------");
+            print_node(&root);
         }
     }
 }
 
-const STATS_ENABLED: bool = true;
+pub fn print_node<T>(node: &Node<T>)
+where T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy
+{
+    if STATS_ENABLED {
+        if node.is_leaf() {
+            // println!("Leaf size: {:?}", node.points().len());
+        } else {
+            println!("Node: {:?}, size = {:?}", node.get_height(), node.nodes().len());
+            for child in node.nodes() {
+                print_node(child);
+            }
+        }
+        
+    }
+}
+
+// Step 1: Enable stats
+const STATS_ENABLED: bool = false;
 
 #[cfg(test)]
 mod tests {
     use crate::{SRTree, Params};
     use rand::{rngs::StdRng, Rng, SeedableRng};
 
-    #[test]
-    pub fn test_bulk_load() {
+    fn generate_uniform_dataset(n: usize, dim: usize) -> Vec<Vec<f64>> {
         let mut rng = StdRng::from_seed(*b"PiH6Xi3GBBXhTK6UsXJYngHaF3fx4aYS");
-        const D: usize = 8; // dimension
-        const N: usize = 10000; // number of points
         let mut pts = Vec::new();
-        for _ in 0..N {
-            let mut point = [0.; D];
-            for item in point.iter_mut().take(D) {
-                *item = rng.gen::<f64>();
+        for _ in 0..n {
+            let mut point = Vec::new();
+            for _ in 0..dim {
+                point.push(rng.gen::<f64>());
             }
             pts.push(point);
         }
-        let pts: Vec<Vec<f64>> = pts.iter().map(|p| p.to_vec()).collect();
+        pts
+    }
+
+    // Step 2: Run this test separately
+    #[test]
+    pub fn test_bulk_load() {
+        const D: usize = 8; // dimension
+        const N: usize = 10000; // number of points
+        let pts = generate_uniform_dataset(N, D);
         let tree = SRTree::bulk_load(&pts, Params::default_params());
         tree.query(&pts[0], 15);
     }
