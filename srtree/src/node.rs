@@ -18,7 +18,6 @@ pub struct Node<T> {
     sphere: Sphere<T>,
     data: Data<T>,
     variance: Vec<T>,
-    total_children: usize,
     height: usize, // height above leaf
 }
 
@@ -31,7 +30,6 @@ where
         sphere: Sphere<T>,
         data: Data<T>,
         variance: Vec<T>,
-        total_children: usize,
         height: usize,
     ) -> Node<T> {
         Node {
@@ -39,7 +37,6 @@ where
             sphere,
             data,
             variance,
-            total_children,
             height,
         }
     }
@@ -50,7 +47,6 @@ where
             Sphere::from_point(point),
             Data::Nodes(Vec::with_capacity(capacity)),
             vec![T::zero(); point.dimension()],
-            0,
             height,
         )
     }
@@ -61,7 +57,6 @@ where
             Sphere::from_point(point),
             Data::Points(Vec::with_capacity(capacity)),
             vec![T::zero(); point.dimension()],
-            0,
             1,
         )
     }
@@ -76,7 +71,6 @@ where
             Sphere::from_point(&self.get_sphere().center),
             data,
             vec![T::zero(); self.dimension()],
-            0,
             self.height,
         )
     }
@@ -87,7 +81,6 @@ where
             Sphere::from_point(point),
             Data::Points(Vec::with_capacity(1)),
             vec![T::zero(); point.dimension()],
-            0,
             0,
         )
     }
@@ -204,14 +197,6 @@ where
         self.height
     }
 
-    pub fn set_total_children(&mut self, total_children: usize) {
-        self.total_children = total_children;
-    }
-
-    pub fn get_total_children(&self) -> usize {
-        self.total_children
-    }
-
     pub fn pop_last(&mut self, n: usize) -> Vec<Node<T>> {
         let center = self.get_sphere().center.clone();
         let number_of_immediate_children = self.immed_children();
@@ -242,6 +227,16 @@ where
         let ds = self.get_sphere().min_distance(point);
         let dr = self.get_rect().min_distance(point);
         ds.max(dr)
+    }
+
+    pub fn node_count(&self) -> usize {
+        match &self.data {
+            Data::Nodes(nodes) => {
+                let node_count: usize = nodes.iter().map(|n| n.node_count()).sum();
+                node_count + self.nodes().len()
+            },
+            Data::Points(_) => 0,
+        }
     }
 
     pub fn leaf_count(&self) -> usize {
