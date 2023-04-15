@@ -4,5 +4,5 @@ use uniform::srtree_uniform_benchmark;
 use uniform::uniform_benchmark;
 mod neighbor;
 
-criterion_group!(benches, srtree_uniform_benchmark);
+criterion_group!(benches, uniform_benchmark);
 criterion_main!(benches);

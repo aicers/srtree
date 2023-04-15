@@ -1,11 +1,11 @@
-use std::collections::BinaryHeap;
+use super::utils::{clustered_dataset, euclidean_squared};
+use crate::neighbor::Neighbor;
 use criterion::{black_box, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
 use ordered_float::OrderedFloat;
 use petal_neighbors::BallTree;
 use srtree::{Params, SRTree};
-use crate::neighbor::Neighbor;
-use super::utils::{clustered_dataset, euclidean_squared};
+use std::collections::BinaryHeap;
 
 // Note:
 // R-tree (https://github.com/tidwall/rtree.rs) does not support bulk loading
@@ -71,7 +71,10 @@ pub fn build_and_query(criterion: &mut Criterion) {
                 // iterate through the points and keep the closest K distances:
                 let mut result_heap = BinaryHeap::new();
                 for j in 0..pts.len() {
-                    result_heap.push(Neighbor::new(OrderedFloat(euclidean_squared(&pts[i], &pts[j])), j));
+                    result_heap.push(Neighbor::new(
+                        OrderedFloat(euclidean_squared(&pts[i], &pts[j])),
+                        j,
+                    ));
                     if result_heap.len() > k {
                         result_heap.pop();
                     }

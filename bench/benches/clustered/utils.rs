@@ -32,7 +32,7 @@ pub fn clustered_dataset() -> Vec<[f64; 24]> {
             let mut point = [f64::INFINITY; 24];
             let line = line.as_ref().unwrap();
             for (i, val) in line.split(",").enumerate() {
-                let mut chars = val.chars();
+                let chars = val.chars();
                 let val = chars.as_str();
                 let c: f64 = val.parse().unwrap_or(f64::INFINITY);
                 point[i] = c;
