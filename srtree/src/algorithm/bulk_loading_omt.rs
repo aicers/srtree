@@ -31,7 +31,7 @@ where
     Node::create_parent(children)
 }
 
-pub fn partition_points<T>(
+fn partition_points<T>(
     mut points: Vec<Point<T>>,
     split_dim: usize,
     num_slices: usize,
@@ -62,7 +62,7 @@ where
     entries
 }
 
-pub fn partition_groups<T>(
+fn partition_groups<T>(
     mut groups: Vec<Node<T>>,
     split_dim: usize,
     num_slices: usize,
@@ -98,7 +98,7 @@ where
 }
 
 // OMT Eq. 1
-pub fn calculate_height(n: usize, m: usize) -> usize {
+fn calculate_height(n: usize, m: usize) -> usize {
     let n: f64 = cast(n).unwrap();
     let m: f64 = cast(m).unwrap();
 
@@ -107,7 +107,7 @@ pub fn calculate_height(n: usize, m: usize) -> usize {
 }
 
 // OMT Eq. 2
-pub fn calculate_n_subtree(m: usize, height: usize) -> usize {
+fn calculate_n_subtree(m: usize, height: usize) -> usize {
     let m: f64 = cast(m).unwrap();
     let height: f64 = cast(height).unwrap();
 
@@ -116,7 +116,7 @@ pub fn calculate_n_subtree(m: usize, height: usize) -> usize {
 }
 
 // OMT Eq. 3
-pub fn calculate_num_slices(n: usize, n_subtree: usize, dim: usize) -> usize {
+fn calculate_num_slices(n: usize, n_subtree: usize, dim: usize) -> usize {
     let n: f64 = cast(n).unwrap();
     let n_subtree: f64 = cast(n_subtree).unwrap();
     let dim: f64 = cast(dim).unwrap();
@@ -125,7 +125,7 @@ pub fn calculate_num_slices(n: usize, n_subtree: usize, dim: usize) -> usize {
     cast(s).unwrap_or(2).max(2) // the number of slices must be at least 2
 }
 
-pub fn calculate_partition_size(n: usize, num_slices: usize) -> usize {
+fn calculate_partition_size(n: usize, num_slices: usize) -> usize {
     let n: f64 = cast(n).unwrap();
     let num_slices: f64 = cast(num_slices).unwrap();
     let partition_size = (n / num_slices).ceil();

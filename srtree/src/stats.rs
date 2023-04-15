@@ -62,7 +62,7 @@ where
             println!("Visited leaves:  {}", num_visited_leaves);
             println!("Compared leaves: {}", num_compared_leaves);
             println!("Visited nodes:   {}", num_visited_nodes);
-            println!("Compared nodes:  {}", num_compared_nodes);
+            println!("Compared nodes:  {}", num_compared_nodes + 1); // including root
             println!("Total leaves:    {}", root.leaf_count());
             println!(
                 "Total nodes:     {} (including leaf nodes)",
@@ -117,7 +117,7 @@ mod tests {
     // Step 2: Run this test separately
     #[test]
     pub fn test_bulk_load() {
-        const D: usize = 8; // dimension
+        const D: usize = 16; // dimension
         const N: usize = 10000; // number of points
         let pts = generate_uniform_dataset(N, D);
         let tree = SRTree::bulk_load(&pts, Params::default_params());
