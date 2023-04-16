@@ -114,6 +114,14 @@ where
             0
         }
     }
+
+    pub fn height(&self) -> usize {
+        if let Some(root) = self.root.as_ref() {
+            root.get_height()
+        } else {
+            0
+        }
+    }
 }
 
 impl<T> Default for SRTree<T>

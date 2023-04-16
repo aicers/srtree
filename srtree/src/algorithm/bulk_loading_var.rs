@@ -1,9 +1,8 @@
 use crate::{node::Node, shape::point::Point, Params};
 use num_traits::cast;
-use ordered_float::{Float, OrderedFloat};
+use ordered_float::Float;
 use std::{
     fmt::Debug,
-    iter::Map,
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 

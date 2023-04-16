@@ -4,7 +4,7 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-use crate::node::Node;
+use crate::{node::Node, SRTree};
 
 static mut num_visited_nodes: usize = 0;
 static mut num_visited_leaves: usize = 0;
@@ -52,7 +52,7 @@ pub fn inc_visited_nodes() {
     }
 }
 
-pub fn print_stats<T>(root: &Node<T>)
+pub fn print_stats<T>(tree: &SRTree<T>)
 where
     T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy,
 {
@@ -63,32 +63,13 @@ where
             println!("Compared leaves: {}", num_compared_leaves);
             println!("Visited nodes:   {}", num_visited_nodes);
             println!("Compared nodes:  {}", num_compared_nodes + 1); // including root
-            println!("Total leaves:    {}", root.leaf_count());
+            println!("Total leaves:    {}", tree.leaf_count());
             println!(
                 "Total nodes:     {} (including leaf nodes)",
-                root.node_count()
+                tree.node_count()
             );
-            println!("Tree height:     {}", root.get_height());
+            println!("Tree height:     {}", tree.height());
             println!("----------------------");
-            print_node(&root);
-        }
-    }
-}
-
-pub fn print_node<T>(node: &Node<T>)
-where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy,
-{
-    if STATS_ENABLED {
-        if !node.is_leaf() {
-            println!(
-                "Node: {:?}, size = {:?}",
-                node.get_height(),
-                node.nodes().len()
-            );
-            for child in node.nodes() {
-                print_node(child);
-            }
         }
     }
 }
@@ -98,7 +79,10 @@ const STATS_ENABLED: bool = false;
 
 #[cfg(test)]
 mod tests {
-    use crate::{Params, SRTree};
+    use crate::{
+        stats::{print_stats, reset_stats},
+        Params, SRTree,
+    };
     use rand::{rngs::StdRng, Rng, SeedableRng};
 
     fn generate_uniform_dataset(n: usize, dim: usize) -> Vec<Vec<f64>> {
@@ -117,10 +101,13 @@ mod tests {
     // Step 2: Run this test separately
     #[test]
     pub fn test_bulk_load() {
-        const D: usize = 16; // dimension
+        const D: usize = 32; // dimension
         const N: usize = 10000; // number of points
         let pts = generate_uniform_dataset(N, D);
         let tree = SRTree::bulk_load(&pts, Params::default_params());
+
+        reset_stats();
         tree.query(&pts[0], 15);
+        print_stats(&tree);
     }
 }

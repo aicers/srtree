@@ -1,7 +1,6 @@
 use crate::node::Node;
 use crate::stats::{
-    inc_compared_leaves, inc_compared_nodes, inc_visited_leaves, inc_visited_nodes, print_stats,
-    reset_stats,
+    inc_compared_leaves, inc_compared_nodes, inc_visited_leaves, inc_visited_nodes,
 };
 use crate::{measure::distance::euclidean_squared, shape::point::Point};
 use ordered_float::{Float, OrderedFloat};
@@ -68,8 +67,6 @@ pub fn nearest_neighbors<T>(node: &Node<T>, point: &Point<T>, k: usize) -> Vec<u
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    reset_stats();
-
     let mut result = Vec::new();
     let mut neighbors = BinaryHeap::new();
     search(node, point, k, &mut neighbors);
@@ -78,8 +75,6 @@ where
         result.push(last.point_index);
     }
     result.reverse();
-
-    print_stats(node);
     result
 }
 
