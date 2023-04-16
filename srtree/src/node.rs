@@ -230,11 +230,8 @@ where
     }
 
     pub fn node_count(&self) -> usize {
-        match &self.data {
-            Data::Nodes(nodes) => {
-                let node_count: usize = nodes.iter().map(|n| n.node_count()).sum();
-                node_count + self.nodes().len()
-            }
+        1 + match &self.data {
+            Data::Nodes(nodes) => nodes.iter().map(|n| n.node_count()).sum(),
             Data::Points(_) => 0,
         }
     }
