@@ -1,4 +1,4 @@
-use crate::{measure::distance::euclidean_squared, shape::point::Point};
+use crate::shape::point::Point;
 use ordered_float::Float;
 use std::{
     fmt::Debug,
@@ -34,7 +34,7 @@ where
                 closest_point.set_coord_at(i, point.coord_at(i));
             }
         }
-        euclidean_squared(&closest_point, point)
+        point.distance(&closest_point)
     }
 
     pub fn farthest_point_to(&self, point: &Point<T>) -> Point<T> {
@@ -52,7 +52,7 @@ where
     #[allow(dead_code)]
     pub fn min_max_distance(&self, point: &Point<T>) -> T {
         let min_max = self.farthest_point_to(point);
-        let mut distance = euclidean_squared(&min_max, point);
+        let mut distance = min_max.distance_squared(point);
         for i in 0..self.low.len() {
             let mut current = min_max.clone();
             if current.coord_at(i) == self.low[i] {
@@ -60,7 +60,7 @@ where
             } else {
                 current.set_coord_at(i, self.low[i]);
             }
-            let current_distance = euclidean_squared(&current, point);
+            let current_distance = point.distance_squared(&current);
             if current_distance < distance {
                 distance = current_distance;
             }
@@ -76,7 +76,7 @@ mod tests {
     #[test]
     pub fn test_rect_min_distance() {
         let rec = Rect::new(vec![5., 5.], vec![10., 10.]);
-        assert_eq!(rec.min_distance(&Point::with_coords(vec![5., 0.])), 25.);
+        assert_eq!(rec.min_distance(&Point::with_coords(vec![5., 0.])), 5.);
     }
 
     #[test]
