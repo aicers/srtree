@@ -4,6 +4,8 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
+use crate::measure::distance::{euclidean, euclidean_squared};
+
 #[derive(Debug, Clone)]
 pub struct Point<T> {
     coords: Vec<T>,
@@ -37,5 +39,13 @@ where
 
     pub fn coords(&self) -> &Vec<T> {
         &self.coords
+    }
+
+    pub fn distance_squared(&self, other: &Point<T>) -> T {
+        euclidean_squared(self, other)
+    }
+
+    pub fn distance(&self, other: &Point<T>) -> T {
+        euclidean(self, other)
     }
 }
