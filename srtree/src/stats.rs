@@ -4,8 +4,10 @@ use std::{
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
 };
 
-use crate::{node::Node, SRTree};
+use crate::SRTree;
 
+static mut num_visited_points: usize = 0;
+static mut num_compared_points: usize = 0;
 static mut num_visited_nodes: usize = 0;
 static mut num_visited_leaves: usize = 0;
 static mut num_compared_nodes: usize = 0;
@@ -17,6 +19,14 @@ pub fn reset_stats() {
         num_visited_leaves = 0;
         num_compared_nodes = 0;
         num_compared_leaves = 0;
+    }
+}
+
+pub fn inc_compared_points(count: usize) {
+    if STATS_ENABLED {
+        unsafe {
+            num_compared_points += count;
+        }
     }
 }
 
@@ -32,6 +42,14 @@ pub fn inc_compared_nodes() {
     if STATS_ENABLED {
         unsafe {
             num_compared_nodes += 1;
+        }
+    }
+}
+
+pub fn inc_visited_points() {
+    if STATS_ENABLED {
+        unsafe {
+            num_visited_points += 1;
         }
     }
 }
@@ -59,6 +77,8 @@ where
     if STATS_ENABLED {
         unsafe {
             println!("----------------------");
+            println!("Visited points:  {}", num_visited_points);
+            println!("Compared points: {}", num_compared_points);
             println!("Visited leaves:  {}", num_visited_leaves);
             println!("Compared leaves: {}", num_compared_leaves);
             println!("Visited nodes:   {}", num_visited_nodes);
@@ -101,7 +121,7 @@ mod tests {
     // Step 2: Run this test separately
     #[test]
     pub fn test_bulk_load() {
-        const D: usize = 32; // dimension
+        const D: usize = 8; // dimension
         const N: usize = 10000; // number of points
         let pts = generate_uniform_dataset(N, D);
         let tree = SRTree::bulk_load(&pts, Params::default_params());
@@ -111,3 +131,25 @@ mod tests {
         print_stats(&tree);
     }
 }
+
+/*
+Visited points:  1443
+Compared points: 1443
+Visited leaves:  74
+Compared leaves: 90
+Visited nodes:   40
+Compared nodes:  49
+Total leaves:    512
+Total nodes:     575 (including leaf nodes)
+Tree height:     7
+
+Visited points:  1110
+Compared points: 1443
+Visited leaves:  74
+Compared leaves: 90
+Visited nodes:   40
+Compared nodes:  49
+Total leaves:    512
+Total nodes:     575 (including leaf nodes)
+Tree height:     7
+*/

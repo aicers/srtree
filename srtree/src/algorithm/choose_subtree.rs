@@ -14,8 +14,10 @@ where
     let mut closest_node_index = 0;
     let mut distance = T::infinity();
     for (i, child) in node.nodes().iter().enumerate() {
-        let current_distance =
-            child.get_sphere().center.distance(&search_node.get_sphere().center);
+        let current_distance = child
+            .get_sphere()
+            .center
+            .distance(&search_node.get_sphere().center);
         if current_distance < distance {
             distance = current_distance;
             closest_node_index = i;
