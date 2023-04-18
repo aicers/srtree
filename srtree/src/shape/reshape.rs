@@ -1,5 +1,4 @@
 use super::{point::Point, rect::Rect, sphere::Sphere};
-use crate::measure::distance::euclidean;
 use crate::measure::mean;
 use crate::node::Node;
 use ordered_float::Float;
@@ -24,7 +23,7 @@ where
                 low[i] = low[i].min(point.coord_at(i));
                 high[i] = high[i].max(point.coord_at(i));
             }
-            ds = ds.max(euclidean(&centroid, point));
+            ds = ds.max(centroid.distance(point));
             dr = ds;
         });
     } else {
@@ -33,12 +32,8 @@ where
                 low[i] = low[i].min(child.get_rect().low[i]);
                 high[i] = high[i].max(child.get_rect().high[i]);
             }
-            ds = ds
-                .max(euclidean(&centroid, &child.get_sphere().center) + child.get_sphere().radius);
-            dr = dr.max(euclidean(
-                &centroid,
-                &child.get_rect().farthest_point_to(&centroid),
-            ));
+            ds = ds.max(centroid.distance(&child.get_sphere().center) + child.get_sphere().radius);
+            dr = dr.max(centroid.distance(&child.get_rect().farthest_point_to(&centroid),));
         });
     }
     let rect = Rect::new(low, high);

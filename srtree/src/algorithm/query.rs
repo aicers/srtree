@@ -2,7 +2,7 @@ use crate::node::Node;
 use crate::stats::{
     inc_compared_leaves, inc_compared_nodes, inc_visited_leaves, inc_visited_nodes,
 };
-use crate::{measure::distance::euclidean_squared, shape::point::Point};
+use crate::shape::point::Point;
 use ordered_float::{Float, OrderedFloat};
 use std::{
     cmp::Ordering,
@@ -87,7 +87,7 @@ where
 
         // insert all potential neighbors (with their distances) in a leaf node:
         node.points().iter().for_each(|candidate| {
-            let neighbor_distance = euclidean_squared(candidate, point);
+            let neighbor_distance = point.distance(candidate);
             neighbors.push(Neighbor::new(
                 OrderedFloat(neighbor_distance),
                 candidate.index,

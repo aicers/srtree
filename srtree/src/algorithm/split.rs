@@ -1,4 +1,3 @@
-use crate::measure::distance::euclidean_squared;
 use crate::measure::mean;
 use crate::node::Node;
 use crate::shape::point::Point;
@@ -98,10 +97,10 @@ where
     let mut index = choose_split_index(node, params);
 
     let node_centroid = Point::with_coords(mean::calculate(node, 0, index));
-    let node_distance = euclidean_squared(parent_centroid, &node_centroid);
+    let node_distance = parent_centroid.distance(&node_centroid);
 
     let sibling_centroid = Point::with_coords(mean::calculate(node, index, node.immed_children()));
-    let sibling_distance = euclidean_squared(parent_centroid, &sibling_centroid);
+    let sibling_distance = parent_centroid.distance(&sibling_centroid);
 
     if node_distance > sibling_distance {
         if node.is_leaf() {
@@ -123,8 +122,6 @@ where
     }
     reshape(node);
     reshape(&mut new_node);
-
-    // todo: return the node whose centroid is closest to parent
     new_node
 }
 
