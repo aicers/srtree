@@ -1,8 +1,9 @@
 use crate::node::Node;
-use crate::stats::{
-    inc_compared_leaves, inc_compared_nodes, inc_visited_leaves, inc_visited_nodes,
-};
 use crate::shape::point::Point;
+use crate::stats::{
+    inc_compared_leaves, inc_compared_nodes, inc_compared_points, inc_visited_leaves,
+    inc_visited_nodes, inc_visited_points,
+};
 use ordered_float::{Float, OrderedFloat};
 use std::{
     cmp::Ordering,
@@ -84,20 +85,8 @@ where
 {
     if node.is_leaf() {
         inc_visited_leaves();
-
-        // insert all potential neighbors (with their distances) in a leaf node:
-        node.points().iter().for_each(|candidate| {
-            let neighbor_distance = point.distance(candidate);
-            neighbors.push(Neighbor::new(
-                OrderedFloat(neighbor_distance),
-                candidate.index,
-            ));
-
-            // keep only closest k neighbors:
-            if neighbors.len() > k {
-                neighbors.pop();
-            }
-        });
+        inc_compared_points(node.points().len());
+        search_leaf_with_pruning(node, point, k, neighbors);
     } else {
         inc_visited_nodes();
 
@@ -127,6 +116,44 @@ where
             }
 
             search(&node.nodes()[child_index], point, k, neighbors);
+        }
+    }
+}
+
+fn search_leaf_with_pruning<T>(
+    node: &Node<T>,
+    point: &Point<T>,
+    k: usize,
+    neighbors: &mut BinaryHeap<Neighbor<T>>,
+) where
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
+    if node.is_leaf() {
+        let distance_to_center = point.distance(&node.get_sphere().center);
+        for candidate in node.points() {
+            let mut current_kth_distance = OrderedFloat::infinity();
+            if neighbors.len() == k {
+                current_kth_distance = neighbors.peek().unwrap().distance;
+            }
+
+            let ball_bound = (distance_to_center - candidate.radius()).max(T::zero());
+            let ball_bound = OrderedFloat(ball_bound);
+            if ball_bound > current_kth_distance {
+                break;
+            }
+
+            let neighbor_distance = point.distance(candidate);
+            neighbors.push(Neighbor::new(
+                OrderedFloat(neighbor_distance),
+                candidate.index,
+            ));
+
+            // keep only closest k neighbors:
+            if neighbors.len() > k {
+                neighbors.pop();
+            }
+
+            inc_visited_points();
         }
     }
 }

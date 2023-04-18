@@ -1,6 +1,4 @@
-use crate::{
-    shape::{point::Point, rect::Rect, reshape::reshape, sphere::Sphere},
-};
+use crate::shape::{point::Point, rect::Rect, reshape::reshape, sphere::Sphere};
 use ordered_float::{Float, OrderedFloat};
 use std::{
     fmt::Debug,
@@ -201,8 +199,7 @@ where
         let number_of_immediate_children = self.immed_children();
         if self.is_leaf() {
             self.points_mut().select_nth_unstable_by(n, |a, b| {
-                OrderedFloat(center.distance(a))
-                    .cmp(&OrderedFloat(center.distance(b)))
+                OrderedFloat(center.distance(a)).cmp(&OrderedFloat(center.distance(b)))
             });
             self.points_mut()
                 .split_off(number_of_immediate_children - n)
@@ -211,9 +208,8 @@ where
                 .collect()
         } else {
             self.nodes_mut().select_nth_unstable_by(n, |a, b| {
-                OrderedFloat(center.distance(&a.get_sphere().center)).cmp(&OrderedFloat(
-                    center.distance(&b.get_sphere().center),
-                ))
+                OrderedFloat(center.distance(&a.get_sphere().center))
+                    .cmp(&OrderedFloat(center.distance(&b.get_sphere().center)))
             });
             self.nodes_mut().split_off(number_of_immediate_children - n)
         }

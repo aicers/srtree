@@ -9,6 +9,7 @@ use crate::measure::distance::{euclidean, euclidean_squared};
 #[derive(Debug, Clone)]
 pub struct Point<T> {
     coords: Vec<T>,
+    radius: T,
     pub index: usize,
 }
 
@@ -17,12 +18,20 @@ where
     T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     pub fn new(coords: Vec<T>, index: usize) -> Point<T> {
-        Point { coords, index }
+        Point {
+            coords,
+            radius: T::zero(),
+            index,
+        }
     }
 
     #[allow(dead_code)]
     pub fn with_coords(coords: Vec<T>) -> Point<T> {
-        Point { coords, index: 0 }
+        Point {
+            coords,
+            radius: T::zero(),
+            index: 0,
+        }
     }
 
     pub fn dimension(&self) -> usize {
@@ -39,6 +48,14 @@ where
 
     pub fn coords(&self) -> &Vec<T> {
         &self.coords
+    }
+
+    pub fn set_radius(&mut self, radius: T) {
+        self.radius = radius;
+    }
+
+    pub fn radius(&self) -> T {
+        self.radius
     }
 
     pub fn distance_squared(&self, other: &Point<T>) -> T {

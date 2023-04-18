@@ -5,7 +5,7 @@ use super::utils::uniform_dataset;
 
 // Note:
 const N: usize = 2000; // number of points
-const D: usize = 8; // dimension
+const D: usize = 32; // dimension
 const k: usize = 15; // number of nearest neighbors
 
 fn build(criterion: &mut Criterion) {
