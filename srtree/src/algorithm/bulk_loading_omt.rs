@@ -40,10 +40,9 @@ fn partition_points<T>(
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    if points.len() <= params.max_number_of_elements {
+    if split_dim == params.dimension || points.len() <= params.max_number_of_elements {
         return vec![points];
     }
-    let split_dim = split_dim % params.dimension;
     let partition_size = calculate_partition_size(points.len(), num_slices);
 
     // Partition the points along this dimension into groups
