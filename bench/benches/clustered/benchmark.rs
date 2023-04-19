@@ -1,4 +1,4 @@
-use super::utils::{clustered_dataset, euclidean_squared, dns_dataset};
+use super::utils::{clustered_dataset, dns_dataset, euclidean_squared};
 use crate::neighbor::Neighbor;
 use criterion::{black_box, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
@@ -16,6 +16,7 @@ pub fn build_and_query(criterion: &mut Criterion) {
     group.sample_size(10);
 
     // R*tree (https://github.com/georust/rstar)
+    /*
     group.bench_function("rstar", |bencher| {
         bencher.iter(|| {
             let pts: Vec<[f64; 24]> = dns_dataset();
@@ -32,6 +33,7 @@ pub fn build_and_query(criterion: &mut Criterion) {
             }
         });
     });
+    */
 
     // Ball-tree (https://github.com/petabi/petal-neighbors)
     group.bench_function("ball-tree", |bencher| {

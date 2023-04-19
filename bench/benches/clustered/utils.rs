@@ -14,7 +14,11 @@ pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
     distance
 }
 
-pub fn clustered_dataset<const D: usize>(filename: &str, skip_header: bool, skip_row: bool) -> Vec<[f64; D]> {
+pub fn clustered_dataset<const D: usize>(
+    filename: &str,
+    mut skip_header: bool,
+    mut skip_row: bool,
+) -> Vec<[f64; D]> {
     let mut pts = Vec::new();
     let file = File::open(filename);
     if file.is_err() {
