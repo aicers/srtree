@@ -1,17 +1,41 @@
-use super::utils::dns_dataset;
+use std::collections::BinaryHeap;
+
+use crate::neighbor::Neighbor;
+
+use super::utils::{dns_dataset, euclidean_squared};
 use criterion::Criterion;
-use srtree::{SRTree, Params};
+use ordered_float::OrderedFloat;
+use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
+use srtree::{Params, SRTree};
 
 const K: usize = 15; // number of nearest neighbors
+
+fn benchmark_dataset() -> Vec<Vec<f64>> {
+    let pts = dns_dataset();
+    let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
+    pts
+}
+
+fn query_dataset(n: usize) -> Vec<Vec<f64>> {
+    let pts = benchmark_dataset();
+    let mut pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
+    let mut rng = StdRng::from_seed(*b"PiH6Xi3GBBXhTK6UsXJYngHaF3fx4aYS");
+    pts.shuffle(&mut rng);
+    pts.truncate(n);
+    pts
+}
 
 fn build(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("build");
     group.sample_size(10);
 
+    let dataset = benchmark_dataset();
+    println!("dataset size: {}, dim: {}", dataset.len(), dataset[0].len());
+
     // benchmark build performance of sequential building
     group.bench_function("sequential", |bencher| {
         bencher.iter(|| {
-            let pts = dns_dataset();
+            let pts = benchmark_dataset();
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
             let mut srtree = SRTree::new();
             for (i, point) in pts.iter().enumerate() {
@@ -23,7 +47,7 @@ fn build(criterion: &mut Criterion) {
     // benchmark build performance of bulk-loading
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
-            let pts = dns_dataset();
+            let pts = benchmark_dataset();
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
             SRTree::bulk_load(&pts, Params::default_params())
         });
@@ -34,8 +58,11 @@ fn query(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("query");
     group.sample_size(10);
 
+    // query points
+    let query_points = query_dataset(1000);
+
     // benchmark query performance of sequantially-built tree
-    let pts = dns_dataset();
+    let pts = benchmark_dataset();
     let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
     let mut srtree = SRTree::new();
     for (i, point) in pts.iter().enumerate() {
@@ -43,26 +70,44 @@ fn query(criterion: &mut Criterion) {
     }
     group.bench_function("sequential", |bencher| {
         bencher.iter(|| {
-            for point in &pts {
+            for point in &query_points {
                 srtree.query(point, K);
             }
         });
     });
 
     // benchmark query performance of bulk-loaded tree
-    let pts = dns_dataset();
-    let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
     let srtree = SRTree::bulk_load(&pts, Params::default_params());
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
-            for point in &pts {
+            for point in &query_points {
                 srtree.query(point, K);
+            }
+        });
+    });
+
+    // Linear scan
+    let pts = benchmark_dataset();
+    group.bench_function("exhaustive", |bencher| {
+        bencher.iter(|| {
+            for i in 0..query_points.len() {
+                // iterate through the points and keep the closest K distances:
+                let mut result_heap = BinaryHeap::new();
+                for j in 0..pts.len() {
+                    result_heap.push(Neighbor::new(
+                        OrderedFloat(euclidean_squared(&query_points[i], &pts[j])),
+                        j,
+                    ));
+                    if result_heap.len() > K {
+                        result_heap.pop();
+                    }
+                }
             }
         });
     });
 }
 
 pub fn benchmark(criterion: &mut Criterion) {
-    build(criterion);
+    // build(criterion);
     query(criterion);
 }
