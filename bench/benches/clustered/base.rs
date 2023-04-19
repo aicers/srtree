@@ -108,6 +108,6 @@ fn query(criterion: &mut Criterion) {
 }
 
 pub fn benchmark(criterion: &mut Criterion) {
-    // build(criterion);
+    build(criterion);
     query(criterion);
 }

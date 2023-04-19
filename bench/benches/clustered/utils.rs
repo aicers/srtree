@@ -53,17 +53,17 @@ pub fn clustered_dataset<const D: usize>(
 }
 
 pub fn dns_dataset() -> Vec<[f64; 24]> {
-    clustered_dataset("benches/clustered/dns.csv", false, false)
+    clustered_dataset("benches/clustered/datasets/dns.csv", false, false)
 }
 
 pub fn audio_dataset() -> Vec<[f64; 40]> {
-    clustered_dataset("benches/clustered/audio.csv", false, false)
+    clustered_dataset("benches/clustered/datasets/audio.csv", false, false)
 }
 
 pub fn glove50D_dataset() -> Vec<[f64; 50]> {
-    clustered_dataset("benches/clustered/glove50D.csv", true, true)
+    clustered_dataset("benches/clustered/datasets/glove50D.csv", true, true)
 }
 
 pub fn glove100D_dataset() -> Vec<[f64; 100]> {
-    clustered_dataset("benches/clustered/glove100D.csv", true, true)
+    clustered_dataset("benches/clustered/datasets/glove100D.csv", true, true)
 }
