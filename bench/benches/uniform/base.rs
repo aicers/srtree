@@ -5,8 +5,8 @@ use super::utils::uniform_dataset;
 
 // Note:
 const N: usize = 2000; // number of points
-const D: usize = 32; // dimension
-const k: usize = 15; // number of nearest neighbors
+const D: usize = 8; // dimension
+const K: usize = 15; // number of nearest neighbors
 
 fn build(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("build");
@@ -48,7 +48,7 @@ fn query(criterion: &mut Criterion) {
     group.bench_function("sequential", |bencher| {
         bencher.iter(|| {
             for point in &pts {
-                srtree.query(point, k);
+                srtree.query(point, K);
             }
         });
     });
@@ -60,7 +60,7 @@ fn query(criterion: &mut Criterion) {
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
             for point in &pts {
-                srtree.query(point, k);
+                srtree.query(point, K);
             }
         });
     });
