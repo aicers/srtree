@@ -13,12 +13,12 @@ use std::collections::BinaryHeap;
 // R-tree (https://github.com/tidwall/rtree.rs) does not support bulk loading
 const N: usize = 2000; // number of points
 const D: usize = 8; // dimension
-const k: usize = 15; // number of nearest neighbors
+const K: usize = 15; // number of nearest neighbors
 
 fn build_and_query(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("uniform");
     group.sample_size(10);
-
+    
     // R*tree (https://github.com/georust/rstar)
     group.bench_function("rstar", |bencher| {
         bencher.iter(|| {
@@ -29,7 +29,7 @@ fn build_and_query(criterion: &mut Criterion) {
                 let mut iter = rstar.nearest_neighbor_iter(&pts[i]);
                 while let Some(_) = iter.next() {
                     count += 1;
-                    if count == k {
+                    if count == K {
                         break;
                     }
                 }
@@ -49,7 +49,7 @@ fn build_and_query(criterion: &mut Criterion) {
             for point in &pts {
                 tree.query(
                     &<ArrayBase<CowRepr<f64>, _> as From<&[f64]>>::from(point),
-                    k,
+                    K,
                 );
             }
         });
@@ -62,7 +62,7 @@ fn build_and_query(criterion: &mut Criterion) {
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
             let srtree = SRTree::bulk_load(&pts, Params::default_params());
             for point in &pts {
-                srtree.query(point, k);
+                srtree.query(point, K);
             }
         });
     });
@@ -79,7 +79,7 @@ fn build_and_query(criterion: &mut Criterion) {
                         OrderedFloat(euclidean_squared(&pts[i], &pts[j])),
                         j,
                     ));
-                    if result_heap.len() > k {
+                    if result_heap.len() > K {
                         result_heap.pop();
                     }
                 }

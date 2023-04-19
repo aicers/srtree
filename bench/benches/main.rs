@@ -5,6 +5,7 @@ use uniform::uniform_benchmark;
 mod clustered;
 mod neighbor;
 use clustered::srtree_clustered_benchmark;
+use clustered::clustered_benchmark;
 
 criterion_group!(benches, srtree_uniform_benchmark);
 criterion_main!(benches);
