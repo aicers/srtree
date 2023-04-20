@@ -1,4 +1,6 @@
-use super::utils::{clustered_dataset, dns_dataset, euclidean_squared, world_cities};
+use super::utils::{
+    audio_dataset, clustered_dataset, dns_dataset, euclidean_squared, world_cities,
+};
 use crate::neighbor::Neighbor;
 use criterion::{black_box, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
@@ -55,10 +57,25 @@ pub fn build_and_query(criterion: &mut Criterion) {
         });
     });
 
-    // SR-tree
-    group.bench_function("srtree", |bencher| {
+    // Sequentially built SR-tree
+    group.bench_function("srtree-seq", |bencher| {
         bencher.iter(|| {
-            let pts: Vec<[f64; 2]> = benchmark_dataset();
+            let pts = benchmark_dataset();
+            let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
+            let mut srtree = SRTree::new();
+            for (i, point) in pts.iter().enumerate() {
+                srtree.insert(point, i);
+            }
+            for point in &pts {
+                srtree.query(point, K);
+            }
+        });
+    });
+
+    // SR-tree
+    group.bench_function("srtree-bulk", |bencher| {
+        bencher.iter(|| {
+            let pts = benchmark_dataset();
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
             let srtree = SRTree::bulk_load(&pts, Params::default_params());
             for point in &pts {

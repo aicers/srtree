@@ -2,7 +2,7 @@ use std::collections::BinaryHeap;
 
 use crate::neighbor::Neighbor;
 
-use super::utils::{dns_dataset, euclidean_squared, darpa_audio_dataset};
+use super::utils::{audio_dataset, darpa_audio_dataset, dns_dataset, euclidean_squared};
 use criterion::Criterion;
 use ordered_float::OrderedFloat;
 use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
@@ -11,7 +11,7 @@ use srtree::{Params, SRTree};
 const K: usize = 15; // number of nearest neighbors
 
 fn benchmark_dataset() -> Vec<Vec<f64>> {
-    let pts = darpa_audio_dataset();
+    let pts = dns_dataset();
     let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
     pts
 }

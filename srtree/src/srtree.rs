@@ -1,4 +1,4 @@
-use crate::algorithm::bulk_loading_omt::bulk_load;
+use crate::algorithm::bulk_loading_var::bulk_load;
 use crate::algorithm::insertion::{insert_data, insert_node};
 use crate::algorithm::query::nearest_neighbors;
 use crate::algorithm::split::split;

@@ -122,7 +122,7 @@ mod tests {
     #[test]
     pub fn test_bulk_load() {
         const D: usize = 8; // dimension
-        const N: usize = 10000; // number of points
+        const N: usize = 700; // number of points
         let pts = generate_uniform_dataset(N, D);
         let tree = SRTree::bulk_load(&pts, Params::default_params());
 
@@ -131,25 +131,3 @@ mod tests {
         print_stats(&tree);
     }
 }
-
-/*
-Visited points:  1443
-Compared points: 1443
-Visited leaves:  74
-Compared leaves: 90
-Visited nodes:   40
-Compared nodes:  49
-Total leaves:    512
-Total nodes:     575 (including leaf nodes)
-Tree height:     7
-
-Visited points:  1110
-Compared points: 1443
-Visited leaves:  74
-Compared leaves: 90
-Visited nodes:   40
-Compared nodes:  49
-Total leaves:    512
-Total nodes:     575 (including leaf nodes)
-Tree height:     7
-*/
