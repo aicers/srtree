@@ -14,7 +14,35 @@ pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
     distance
 }
 
-pub fn world_cities() -> Vec<[f64; 2]> {
+pub fn world_cities_dataset() -> Vec<[f64; 2]> {
+    world_cities()
+}
+
+pub fn dns_dataset() -> Vec<[f64; 24]> {
+    clustered_dataset("benches/clustered/datasets/dns.csv", false, false)
+}
+
+pub fn home_dataset() -> Vec<[f64; 96]> {
+    home_electricity_usage()
+}
+
+pub fn audio_dataset() -> Vec<[f64; 40]> {
+    clustered_dataset("benches/clustered/datasets/drone_audio.csv", false, false)
+}
+
+pub fn glove50D_dataset() -> Vec<[f64; 50]> {
+    clustered_dataset("benches/clustered/datasets/glove50D.csv", true, true)
+}
+
+pub fn glove100D_dataset() -> Vec<[f64; 100]> {
+    clustered_dataset("benches/clustered/datasets/glove100D.csv", true, true)
+}
+
+pub fn darpa_audio_dataset() -> Vec<[f64; 192]> {
+    clustered_dataset("benches/clustered/datasets/darpa_audio.csv", true, true)
+}
+
+fn world_cities() -> Vec<[f64; 2]> {
     let mut pts = Vec::new();
     let file = File::open("benches/clustered/datasets/worldcities.csv");
     if file.is_err() {
@@ -51,7 +79,46 @@ pub fn world_cities() -> Vec<[f64; 2]> {
     pts
 }
 
-pub fn clustered_dataset<const D: usize>(
+fn home_electricity_usage<const D: usize>() -> Vec<[f64; D]> {
+    let mut pts = Vec::new();
+    let file = File::open("benches/clustered/datasets/home.csv");
+    if file.is_err() {
+        return pts;
+    }
+
+    let mut skip_header = true;
+    let reader = BufReader::new(file.unwrap());
+
+    let mut electricity_usage = Vec::new();
+    for line in reader.lines() {
+        if skip_header {
+            skip_header = false;
+            continue;
+        }
+        if line.is_ok() {
+            let line = line.as_ref().unwrap();
+            let columns: Vec<&str> = line.split(",").into_iter().collect();
+            let usage = columns[1].parse().unwrap_or(f64::INFINITY);
+            if usage != f64::INFINITY {
+                electricity_usage.push(usage);
+            }
+        }
+    }
+
+    // Sample D dimensional points from the electricity usage sequentially
+    let mut i = 0;
+    while i + D < electricity_usage.len() {
+        let mut point = [f64::INFINITY; D];
+        for j in 0..D {
+            point[j] = electricity_usage[i + j];
+        }
+        pts.push(point);
+        i += D;
+    }
+    pts
+}
+
+fn clustered_dataset<const D: usize>(
     filename: &str,
     mut skip_header: bool,
     mut skip_row: bool,
@@ -87,24 +154,4 @@ pub fn clustered_dataset<const D: usize>(
         }
     }
     pts
-}
-
-pub fn dns_dataset() -> Vec<[f64; 24]> {
-    clustered_dataset("benches/clustered/datasets/dns.csv", false, false)
-}
-
-pub fn audio_dataset() -> Vec<[f64; 40]> {
-    clustered_dataset("benches/clustered/datasets/drone_audio.csv", false, false)
-}
-
-pub fn glove50D_dataset() -> Vec<[f64; 50]> {
-    clustered_dataset("benches/clustered/datasets/glove50D.csv", true, true)
-}
-
-pub fn glove100D_dataset() -> Vec<[f64; 100]> {
-    clustered_dataset("benches/clustered/datasets/glove100D.csv", true, true)
-}
-
-pub fn darpa_audio_dataset() -> Vec<[f64; 192]> {
-    clustered_dataset("benches/clustered/datasets/darpa_audio.csv", true, true)
 }

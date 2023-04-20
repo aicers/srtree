@@ -2,7 +2,9 @@ use std::collections::BinaryHeap;
 
 use crate::neighbor::Neighbor;
 
-use super::utils::{audio_dataset, darpa_audio_dataset, dns_dataset, euclidean_squared};
+use super::utils::{
+    audio_dataset, darpa_audio_dataset, dns_dataset, euclidean_squared, home_dataset,
+};
 use criterion::Criterion;
 use ordered_float::OrderedFloat;
 use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
@@ -11,7 +13,7 @@ use srtree::{Params, SRTree};
 const K: usize = 15; // number of nearest neighbors
 
 fn benchmark_dataset() -> Vec<Vec<f64>> {
-    let pts = dns_dataset();
+    let pts = home_dataset();
     let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
     pts
 }
@@ -59,7 +61,7 @@ fn query(criterion: &mut Criterion) {
     group.sample_size(10);
 
     // query points
-    let query_points = query_dataset(1000);
+    let query_points = query_dataset(usize::MAX);
 
     // benchmark query performance of sequantially-built tree
     let pts = benchmark_dataset();
