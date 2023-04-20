@@ -1,4 +1,8 @@
-use crate::{node::Node, shape::point::Point, Params};
+use crate::{
+    node::Node,
+    shape::point::Point,
+    Params,
+};
 use num_traits::cast;
 use ordered_float::Float;
 use std::{
@@ -14,6 +18,18 @@ where
         return Node::create_leaf(points);
     }
 
+    let groups = create_entries(points, params);
+    let children: Vec<Node<T>> = groups
+        .into_iter()
+        .map(|group| bulk_load(group, params))
+        .collect();
+    Node::create_parent(children)
+}
+
+pub fn create_entries<T>(points: Vec<Point<T>>, params: &Params) -> Vec<Vec<Point<T>>>
+where
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
     let variances = calculate_variance(&points);
     let split_dim = variances
         .iter()
@@ -21,19 +37,12 @@ where
         .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
         .map(|(i, _)| i)
         .unwrap();
-
-    let groups = partition_points(points, split_dim, params.min_number_of_elements, params);
-    let children = groups
-        .into_iter()
-        .map(|group| bulk_load(group, params))
-        .collect();
-    Node::create_parent(children)
+    partition_points(points, split_dim, params)
 }
 
-pub fn partition_points<T>(
+fn partition_points<T>(
     mut points: Vec<Point<T>>,
     split_dim: usize,
-    num_slices: usize,
     params: &Params,
 ) -> Vec<Vec<Point<T>>>
 where
@@ -43,8 +52,11 @@ where
         return vec![points];
     }
     let split_dim = split_dim % params.dimension;
-    let partition_size =
-        calculate_partition_size(points.len(), num_slices).max(params.min_number_of_elements);
+    let partition_size = calculate_internal_node_size(
+        points.len(),
+        params.max_number_of_elements,
+        params.min_number_of_elements,
+    );
     let mut remaining = points.len() % partition_size;
     let mut entries = Vec::new();
     while !points.is_empty() {
@@ -81,7 +93,7 @@ where
     variance
 }
 
-fn calculate_variance<T>(points: &[Point<T>]) -> Vec<T>
+fn calculate_variance<T>(points: &Vec<Point<T>>) -> Vec<T>
 where
     T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy,
 {
@@ -93,12 +105,19 @@ where
     variances
 }
 
-fn calculate_partition_size(n: usize, num_slices: usize) -> usize {
+// VAMSplit R-tree Equation 2: Calculate the internal node size
+fn calculate_internal_node_size(n: usize, leaf_size: usize, internal_node_fanout: usize) -> usize {
     let n: f64 = cast(n).unwrap();
-    let num_slices: f64 = cast(num_slices).unwrap();
-    let partition_size = (n / num_slices).floor();
+    let leaf_size: f64 = cast(leaf_size).unwrap();
+    let internal_node_fanout: f64 = cast(internal_node_fanout).unwrap();
+    if n <= 2. * leaf_size {
+        return 1;
+    }
 
-    cast(partition_size).unwrap()
+    let num_leaves = n / (2. * leaf_size);
+    let num_leaves_per_node = num_leaves.log(internal_node_fanout).floor();
+    let internal_node_size = leaf_size * internal_node_fanout.powf(num_leaves_per_node);
+    cast(internal_node_size).unwrap()
 }
 
 #[cfg(test)]
@@ -114,5 +133,14 @@ mod tests {
         ];
         let variance = calculate_dimension_variance(&points, 0);
         assert!((variance - 2.0 / 3.0).abs() <= 0.00001);
+    }
+
+    #[test]
+    pub fn test_internal_node_size() {
+        let n = 5000;
+        let leaf_size = 21;
+        let internal_node_fanout = 9;
+        let internal_node_size = calculate_internal_node_size(n, leaf_size, internal_node_fanout);
+        assert_eq!(internal_node_size, 1701);
     }
 }
