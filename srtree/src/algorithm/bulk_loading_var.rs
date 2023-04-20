@@ -1,8 +1,4 @@
-use crate::{
-    node::Node,
-    shape::point::Point,
-    Params,
-};
+use crate::{node::Node, shape::point::Point, Params};
 use num_traits::cast;
 use ordered_float::Float;
 use std::{
@@ -57,13 +53,9 @@ where
         params.max_number_of_elements,
         params.min_number_of_elements,
     );
-    let mut remaining = points.len() % partition_size;
     let mut entries = Vec::new();
     while !points.is_empty() {
-        let left = points
-            .len()
-            .saturating_sub(partition_size + (remaining > 0) as usize);
-        remaining = remaining.saturating_sub(1);
+        let left = points.len().saturating_sub(partition_size);
         points.select_nth_unstable_by(left, |a, b| {
             a.coord_at(split_dim)
                 .partial_cmp(&b.coord_at(split_dim))
