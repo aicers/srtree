@@ -1,7 +1,3 @@
-use super::utils::{
-    audio_dataset, clustered_dataset, darpa_audio_dataset, dns_dataset, euclidean_squared,
-    glove50D_dataset, world_cities,
-};
 use crate::neighbor::Neighbor;
 use criterion::{black_box, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
@@ -11,12 +7,14 @@ use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 use srtree::{Params, SRTree};
 use std::collections::BinaryHeap;
 
+use super::utils::{euclidean_squared, world_cities_dataset};
+
 // Note:
 // R-tree (https://github.com/tidwall/rtree.rs) does not support bulk loading
 const K: usize = 15; // number of nearest neighbors
 
 fn benchmark_dataset() -> Vec<[f64; 2]> {
-    world_cities()
+    world_cities_dataset()
 }
 
 fn query_dataset(n: usize) -> Vec<[f64; 2]> {
