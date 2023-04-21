@@ -57,8 +57,8 @@ where
     while !points.is_empty() {
         let left = points.len().saturating_sub(partition_size);
         points.select_nth_unstable_by(left, |a, b| {
-            a.coord_at(split_dim)
-                .partial_cmp(&b.coord_at(split_dim))
+            a.coords[split_dim]
+                .partial_cmp(&b.coords[split_dim])
                 .unwrap()
         });
         let slice = points.split_off(left);
@@ -74,18 +74,17 @@ where
     let mut sum = T::zero();
     let mut sum_sq = T::zero();
     for point in points {
-        let coord = point.coord_at(dim);
+        let coord = point.coords[dim];
         sum += coord;
         sum_sq += coord * coord;
     }
     let n = T::from(points.len()).unwrap();
     let mean = sum / n;
     let mean_sq = mean * mean;
-    let variance = sum_sq / n - mean_sq;
-    variance
+    sum_sq / n - mean_sq
 }
 
-fn calculate_variance<T>(points: &Vec<Point<T>>) -> Vec<T>
+fn calculate_variance<T>(points: &[Point<T>]) -> Vec<T>
 where
     T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy,
 {

@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub mod bulk_loading_omt;
 pub mod bulk_loading_var;
 mod choose_subtree;

@@ -4,6 +4,7 @@ mod node;
 mod params;
 mod shape;
 mod srtree;
+#[allow(dead_code)]
 mod stats;
 pub use crate::params::Params;
 pub use crate::srtree::InsertionResult;

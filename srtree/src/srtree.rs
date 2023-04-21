@@ -75,9 +75,9 @@ where
             );
 
             if root.immed_children() > self.params.max_number_of_elements {
-                let sibling = split(root, &root.get_sphere().center.clone(), &self.params);
+                let sibling = split(root, &root.sphere.center.clone(), &self.params);
                 let mut new_root = Node::new_node(
-                    &root.get_sphere().center,
+                    &root.sphere.center,
                     self.params.max_number_of_elements,
                     root.get_height() + 1,
                 );

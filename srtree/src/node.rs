@@ -11,11 +11,11 @@ pub enum Data<T> {
 }
 
 pub struct Node<T> {
-    rect: Rect<T>,
-    sphere: Sphere<T>,
+    pub rect: Rect<T>,
+    pub sphere: Sphere<T>,
     data: Data<T>,
-    variance: Vec<T>,
-    height: usize, // height above leaf
+    pub variance: Vec<T>,
+    pub height: usize,
 }
 
 impl<T> Node<T>
@@ -64,8 +64,8 @@ where
             Data::Points(_) => Data::Points(Vec::with_capacity(capacity)),
         };
         Node::new(
-            Rect::from_point(&self.get_sphere().center),
-            Sphere::from_point(&self.get_sphere().center),
+            Rect::from_point(&self.sphere.center),
+            Sphere::from_point(&self.sphere.center),
             data,
             vec![T::zero(); self.dimension()],
             self.height,
@@ -91,7 +91,7 @@ where
 
     pub fn create_parent(nodes: Vec<Node<T>>) -> Node<T> {
         let mut parent = Node::new_node(
-            &nodes[0].get_sphere().center,
+            &nodes[0].sphere.center,
             nodes.len(),
             nodes[0].get_height() + 1,
         );
@@ -106,30 +106,6 @@ where
 
     pub fn dimension(&self) -> usize {
         self.sphere.center.dimension()
-    }
-
-    pub fn set_rect(&mut self, rect: Rect<T>) {
-        self.rect = rect;
-    }
-
-    pub fn get_rect(&self) -> &Rect<T> {
-        &self.rect
-    }
-
-    pub fn set_sphere(&mut self, sphere: Sphere<T>) {
-        self.sphere = sphere;
-    }
-
-    pub fn get_sphere(&self) -> &Sphere<T> {
-        &self.sphere
-    }
-
-    pub fn set_variance(&mut self, variance: Vec<T>) {
-        self.variance = variance;
-    }
-
-    pub fn get_variance(&self) -> &[T] {
-        &self.variance
     }
 
     pub fn nodes(&self) -> &Vec<Node<T>> {
@@ -183,7 +159,7 @@ where
 
     pub fn child_variance(&self, i: usize) -> &[T] {
         match &self.data {
-            Data::Nodes(_) => self.nodes()[i].get_variance(),
+            Data::Nodes(_) => &self.nodes()[i].variance,
             Data::Points(_) => {
                 panic!("Trying to access variance of a point");
             }
@@ -195,7 +171,7 @@ where
     }
 
     pub fn pop_last(&mut self, n: usize) -> Vec<Node<T>> {
-        let center = self.get_sphere().center.clone();
+        let center = self.sphere.center.clone();
         let number_of_immediate_children = self.immed_children();
         if self.is_leaf() {
             self.points_mut().select_nth_unstable_by(n, |a, b| {
@@ -208,8 +184,8 @@ where
                 .collect()
         } else {
             self.nodes_mut().select_nth_unstable_by(n, |a, b| {
-                OrderedFloat(center.distance(&a.get_sphere().center))
-                    .cmp(&OrderedFloat(center.distance(&b.get_sphere().center)))
+                OrderedFloat(center.distance(&a.sphere.center))
+                    .cmp(&OrderedFloat(center.distance(&b.sphere.center)))
             });
             self.nodes_mut().split_off(number_of_immediate_children - n)
         }
@@ -219,21 +195,21 @@ where
     where
         T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
     {
-        let ds = self.get_sphere().min_distance(point);
-        let dr = self.get_rect().min_distance(point);
+        let ds = self.sphere.min_distance(point);
+        let dr = self.rect.min_distance(point);
         ds.max(dr)
     }
 
     pub fn node_count(&self) -> usize {
         1 + match &self.data {
-            Data::Nodes(nodes) => nodes.iter().map(|n| n.node_count()).sum(),
+            Data::Nodes(nodes) => nodes.iter().map(Node::node_count).sum(),
             Data::Points(_) => 0,
         }
     }
 
     pub fn leaf_count(&self) -> usize {
         match &self.data {
-            Data::Nodes(nodes) => nodes.iter().map(|n| n.leaf_count()).sum(),
+            Data::Nodes(nodes) => nodes.iter().map(Node::leaf_count).sum(),
             Data::Points(_) => 1,
         }
     }
@@ -256,9 +232,26 @@ mod tests {
                 .push(Point::with_coords(vec![0., i as f64]));
         }
         reshape(&mut leaf_node);
-        assert_eq!(leaf_node.get_sphere().center.coords(), &vec![0., 4.5]);
+        assert_eq!(leaf_node.sphere.center.coords, vec![0., 4.5]);
         let last = leaf_node.pop_last(2);
-        assert_eq!(last[0].get_sphere().center.coords(), &vec![0., 0.]);
-        assert_eq!(last[1].get_sphere().center.coords(), &vec![0., 9.]);
+        assert_eq!(last[0].sphere.center.coords, vec![0., 0.]);
+        assert_eq!(last[1].sphere.center.coords, vec![0., 9.]);
+    }
+
+    #[test]
+    pub fn test_node_count() {
+        let points1 = vec![
+            Point::with_coords(vec![0., 0.]),
+            Point::with_coords(vec![0., 1.]),
+        ];
+        let leaf1 = Node::create_leaf(points1);
+        let points2 = vec![
+            Point::with_coords(vec![10., 0.]),
+            Point::with_coords(vec![10., 1.]),
+        ];
+        let leaf2 = Node::create_leaf(points2);
+        let parent = Node::create_parent(vec![leaf1, leaf2]);
+        assert_eq!(parent.leaf_count(), 2);
+        assert_eq!(parent.node_count(), 3);
     }
 }

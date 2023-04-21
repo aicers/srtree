@@ -20,18 +20,18 @@ where
     }
 
     pub fn from_point(point: &Point<T>) -> Rect<T> {
-        Rect::new(point.coords().clone(), point.coords().clone())
+        Rect::new(point.coords.clone(), point.coords.clone())
     }
 
     pub fn min_distance(&self, point: &Point<T>) -> T {
         let mut closest_point = Point::with_coords(vec![T::infinity(); self.low.len()]);
         for i in 0..self.low.len() {
-            if point.coord_at(i) < self.low[i] {
-                closest_point.set_coord_at(i, self.low[i]);
-            } else if point.coord_at(i) > self.high[i] {
-                closest_point.set_coord_at(i, self.high[i]);
+            if point.coords[i] < self.low[i] {
+                closest_point.coords[i] = self.low[i];
+            } else if point.coords[i] > self.high[i] {
+                closest_point.coords[i] = self.high[i];
             } else {
-                closest_point.set_coord_at(i, point.coord_at(i));
+                closest_point.coords[i] = point.coords[i];
             }
         }
         point.distance(&closest_point)
@@ -40,10 +40,10 @@ where
     pub fn farthest_point_to(&self, point: &Point<T>) -> Point<T> {
         let mut result = Point::with_coords(self.low.clone());
         for i in 0..point.dimension() {
-            if (self.high[i] - point.coord_at(i)).abs() >= (self.low[i] - point.coord_at(i)).abs() {
-                result.set_coord_at(i, self.high[i]);
+            if (self.high[i] - point.coords[i]).abs() >= (self.low[i] - point.coords[i]).abs() {
+                result.coords[i] = self.high[i];
             } else {
-                result.set_coord_at(i, self.low[i]);
+                result.coords[i] = self.low[i];
             }
         }
         result
@@ -55,10 +55,10 @@ where
         let mut distance = min_max.distance_squared(point);
         for i in 0..self.low.len() {
             let mut current = min_max.clone();
-            if current.coord_at(i) == self.low[i] {
-                current.set_coord_at(i, self.high[i]);
+            if current.coords[i] == self.low[i] {
+                current.coords[i] = self.high[i];
             } else {
-                current.set_coord_at(i, self.low[i]);
+                current.coords[i] = self.low[i];
             }
             let current_distance = point.distance_squared(&current);
             if current_distance < distance {
@@ -84,28 +84,28 @@ mod tests {
         let rec = Rect::new(vec![5., 5.], vec![10., 10.]);
         assert_eq!(
             rec.farthest_point_to(&Point::with_coords(vec![0., 0.]))
-                .coords(),
-            &vec![10., 10.]
+                .coords,
+            vec![10., 10.]
         );
         assert_eq!(
             rec.farthest_point_to(&Point::with_coords(vec![15., 0.]))
-                .coords(),
-            &vec![5., 10.]
+                .coords,
+            vec![5., 10.]
         );
         assert_eq!(
             rec.farthest_point_to(&Point::with_coords(vec![0., 15.]))
-                .coords(),
-            &vec![10., 5.]
+                .coords,
+            vec![10., 5.]
         );
         assert_eq!(
             rec.farthest_point_to(&Point::with_coords(vec![15., 15.]))
-                .coords(),
-            &vec![5., 5.]
+                .coords,
+            vec![5., 5.]
         );
         assert_eq!(
             rec.farthest_point_to(&Point::with_coords(vec![15., 5.]))
-                .coords(),
-            &vec![5., 10.]
+                .coords,
+            vec![5., 10.]
         );
     }
 

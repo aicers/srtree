@@ -24,7 +24,7 @@ where
         }
     }
 
-    node.set_variance(variance);
+    node.variance = variance;
     selected_index
 }
 
@@ -87,10 +87,10 @@ where
     // 2. Sort node points along that axis
     if node.is_leaf() {
         node.points_mut()
-            .sort_by_key(|p| OrderedFloat(p.coord_at(axis)));
+            .sort_by_key(|p| OrderedFloat(p.coords[axis]));
     } else {
         node.nodes_mut()
-            .sort_by_key(|child| OrderedFloat(child.get_sphere().center.coord_at(axis)));
+            .sort_by_key(|child| OrderedFloat(child.sphere.center.coords[axis]));
     }
 
     // 3. Choose the split index along this axis

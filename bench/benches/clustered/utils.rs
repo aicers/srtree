@@ -22,7 +22,7 @@ pub fn dns_dataset() -> Vec<[f64; 24]> {
     clustered_dataset("benches/clustered/datasets/dns.csv", false, false)
 }
 
-pub fn home_dataset() -> Vec<[f64; 96]> {
+pub fn home_dataset() -> Vec<[f64; 64]> {
     home_electricity_usage()
 }
 
