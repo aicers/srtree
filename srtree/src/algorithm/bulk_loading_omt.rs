@@ -51,8 +51,8 @@ where
     while !points.is_empty() {
         let remaining = points.len().saturating_sub(partition_size);
         points.select_nth_unstable_by(remaining, |a, b| {
-            a.coord_at(split_dim)
-                .partial_cmp(&b.coord_at(split_dim))
+            a.coords[split_dim]
+                .partial_cmp(&b.coords[split_dim])
                 .unwrap()
         });
         let slice = points.split_off(remaining);
@@ -79,10 +79,8 @@ where
     while !groups.is_empty() {
         let remaining = groups.len().saturating_sub(partition_size);
         groups.select_nth_unstable_by(remaining, |a, b| {
-            a.get_sphere()
-                .center
-                .coord_at(split_dim)
-                .partial_cmp(&b.get_sphere().center.coord_at(split_dim))
+            a.sphere.center.coords[split_dim]
+                .partial_cmp(&b.sphere.center.coords[split_dim])
                 .unwrap()
         });
         let slice = groups.split_off(remaining);

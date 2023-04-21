@@ -15,7 +15,7 @@ where
         let child_number_of_entries =
             T::from(node.child_immed_children(child_index)).unwrap_or_else(T::one);
         for (axis_index, m) in mean.iter_mut().enumerate() {
-            *m += node.child_centroid(child_index).coord_at(axis_index) * child_number_of_entries;
+            *m += node.child_centroid(child_index).coords[axis_index] * child_number_of_entries;
         }
         number_of_entries += child_number_of_entries;
     }

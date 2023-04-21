@@ -25,7 +25,7 @@ where
             T::from(node.child_immed_children(child_index)).unwrap_or_else(T::one);
         for axis_index in 0..variance.len() {
             variance[axis_index] +=
-                (node.child_centroid(child_index).coord_at(axis_index) - mean[axis_index]).powi(2)
+                (node.child_centroid(child_index).coords[axis_index] - mean[axis_index]).powi(2)
                     * child_number_of_entries;
             if !node.is_leaf() {
                 variance[axis_index] +=

@@ -129,14 +129,14 @@ fn search_leaf_with_pruning<T>(
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     if node.is_leaf() {
-        let distance_to_center = point.distance(&node.get_sphere().center);
+        let distance_to_center = point.distance(&node.sphere.center);
         for candidate in node.points() {
             let mut current_kth_distance = OrderedFloat::infinity();
             if neighbors.len() == k {
                 current_kth_distance = neighbors.peek().unwrap().distance;
             }
 
-            let ball_bound = (distance_to_center - candidate.radius()).max(T::zero());
+            let ball_bound = (distance_to_center - candidate.radius).max(T::zero());
             let ball_bound = OrderedFloat(ball_bound);
             if ball_bound > current_kth_distance {
                 break;

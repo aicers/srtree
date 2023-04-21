@@ -64,7 +64,7 @@ where
         insert_or_reinsert(root, insert_node, params)
     } else {
         insert_or_split(
-            &root.get_sphere().center.clone(),
+            &root.sphere.center.clone(),
             root,
             insert_node,
             params,
@@ -89,8 +89,7 @@ where
 
     if node.get_height() == target_height {
         if node.is_leaf() {
-            node.points_mut()
-                .push(insert_node.get_sphere().center.clone());
+            node.points_mut().push(insert_node.sphere.center);
         } else {
             node.nodes_mut().push(insert_node);
         }
@@ -132,8 +131,7 @@ where
 
     if node.get_height() == target_height {
         if node.is_leaf() {
-            node.points_mut()
-                .push(insert_node.get_sphere().center.clone());
+            node.points_mut().push(insert_node.sphere.center);
         } else {
             node.nodes_mut().push(insert_node);
         }
@@ -150,7 +148,7 @@ where
         }
     } else {
         let closest_child_index = choose_closest_node_index(node, &insert_node);
-        let parent_centroid = node.get_sphere().center.clone();
+        let parent_centroid = node.sphere.center.clone();
         let closest_child = &mut node.nodes_mut()[closest_child_index];
         let result = insert_or_split(
             &parent_centroid,
@@ -175,7 +173,7 @@ mod tests {
         let params = Params::new(4, 9, 4, true).unwrap();
         let mut leaf_node = Node::new_leaf(&point, params.max_number_of_elements);
         insert_data(&mut leaf_node, &point, &params);
-        assert_eq!(leaf_node.points()[0].coords(), point.coords());
+        assert_eq!(leaf_node.points()[0].coords, point.coords);
     }
 
     #[test]
@@ -208,10 +206,10 @@ mod tests {
         let search_node = Node::new_point(&point);
         let leaf = choose_subtree(&mut root, &search_node);
         assert_eq!(leaf.points().len(), 2);
-        assert_eq!(leaf.get_sphere().center.coords(), &vec![0., 10.5]);
-        assert_eq!(root.get_sphere().center.coords(), &vec![0., 7.]);
-        assert_eq!(root.get_rect().low, vec![0., 0.]);
-        assert_eq!(root.get_rect().high, vec![0., 11.]);
+        assert_eq!(leaf.sphere.center.coords, vec![0., 10.5]);
+        assert_eq!(root.sphere.center.coords, vec![0., 7.]);
+        assert_eq!(root.rect.low, vec![0., 0.]);
+        assert_eq!(root.rect.high, vec![0., 11.]);
     }
 
     #[test]
@@ -265,10 +263,10 @@ mod tests {
             insert_data(&mut leaf_node1, &Point::with_coords(point_coords), &params);
         }
         assert_eq!(leaf_node1.immed_children(), 4);
-        assert_eq!(leaf_node1.get_rect().low, vec![1., 1.]);
-        assert_eq!(leaf_node1.get_rect().high, vec![3., 3.]);
-        assert_eq!(leaf_node1.get_sphere().center.coords(), &vec![2., 2.]);
-        assert_eq!(leaf_node1.get_sphere().radius, (2.0).sqrt());
+        assert_eq!(leaf_node1.rect.low, vec![1., 1.]);
+        assert_eq!(leaf_node1.rect.high, vec![3., 3.]);
+        assert_eq!(leaf_node1.sphere.center.coords, vec![2., 2.]);
+        assert_eq!(leaf_node1.sphere.radius, (2.0).sqrt());
 
         // The second leaf
         let second_leaf_points = vec![vec![5., 1.], vec![6., 2.]];
@@ -280,10 +278,10 @@ mod tests {
             insert_data(&mut leaf_node2, &Point::with_coords(point_coords), &params);
         }
         assert_eq!(leaf_node2.immed_children(), 2);
-        assert_eq!(leaf_node2.get_rect().low, vec![5., 1.]);
-        assert_eq!(leaf_node2.get_rect().high, vec![6., 2.]);
-        assert_eq!(leaf_node2.get_sphere().center.coords(), &vec![5.5, 1.5]);
-        assert_eq!(leaf_node2.get_sphere().radius, (2.0).sqrt() / 2.);
+        assert_eq!(leaf_node2.rect.low, vec![5., 1.]);
+        assert_eq!(leaf_node2.rect.high, vec![6., 2.]);
+        assert_eq!(leaf_node2.sphere.center.coords, vec![5.5, 1.5]);
+        assert_eq!(leaf_node2.sphere.radius, (2.0).sqrt() / 2.);
 
         // Insert the leaves
         let point = Point::with_coords(vec![0., 0.]);
@@ -291,13 +289,13 @@ mod tests {
         insert(&mut root, leaf_node1, &params);
         insert(&mut root, leaf_node2, &params);
         assert_eq!(root.immed_children(), 2);
-        assert_eq!(root.get_rect().low, vec![1., 1.]);
-        assert_eq!(root.get_rect().high, vec![6., 3.]);
+        assert_eq!(root.rect.low, vec![1., 1.]);
+        assert_eq!(root.rect.high, vec![6., 3.]);
         assert_eq!(
-            root.get_sphere().center.coords(),
-            &vec![3.1666666666666665, 1.8333333333333333]
+            root.sphere.center.coords,
+            vec![3.1666666666666665, 1.8333333333333333]
         );
-        assert_eq!(root.get_sphere().radius, 2.953340857778225);
+        assert_eq!(root.sphere.radius, 2.953340857778225);
 
         // These two points expands the second leaf
         let new_points = vec![vec![7., 3.], vec![8., 4.]];
@@ -306,23 +304,20 @@ mod tests {
         }
 
         assert_eq!(root.immed_children(), 2);
-        assert_eq!(root.get_rect().low, vec![1., 1.]);
-        assert_eq!(root.get_rect().high, vec![8., 4.]);
+        assert_eq!(root.rect.low, vec![1., 1.]);
+        assert_eq!(root.rect.high, vec![8., 4.]);
         assert_eq!(root.nodes()[1].immed_children(), 4);
-        assert_eq!(root.nodes()[1].get_rect().low, vec![5., 1.]);
-        assert_eq!(root.nodes()[1].get_rect().high, vec![8., 4.]);
-        assert_eq!(
-            root.nodes()[1].get_sphere().center.coords(),
-            &vec![6.5, 2.5]
-        );
-        assert_eq!(root.nodes()[1].get_sphere().radius, (18.0).sqrt() / 2.);
+        assert_eq!(root.nodes()[1].rect.low, vec![5., 1.]);
+        assert_eq!(root.nodes()[1].rect.high, vec![8., 4.]);
+        assert_eq!(root.nodes()[1].sphere.center.coords, vec![6.5, 2.5]);
+        assert_eq!(root.nodes()[1].sphere.radius, (18.0).sqrt() / 2.);
 
         // This insertion causes reinsert and split:
         let new_point = Point::with_coords(vec![9., 5.]);
         insert_data(&mut root, &new_point, &params);
 
         assert_eq!(root.immed_children(), 3);
-        assert_eq!(root.get_rect().low, vec![1., 1.]);
-        assert_eq!(root.get_rect().high, vec![9., 5.]);
+        assert_eq!(root.rect.low, vec![1., 1.]);
+        assert_eq!(root.rect.high, vec![9., 5.]);
     }
 }

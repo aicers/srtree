@@ -22,7 +22,7 @@ where
     }
     let mut distance = T::zero();
     for i in 0..point1.dimension() {
-        distance += (point1.coord_at(i) - point2.coord_at(i)).powi(2);
+        distance += (point1.coords[i] - point2.coords[i]).powi(2);
     }
     distance
 }

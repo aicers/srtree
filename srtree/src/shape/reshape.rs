@@ -15,36 +15,36 @@ where
     let mut ds = T::zero(); // farthest distance to child spheres
     let mut dr = T::zero(); // farthest distance to child rectangles
 
-    let mut low = centroid.coords().clone();
-    let mut high = centroid.coords().clone();
+    let mut low = centroid.coords.clone();
+    let mut high = centroid.coords.clone();
     if node.is_leaf() {
         node.points_mut().iter_mut().for_each(|point| {
             for i in 0..point.dimension() {
-                low[i] = low[i].min(point.coord_at(i));
-                high[i] = high[i].max(point.coord_at(i));
+                low[i] = low[i].min(point.coords[i]);
+                high[i] = high[i].max(point.coords[i]);
             }
             let distance_to_point = centroid.distance(point);
-            point.set_radius(distance_to_point); // set radius of point to distance to centroid
+            point.radius = distance_to_point; // set radius of point to distance to centroid
             ds = ds.max(distance_to_point);
             dr = ds;
         });
         node.points_mut()
-            .sort_by_key(|point| -OrderedFloat(point.radius())); // sort by radius in descending order
+            .sort_by_key(|point| -OrderedFloat(point.radius)); // sort by radius in descending order
     } else {
         node.nodes().iter().for_each(|child| {
             for i in 0..child.dimension() {
-                low[i] = low[i].min(child.get_rect().low[i]);
-                high[i] = high[i].max(child.get_rect().high[i]);
+                low[i] = low[i].min(child.rect.low[i]);
+                high[i] = high[i].max(child.rect.high[i]);
             }
-            ds = ds.max(centroid.distance(&child.get_sphere().center) + child.get_sphere().radius);
-            dr = dr.max(centroid.distance(&child.get_rect().farthest_point_to(&centroid)));
+            ds = ds.max(centroid.distance(&child.sphere.center) + child.sphere.radius);
+            dr = dr.max(centroid.distance(&child.rect.farthest_point_to(&centroid)));
         });
     }
     let rect = Rect::new(low, high);
-    node.set_rect(rect);
+    node.rect = rect;
 
     let radius = ds.min(dr);
-    node.set_sphere(Sphere::new(centroid, radius));
+    node.sphere = Sphere::new(centroid, radius);
 }
 
 #[cfg(test)]
@@ -63,9 +63,9 @@ mod tests {
         }
         reshape(&mut leaf);
 
-        assert_eq!(leaf.get_sphere().center.coords(), &vec![0., 2.]);
-        assert_eq!(&leaf.get_rect().low, &vec![0., 0.]);
-        assert_eq!(&leaf.get_rect().high, &vec![0., 4.]);
+        assert_eq!(leaf.sphere.center.coords, vec![0., 2.]);
+        assert_eq!(&leaf.rect.low, &vec![0., 0.]);
+        assert_eq!(&leaf.rect.high, &vec![0., 4.]);
     }
 
     #[test]
@@ -77,7 +77,7 @@ mod tests {
         leaf.points_mut().push(Point::with_coords(vec![250., 250.]));
         leaf.points_mut().push(Point::with_coords(vec![150., 300.]));
         reshape(&mut leaf);
-        assert_eq!(leaf.get_sphere().radius, 111.80339887498948);
+        assert_eq!(leaf.sphere.radius, 111.80339887498948);
     }
 
     #[test]
@@ -91,10 +91,10 @@ mod tests {
         leaf.points_mut().push(Point::with_coords(vec![4., 4.]));
         reshape(&mut leaf);
         // points are sorted by radius in descending order
-        assert_eq!(leaf.points()[0].radius(), 2.8284271247461903);
-        assert_eq!(leaf.points()[1].radius(), 2.8284271247461903);
-        assert_eq!(leaf.points()[2].radius(), 1.4142135623730951);
-        assert_eq!(leaf.points()[3].radius(), 1.4142135623730951);
-        assert_eq!(leaf.points()[4].radius(), 0.0);
+        assert_eq!(leaf.points()[0].radius, 2.8284271247461903);
+        assert_eq!(leaf.points()[1].radius, 2.8284271247461903);
+        assert_eq!(leaf.points()[2].radius, 1.4142135623730951);
+        assert_eq!(leaf.points()[3].radius, 1.4142135623730951);
+        assert_eq!(leaf.points()[4].radius, 0.0);
     }
 }
