@@ -7,7 +7,7 @@ use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 use srtree::{Params, SRTree};
 use std::collections::BinaryHeap;
 
-use super::utils::{euclidean_squared, world_cities_dataset};
+use super::utils::{euclidean_squared, world_cities_dataset, dns_dataset, audio_dataset};
 
 // Note:
 // R-tree (https://github.com/tidwall/rtree.rs) does not support bulk loading

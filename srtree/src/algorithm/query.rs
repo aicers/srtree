@@ -71,6 +71,7 @@ where
     let mut result = Vec::new();
     let mut neighbors = BinaryHeap::new();
     search(node, point, k, &mut neighbors);
+
     while !neighbors.is_empty() {
         let last = neighbors.pop().unwrap();
         result.push(last.point_index);
@@ -142,15 +143,12 @@ fn search_leaf_with_pruning<T>(
                 break;
             }
 
-            let neighbor_distance = point.distance(candidate);
-            neighbors.push(Neighbor::new(
-                OrderedFloat(neighbor_distance),
-                candidate.index,
-            ));
-
-            // keep only closest k neighbors:
-            if neighbors.len() > k {
+            let neighbor_distance = OrderedFloat(point.distance(candidate));
+            if neighbors.len() < k {
+                neighbors.push(Neighbor::new(neighbor_distance, candidate.index));
+            } else if neighbor_distance < current_kth_distance {
                 neighbors.pop();
+                neighbors.push(Neighbor::new(neighbor_distance, candidate.index));
             }
 
             inc_visited_points();

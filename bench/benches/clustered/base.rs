@@ -13,7 +13,7 @@ use srtree::{Params, SRTree};
 const K: usize = 15; // number of nearest neighbors
 
 fn benchmark_dataset() -> Vec<Vec<f64>> {
-    let pts = home_dataset();
+    let pts = dns_dataset();
     let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
     pts
 }
