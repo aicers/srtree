@@ -12,8 +12,7 @@ where
     T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
     let centroid = Point::with_coords(mean::calculate(node, 0, node.immed_children()));
-    let mut ds = T::zero(); // farthest distance to child spheres
-    let mut dr = T::zero(); // farthest distance to child rectangles
+    let mut max_distance = T::zero();
 
     let mut low = centroid.coords.clone();
     let mut high = centroid.coords.clone();
@@ -25,8 +24,7 @@ where
             }
             let distance_to_point = centroid.distance(point);
             point.radius = distance_to_point; // set radius of point to distance to centroid
-            ds = ds.max(distance_to_point);
-            dr = ds;
+            max_distance = max_distance.max(distance_to_point);
         });
         node.points_mut()
             .sort_by_key(|point| -OrderedFloat(point.radius)); // sort by radius in descending order
@@ -36,15 +34,12 @@ where
                 low[i] = low[i].min(child.rect.low[i]);
                 high[i] = high[i].max(child.rect.high[i]);
             }
-            ds = ds.max(centroid.distance(&child.sphere.center) + child.sphere.radius);
-            dr = dr.max(centroid.distance(&child.rect.farthest_point_to(&centroid)));
+            let distance = child.max_distance(&centroid);
+            max_distance = max_distance.max(distance);
         });
     }
-    let rect = Rect::new(low, high);
-    node.rect = rect;
-
-    let radius = ds.min(dr);
-    node.sphere = Sphere::new(centroid, radius);
+    node.rect = Rect::new(low, high);;
+    node.sphere = Sphere::new(centroid, max_distance);
 }
 
 #[cfg(test)]

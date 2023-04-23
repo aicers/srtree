@@ -37,7 +37,7 @@ where
         point.distance(&closest_point)
     }
 
-    pub fn farthest_point_to(&self, point: &Point<T>) -> Point<T> {
+    fn farthest_point_to(&self, point: &Point<T>) -> Point<T> {
         let mut result = Point::with_coords(self.low.clone());
         for i in 0..point.dimension() {
             if (self.high[i] - point.coords[i]).abs() >= (self.low[i] - point.coords[i]).abs() {
@@ -47,6 +47,11 @@ where
             }
         }
         result
+    }
+
+    pub fn max_distance(&self, point: &Point<T>) -> T {
+        let mut farthest_point = self.farthest_point_to(point);
+        point.distance(&farthest_point)
     }
 
     #[allow(dead_code)]
