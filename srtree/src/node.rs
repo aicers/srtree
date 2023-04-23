@@ -200,6 +200,15 @@ where
         ds.max(dr)
     }
 
+    pub fn max_distance(&self, point: &Point<T>) -> T
+    where
+        T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    {
+        let ds = self.sphere.max_distance(point);
+        let dr = self.rect.max_distance(point);
+        ds.min(dr)
+    }
+
     pub fn node_count(&self) -> usize {
         1 + match &self.data {
             Data::Nodes(nodes) => nodes.iter().map(Node::node_count).sum(),

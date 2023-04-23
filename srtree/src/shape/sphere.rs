@@ -25,7 +25,12 @@ where
 
     pub fn min_distance(&self, point: &Point<T>) -> T {
         let distance = self.center.distance(point);
-        T::zero().max(distance - (self.radius)) //.powi(2)
+        T::zero().max(distance - self.radius)
+    }
+
+    pub fn max_distance(&self, point: &Point<T>) -> T {
+        let distance = self.center.distance(point);
+        distance + self.radius
     }
 }
 
