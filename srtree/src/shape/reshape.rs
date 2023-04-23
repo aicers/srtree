@@ -38,7 +38,7 @@ where
             max_distance = max_distance.max(distance);
         });
     }
-    node.rect = Rect::new(low, high);;
+    node.rect = Rect::new(low, high);
     node.sphere = Sphere::new(centroid, max_distance);
 }
 

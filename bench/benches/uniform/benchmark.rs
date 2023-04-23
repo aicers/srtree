@@ -19,6 +19,7 @@ fn build_and_query(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("uniform");
     group.sample_size(10);
 
+     
     // R*tree (https://github.com/georust/rstar)
     group.bench_function("rstar", |bencher| {
         bencher.iter(|| {
@@ -54,7 +55,7 @@ fn build_and_query(criterion: &mut Criterion) {
             }
         });
     });
-
+    
     // SR-tree
     group.bench_function("srtree", |bencher| {
         bencher.iter(|| {

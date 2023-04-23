@@ -50,7 +50,7 @@ where
     }
 
     pub fn max_distance(&self, point: &Point<T>) -> T {
-        let mut farthest_point = self.farthest_point_to(point);
+        let farthest_point = self.farthest_point_to(point);
         point.distance(&farthest_point)
     }
 
