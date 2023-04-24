@@ -137,7 +137,7 @@ fn search_leaf_with_pruning<T>(
                 current_kth_distance = neighbors.peek().unwrap().distance;
             }
 
-            let ball_bound = (distance_to_center - candidate.radius).max(T::zero());
+            let ball_bound = (distance_to_center - candidate.radius).abs();
             let ball_bound = OrderedFloat(ball_bound);
             if ball_bound > current_kth_distance {
                 break;
