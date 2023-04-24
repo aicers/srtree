@@ -146,14 +146,6 @@ mod tests {
     use crate::shape::point::Point;
 
     #[test]
-    pub fn test_binary_search() {
-        let pts = vec![6, 5, 3, 2, 1, 0];
-
-        let result = pts.binary_search_by_key(&Reverse(7), |b| Reverse(*b));
-        assert_eq!(result, Err(0));
-    }
-
-    #[test]
     pub fn test_nearest_neighbors_with_leaf() {
         let params = Params::new(4, 9, 4, true).unwrap();
         let origin = Point::with_coords(vec![0., 0.]);
