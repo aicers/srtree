@@ -23,7 +23,7 @@ where
         Rect::new(point.coords.clone(), point.coords.clone())
     }
 
-    pub fn min_distance(&self, point: &Point<T>) -> T {
+    fn closest_point_to(&self, point: &Point<T>) -> Point<T> {
         let mut closest_point = Point::with_coords(vec![T::infinity(); self.low.len()]);
         for i in 0..self.low.len() {
             if point.coords[i] < self.low[i] {
@@ -34,6 +34,11 @@ where
                 closest_point.coords[i] = point.coords[i];
             }
         }
+        closest_point
+    }
+
+    pub fn min_distance(&self, point: &Point<T>) -> T {
+        let closest_point = self.closest_point_to(point);
         point.distance(&closest_point)
     }
 
@@ -82,6 +87,7 @@ mod tests {
     pub fn test_rect_min_distance() {
         let rec = Rect::new(vec![5., 5.], vec![10., 10.]);
         assert_eq!(rec.min_distance(&Point::with_coords(vec![5., 0.])), 5.);
+        assert_eq!(rec.min_distance(&Point::with_coords(vec![7., 7.])), 0.);
     }
 
     #[test]

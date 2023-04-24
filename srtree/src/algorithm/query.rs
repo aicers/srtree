@@ -4,7 +4,6 @@ use crate::stats::{
     inc_compared_nodes, inc_compared_points, inc_visited_nodes, inc_visited_points,
 };
 use ordered_float::{Float, OrderedFloat};
-use std::cmp::Reverse;
 use std::{
     cmp::Ordering,
     collections::BinaryHeap,
