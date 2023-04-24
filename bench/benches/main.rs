@@ -7,5 +7,5 @@ mod uniform;
 use uniform::srtree_uniform_benchmark;
 use uniform::uniform_benchmark;
 
-criterion_group!(benches, uniform_benchmark);
+criterion_group!(benches, srtree_clustered_benchmark);
 criterion_main!(benches);

@@ -1,10 +1,10 @@
 use crate::node::Node;
 use crate::shape::point::Point;
 use crate::stats::{
-    inc_compared_leaves, inc_compared_nodes, inc_compared_points, inc_visited_leaves,
-    inc_visited_nodes, inc_visited_points,
+    inc_compared_nodes, inc_compared_points, inc_visited_nodes, inc_visited_points,
 };
 use ordered_float::{Float, OrderedFloat};
+use std::cmp::Reverse;
 use std::{
     cmp::Ordering,
     collections::BinaryHeap,
@@ -84,74 +84,56 @@ fn search<T>(node: &Node<T>, point: &Point<T>, k: usize, neighbors: &mut BinaryH
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
+    inc_visited_nodes(node.is_leaf());
+
+    let mut kth_distance = OrderedFloat(T::infinity());
     if node.is_leaf() {
-        inc_visited_leaves();
         inc_compared_points(node.points().len());
-        search_leaf_with_pruning(node, point, k, neighbors);
-    } else {
-        inc_visited_nodes();
 
-        let mut to_visit = Vec::new();
-        for (child_index, child) in node.nodes().iter().enumerate() {
-            let distance = child.min_distance(point);
-            to_visit.push((OrderedFloat(distance), child_index));
-        }
-        to_visit.sort();
-
-        for (child_distance, child_index) in to_visit {
-            if node.nodes()[child_index].is_leaf() {
-                inc_compared_leaves();
-            } else {
-                inc_compared_nodes();
-            }
-
-            // if k neighbors were already sampled, then the target distance is kth closest distance:
-            let mut target_distance = OrderedFloat(T::infinity());
-            if neighbors.len() == k {
-                target_distance = neighbors.peek().unwrap().distance;
-            }
-
-            // search pruning: don't visit nodes with min_distance bigger than kth distance
-            if child_distance > target_distance {
-                break;
-            }
-
-            search(&node.nodes()[child_index], point, k, neighbors);
-        }
-    }
-}
-
-fn search_leaf_with_pruning<T>(
-    node: &Node<T>,
-    point: &Point<T>,
-    k: usize,
-    neighbors: &mut BinaryHeap<Neighbor<T>>,
-) where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
-{
-    if node.is_leaf() {
         let distance_to_center = point.distance(&node.sphere.center);
         for candidate in node.points() {
-            let mut current_kth_distance = OrderedFloat::infinity();
             if neighbors.len() == k {
-                current_kth_distance = neighbors.peek().unwrap().distance;
+                kth_distance = neighbors.peek().unwrap().distance;
             }
 
-            let ball_bound = (distance_to_center - candidate.radius).abs();
+            let ball_bound = (distance_to_center - candidate.radius).max(T::zero());
             let ball_bound = OrderedFloat(ball_bound);
-            if ball_bound > current_kth_distance {
+            if ball_bound > kth_distance {
                 break;
             }
 
             let neighbor_distance = OrderedFloat(point.distance(candidate));
             if neighbors.len() < k {
                 neighbors.push(Neighbor::new(neighbor_distance, candidate.index));
-            } else if neighbor_distance < current_kth_distance {
+            } else if neighbor_distance < kth_distance {
                 neighbors.pop();
                 neighbors.push(Neighbor::new(neighbor_distance, candidate.index));
             }
 
             inc_visited_points();
+        }
+    } else {
+        let mut to_visit = Vec::new();
+        for (child_index, child) in node.nodes().iter().enumerate() {
+            let distance = OrderedFloat(child.min_distance(point));
+            to_visit.push((distance, child_index));
+        }
+        to_visit.sort();
+
+        for (child_distance, child_index) in to_visit {
+            inc_compared_nodes(node.nodes()[child_index].is_leaf());
+
+            // if k neighbors were already sampled, then the target distance is kth closest distance:
+            if neighbors.len() == k {
+                kth_distance = neighbors.peek().unwrap().distance;
+            }
+
+            // search pruning: don't visit nodes with min_distance bigger than kth distance
+            if child_distance > kth_distance {
+                break;
+            }
+
+            search(&node.nodes()[child_index], point, k, neighbors);
         }
     }
 }
@@ -163,6 +145,14 @@ mod tests {
     use crate::node::Node;
     use crate::params::Params;
     use crate::shape::point::Point;
+
+    #[test]
+    pub fn test_binary_search() {
+        let pts = vec![6, 5, 3, 2, 1, 0];
+
+        let result = pts.binary_search_by_key(&Reverse(7), |b| Reverse(*b));
+        assert_eq!(result, Err(0));
+    }
 
     #[test]
     pub fn test_nearest_neighbors_with_leaf() {
