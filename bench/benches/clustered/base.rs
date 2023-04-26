@@ -1,8 +1,8 @@
 use std::collections::BinaryHeap;
 
-use crate::neighbor::Neighbor;
+use crate::utils::Neighbor;
 
-use super::utils::{
+use super::data::{
     audio_dataset, darpa_audio_dataset, dns_dataset, euclidean_squared, home_dataset,
 };
 use criterion::Criterion;

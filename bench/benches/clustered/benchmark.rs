@@ -1,4 +1,4 @@
-use crate::neighbor::Neighbor;
+use crate::utils::{LargeNodeRTree, Neighbor};
 use criterion::{black_box, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
 use ordered_float::OrderedFloat;
@@ -7,7 +7,7 @@ use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 use srtree::{Params, SRTree};
 use std::collections::BinaryHeap;
 
-use super::utils::{audio_dataset, dns_dataset, euclidean_squared, world_cities_dataset};
+use super::data::{audio_dataset, dns_dataset, euclidean_squared, world_cities_dataset};
 
 // Note:
 // R-tree (https://github.com/tidwall/rtree.rs) does not support bulk loading
@@ -28,17 +28,40 @@ fn query_dataset(n: usize) -> Vec<[f64; 2]> {
 pub fn build_and_query(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("clustered");
     group.sample_size(10);
-
     let query_pts = query_dataset(1000);
 
-    // R*tree (https://github.com/georust/rstar)
-    group.bench_function("rstar-seq", |bencher| {
+    // SR-tree
+    group.bench_function("srtree", |bencher| {
         bencher.iter(|| {
             let pts = benchmark_dataset();
-            let mut rstar = rstar::RTree::new();
-            for (_, point) in pts.iter().enumerate() {
-                rstar.insert(point.clone());
+            let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
+            let srtree = SRTree::bulk_load(&pts, Params::default_params());
+            for point in &query_pts {
+                srtree.query(point, K);
             }
+        });
+    });
+
+    // Sequentially built SR-tree
+    group.bench_function("srtree-seq", |bencher| {
+        bencher.iter(|| {
+            let pts = benchmark_dataset();
+            let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
+            let mut srtree = SRTree::new();
+            for (i, point) in pts.iter().enumerate() {
+                srtree.insert(point, i);
+            }
+            for point in &query_pts {
+                srtree.query(point, K);
+            }
+        });
+    });
+
+    // R*tree (https://github.com/georust/rstar) with bulk loading
+    group.bench_function("rstar", |bencher| {
+        bencher.iter(|| {
+            let pts = benchmark_dataset();
+            let rstar: LargeNodeRTree<_> = rstar::RTree::bulk_load_with_params(pts.clone());
             for i in 0..query_pts.len() {
                 let mut count = 0;
                 let mut iter = rstar.nearest_neighbor_iter(&query_pts[i]);
@@ -52,11 +75,14 @@ pub fn build_and_query(criterion: &mut Criterion) {
         });
     });
 
-    // R*tree (bulk-loaded)
-    group.bench_function("rstar", |bencher| {
+    // R*tree (https://github.com/georust/rstar)
+    group.bench_function("rstar-seq", |bencher| {
         bencher.iter(|| {
             let pts = benchmark_dataset();
-            let rstar = rstar::RTree::bulk_load(pts.clone());
+            let mut rstar: LargeNodeRTree<_> = rstar::RTree::new_with_params();
+            for (_, point) in pts.iter().enumerate() {
+                rstar.insert(point.clone());
+            }
             for i in 0..query_pts.len() {
                 let mut count = 0;
                 let mut iter = rstar.nearest_neighbor_iter(&query_pts[i]);
@@ -84,33 +110,6 @@ pub fn build_and_query(criterion: &mut Criterion) {
                     &<ArrayBase<CowRepr<f64>, _> as From<&[f64]>>::from(point),
                     K,
                 );
-            }
-        });
-    });
-
-    // Sequentially built SR-tree
-    group.bench_function("srtree-seq", |bencher| {
-        bencher.iter(|| {
-            let pts = benchmark_dataset();
-            let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            let mut srtree = SRTree::new();
-            for (i, point) in pts.iter().enumerate() {
-                srtree.insert(point, i);
-            }
-            for point in &query_pts {
-                srtree.query(point, K);
-            }
-        });
-    });
-
-    // SR-tree
-    group.bench_function("srtree-bulk", |bencher| {
-        bencher.iter(|| {
-            let pts = benchmark_dataset();
-            let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            let srtree = SRTree::bulk_load(&pts, Params::default_params());
-            for point in &query_pts {
-                srtree.query(point, K);
             }
         });
     });

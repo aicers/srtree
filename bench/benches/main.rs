@@ -1,11 +1,11 @@
 use criterion::{criterion_group, criterion_main};
 mod clustered;
-use clustered::clustered_benchmark;
-use clustered::srtree_clustered_benchmark;
-mod neighbor;
+#[allow(unused)]
+use clustered::{clustered_benchmark, srtree_clustered_benchmark};
 mod uniform;
-use uniform::srtree_uniform_benchmark;
-use uniform::uniform_benchmark;
+#[allow(unused)]
+use uniform::{srtree_uniform_benchmark, uniform_benchmark};
+mod utils;
 
-criterion_group!(benches, clustered_benchmark);
+criterion_group!(benches, uniform_benchmark);
 criterion_main!(benches);
