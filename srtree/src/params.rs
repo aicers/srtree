@@ -32,9 +32,9 @@ impl Params {
     #[must_use]
     pub fn default_params() -> Params {
         Params {
-            min_number_of_elements: 9,
-            max_number_of_elements: 21,
-            reinsert_count: 7,
+            min_number_of_elements: 8,
+            max_number_of_elements: 20,
+            reinsert_count: 6,
             prefer_close_reinsert: true,
             dimension: 0,
         }

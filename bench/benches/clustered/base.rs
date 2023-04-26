@@ -1,14 +1,15 @@
-use std::collections::BinaryHeap;
-
-use crate::utils::Neighbor;
-
-use super::data::{
-    audio_dataset, darpa_audio_dataset, dns_dataset, euclidean_squared, home_dataset,
-};
+use crate::utils::{euclidean_squared, Neighbor};
 use criterion::Criterion;
 use ordered_float::OrderedFloat;
 use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 use srtree::{Params, SRTree};
+use std::collections::BinaryHeap;
+
+#[allow(unused)]
+use super::data::{
+    audio_dataset, darpa_audio_dataset, dns_dataset, glove100d_dataset, glove50d_dataset,
+    home_dataset, world_cities_dataset,
+};
 
 const K: usize = 15; // number of nearest neighbors
 

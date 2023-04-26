@@ -54,6 +54,17 @@ where
     }
 }
 
+pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
+    if point1.len() != point2.len() {
+        return f64::INFINITY;
+    }
+    let mut distance = 0.;
+    for i in 0..point1.len() {
+        distance += (point1[i] - point2[i]).powi(2);
+    }
+    distance
+}
+
 pub struct LargeNodeParameters;
 impl RTreeParams for LargeNodeParameters {
     const MIN_SIZE: usize = 12; // 40% of MAX_SIZE

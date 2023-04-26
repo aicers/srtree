@@ -12,7 +12,7 @@ use std::collections::BinaryHeap;
 // Note:
 // R-tree (https://github.com/tidwall/rtree.rs) does not support bulk loading
 const N: usize = 2000; // number of points
-const D: usize = 9; // dimension
+const D: usize = 8; // dimension
 const K: usize = 15; // number of nearest neighbors
 
 fn build_and_query(criterion: &mut Criterion) {
