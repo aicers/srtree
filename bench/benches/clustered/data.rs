@@ -3,17 +3,6 @@ use std::{
     io::{BufRead, BufReader},
 };
 
-pub fn euclidean_squared(point1: &[f64], point2: &[f64]) -> f64 {
-    if point1.len() != point2.len() {
-        return f64::INFINITY;
-    }
-    let mut distance = 0.;
-    for i in 0..point1.len() {
-        distance += (point1[i] - point2[i]).powi(2);
-    }
-    distance
-}
-
 pub fn world_cities_dataset() -> Vec<[f64; 2]> {
     world_cities()
 }
@@ -30,11 +19,11 @@ pub fn audio_dataset() -> Vec<[f64; 40]> {
     clustered_dataset("benches/clustered/datasets/drone_audio.csv", false, false)
 }
 
-pub fn glove50D_dataset() -> Vec<[f64; 50]> {
+pub fn glove50d_dataset() -> Vec<[f64; 50]> {
     clustered_dataset("benches/clustered/datasets/glove50D.csv", true, true)
 }
 
-pub fn glove100D_dataset() -> Vec<[f64; 100]> {
+pub fn glove100d_dataset() -> Vec<[f64; 100]> {
     clustered_dataset("benches/clustered/datasets/glove100D.csv", true, true)
 }
 

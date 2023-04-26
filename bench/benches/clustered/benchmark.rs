@@ -1,4 +1,4 @@
-use crate::utils::{LargeNodeRTree, Neighbor};
+use crate::utils::{euclidean_squared, LargeNodeRTree, Neighbor};
 use criterion::{black_box, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
 use ordered_float::OrderedFloat;
@@ -7,7 +7,11 @@ use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 use srtree::{Params, SRTree};
 use std::collections::BinaryHeap;
 
-use super::data::{audio_dataset, dns_dataset, euclidean_squared, world_cities_dataset};
+#[allow(unused)]
+use super::data::{
+    audio_dataset, darpa_audio_dataset, dns_dataset, glove100d_dataset, glove50d_dataset,
+    home_dataset, world_cities_dataset,
+};
 
 // Note:
 // R-tree (https://github.com/tidwall/rtree.rs) does not support bulk loading
