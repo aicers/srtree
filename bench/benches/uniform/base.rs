@@ -1,7 +1,7 @@
 use criterion::Criterion;
 use srtree::{Params, SRTree};
 
-use super::utils::uniform_dataset;
+use super::data::uniform_dataset;
 
 // Note:
 const N: usize = 2000; // number of points

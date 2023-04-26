@@ -1,4 +1,5 @@
 use ordered_float::{Float, OrderedFloat};
+use rstar::{RStarInsertionStrategy, RTree, RTreeParams};
 use std::cmp::Ordering;
 
 pub struct Neighbor<T>
@@ -52,3 +53,12 @@ where
         self.distance.eq(&other.distance)
     }
 }
+
+pub struct LargeNodeParameters;
+impl RTreeParams for LargeNodeParameters {
+    const MIN_SIZE: usize = 12; // 40% of MAX_SIZE
+    const MAX_SIZE: usize = 31;
+    const REINSERTION_COUNT: usize = 9; // 30% of MAX_SIZE
+    type DefaultInsertionStrategy = RStarInsertionStrategy;
+}
+pub type LargeNodeRTree<T> = RTree<T, LargeNodeParameters>;
