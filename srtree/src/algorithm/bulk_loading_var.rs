@@ -98,11 +98,15 @@ where
 
 // VAMSplit R-tree Equation 2: Calculate the internal node size
 fn calculate_internal_node_size(n: usize, leaf_size: usize, internal_node_fanout: usize) -> usize {
+    if n <= leaf_size {
+        return n;
+    }
+
     let n: f64 = cast(n).unwrap();
     let leaf_size: f64 = cast(leaf_size).unwrap();
     let internal_node_fanout: f64 = cast(internal_node_fanout).unwrap();
     if n < 2. * leaf_size {
-        return 1;
+        return cast(n / 2.).unwrap();
     }
 
     let num_leaves = n / (2. * leaf_size);
