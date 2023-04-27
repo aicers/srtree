@@ -101,7 +101,7 @@ fn calculate_internal_node_size(n: usize, leaf_size: usize, internal_node_fanout
     let n: f64 = cast(n).unwrap();
     let leaf_size: f64 = cast(leaf_size).unwrap();
     let internal_node_fanout: f64 = cast(internal_node_fanout).unwrap();
-    if n <= 2. * leaf_size {
+    if n < 2. * leaf_size {
         return 1;
     }
 
