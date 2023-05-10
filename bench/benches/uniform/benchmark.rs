@@ -6,7 +6,7 @@ use criterion::{black_box, Criterion};
 use ndarray::{ArrayBase, ArrayView, CowRepr};
 use ordered_float::OrderedFloat;
 use petal_neighbors::BallTree;
-use srtree::{Params, SRTree};
+use srtree::SRTree;
 use std::collections::BinaryHeap;
 
 // Note:
@@ -24,7 +24,7 @@ fn build_and_query(criterion: &mut Criterion) {
         bencher.iter(|| {
             let pts: Vec<[f64; D]> = uniform_dataset(N);
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            let srtree = SRTree::bulk_load(&pts, Params::default_params());
+            let srtree = SRTree::bulk_load(&pts);
             for point in &pts {
                 srtree.query(point, K);
             }

@@ -2,7 +2,7 @@ use crate::utils::{euclidean_squared, Neighbor};
 use criterion::Criterion;
 use ordered_float::OrderedFloat;
 use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
-use srtree::{Params, SRTree};
+use srtree::SRTree;
 use std::collections::BinaryHeap;
 
 #[allow(unused)]
@@ -52,7 +52,7 @@ fn build(criterion: &mut Criterion) {
         bencher.iter(|| {
             let pts = benchmark_dataset();
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            SRTree::bulk_load(&pts, Params::default_params())
+            SRTree::bulk_load(&pts)
         });
     });
 }
@@ -80,7 +80,7 @@ fn query(criterion: &mut Criterion) {
     });
 
     // benchmark query performance of bulk-loaded tree
-    let srtree = SRTree::bulk_load(&pts, Params::default_params());
+    let srtree = SRTree::bulk_load(&pts);
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
             for point in &query_points {
