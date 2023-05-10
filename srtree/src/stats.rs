@@ -92,7 +92,7 @@ const STATS_ENABLED: bool = false;
 mod tests {
     use crate::{
         stats::{print, reset},
-        Params, SRTree,
+        SRTree,
     };
     use rand::{rngs::StdRng, Rng, SeedableRng};
 
@@ -115,7 +115,7 @@ mod tests {
         const D: usize = 8; // dimension
         const N: usize = 2000; // number of points
         let pts = generate_uniform_dataset(N, D);
-        let tree = SRTree::bulk_load(&pts, Params::default_params());
+        let tree = SRTree::bulk_load(&pts);
 
         reset();
         tree.query(&pts[0], 15);

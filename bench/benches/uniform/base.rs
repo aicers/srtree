@@ -1,5 +1,5 @@
 use criterion::Criterion;
-use srtree::{Params, SRTree};
+use srtree::SRTree;
 
 use super::data::uniform_dataset;
 
@@ -29,7 +29,7 @@ fn build(criterion: &mut Criterion) {
         bencher.iter(|| {
             let pts: Vec<[f64; D]> = uniform_dataset(N);
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            SRTree::bulk_load(&pts, Params::default_params())
+            SRTree::bulk_load(&pts)
         });
     });
 }
@@ -56,7 +56,7 @@ fn query(criterion: &mut Criterion) {
     // benchmark query performance of bulk-loaded tree
     let pts: Vec<[f64; D]> = uniform_dataset(N);
     let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-    let srtree = SRTree::bulk_load(&pts, Params::default_params());
+    let srtree = SRTree::bulk_load(&pts);
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
             for point in &pts {

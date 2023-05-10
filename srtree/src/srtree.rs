@@ -38,7 +38,7 @@ where
     }
 
     #[must_use]
-    pub fn bulk_load(pts: &[Vec<T>], mut params: Params) -> SRTree<T> {
+    pub fn bulk_load_with_params(pts: &[Vec<T>], mut params: Params) -> SRTree<T> {
         let points: Vec<Point<T>> = pts
             .iter()
             .enumerate()
@@ -50,6 +50,11 @@ where
             root: Some(root),
             params,
         }
+    }
+
+    #[must_use]
+    pub fn bulk_load(pts: &[Vec<T>]) -> SRTree<T> {
+        SRTree::bulk_load_with_params(pts, Params::default_params())
     }
 
     pub fn insert(&mut self, point_coords: &[T], index: usize) -> InsertionResult {
