@@ -63,7 +63,7 @@ where
     }
 }
 
-pub fn nearest_neighbors<T>(node: &Node<T>, point: &Point<T>, k: usize) -> Vec<usize>
+pub fn search_neighbors<T>(node: &Node<T>, point: &Point<T>, k: usize) -> Vec<usize>
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
@@ -137,31 +137,103 @@ where
     }
 }
 
+pub fn search_neighborhood<T>(node: &Node<T>, point: &Point<T>, radius: T) -> Vec<usize>
+where
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
+    let mut neighbors = Vec::new();
+    search_radius(node, point, OrderedFloat(radius), &mut neighbors);
+    neighbors
+}
+
+fn search_radius<T>(
+    node: &Node<T>,
+    point: &Point<T>,
+    radius: OrderedFloat<T>,
+    neighbors: &mut Vec<usize>,
+) where
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+{
+    inc_visited_nodes(node.is_leaf());
+
+    if node.is_leaf() {
+        inc_compared_points(node.points().len());
+
+        let distance_to_center = point.distance(&node.sphere.center);
+        for candidate in node.points() {
+            let ball_bound = (distance_to_center - candidate.radius).max(T::zero());
+            let ball_bound = OrderedFloat(ball_bound);
+            if ball_bound > radius {
+                break;
+            }
+
+            let neighbor_distance = OrderedFloat(point.distance(candidate));
+            if neighbor_distance <= radius {
+                neighbors.push(candidate.index);
+            }
+
+            inc_visited_points();
+        }
+    } else {
+        let mut to_visit = Vec::new();
+        for (child_index, child) in node.nodes().iter().enumerate() {
+            let distance = OrderedFloat(child.min_distance(point));
+            to_visit.push((distance, child_index));
+        }
+        to_visit.sort();
+
+        for (child_distance, child_index) in to_visit {
+            inc_compared_nodes(node.nodes()[child_index].is_leaf());
+
+            // search pruning: don't visit nodes with min_distance bigger than kth distance
+            if child_distance > radius {
+                break;
+            }
+
+            search_radius(&node.nodes()[child_index], point, radius, neighbors);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::algorithm::insertion::insert_data;
     use crate::node::Node;
-    use crate::params::Params;
     use crate::shape::point::Point;
 
     #[test]
-    pub fn test_nearest_neighbors_with_leaf() {
-        let params = Params::new(4, 9, 4, true).unwrap();
-        let origin = Point::with_coords(vec![0., 0.]);
-        let mut leaf_node = Node::new_leaf(&origin, params.max_number_of_elements);
-
-        for i in 0..params.max_number_of_elements {
-            let point = Point::new(vec![i as f64, 0.], i);
-            insert_data(&mut leaf_node, &point, &params);
+    pub fn test_query_neighbors() {
+        let mut leaf1 = Vec::new();
+        for i in 0..10 {
+            leaf1.push(Point::new(vec![i as f64, i as f64], i));
         }
-
-        let k = params.max_number_of_elements / 3;
-        let result = nearest_neighbors(&mut leaf_node, &origin, k);
-
-        for i in 0..k {
-            let point = Point::new(vec![i as f64, 0.], i);
-            assert!(result.contains(&point.index));
+        let leaf1 = Node::create_leaf(leaf1);
+        let mut leaf2 = Vec::new();
+        for i in 10..20 {
+            leaf2.push(Point::new(vec![i as f64, i as f64], i));
         }
+        let leaf2 = Node::create_leaf(leaf2);
+
+        let root = Node::create_parent(vec![leaf1, leaf2]);
+        let neighbors = search_neighbors(&root, &Point::with_coords(vec![0.0, 0.0]), 5);
+        assert_eq!(neighbors, vec![0, 1, 2, 3, 4]);
+    }
+
+    #[test]
+    pub fn test_query_neighborhood() {
+        let mut leaf1 = Vec::new();
+        for i in 0..10 {
+            leaf1.push(Point::new(vec![i as f64, i as f64], i));
+        }
+        let leaf1 = Node::create_leaf(leaf1);
+        let mut leaf2 = Vec::new();
+        for i in 10..20 {
+            leaf2.push(Point::new(vec![i as f64, i as f64], i));
+        }
+        let leaf2 = Node::create_leaf(leaf2);
+
+        let root = Node::create_parent(vec![leaf1, leaf2]);
+        let neighbors = search_neighborhood(&root, &Point::with_coords(vec![0.0, 0.0]), 5.0);
+        assert_eq!(neighbors, vec![0, 1, 2, 3]);
     }
 }
