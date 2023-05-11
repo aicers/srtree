@@ -4,8 +4,8 @@ mod clustered;
 use clustered::{clustered_benchmark, srtree_clustered_benchmark};
 mod uniform;
 #[allow(unused)]
-use uniform::{srtree_uniform_benchmark, uniform_benchmark};
+use uniform::{srtree_uniform_benchmark, uniform_benchmark, uniform_benchmark_query_radius};
 mod utils;
 
-criterion_group!(benches, uniform_benchmark);
+criterion_group!(benches, uniform_benchmark_query_radius);
 criterion_main!(benches);

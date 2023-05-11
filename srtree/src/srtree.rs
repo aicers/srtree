@@ -1,6 +1,6 @@
 use crate::algorithm::bulk_loading_var::bulk_load;
 use crate::algorithm::insertion::{insert_data, insert_node};
-use crate::algorithm::query::nearest_neighbors;
+use crate::algorithm::query::{search_neighborhood, search_neighbors};
 use crate::algorithm::split::split;
 use crate::node::Node;
 use crate::params::Params;
@@ -98,7 +98,15 @@ where
 
     pub fn query(&self, point: &[T], k: usize) -> Vec<usize> {
         if let Some(root) = self.root.as_ref() {
-            nearest_neighbors(root, &Point::with_coords(point.to_vec()), k)
+            search_neighbors(root, &Point::with_coords(point.to_vec()), k)
+        } else {
+            Vec::new()
+        }
+    }
+
+    pub fn query_radius(&self, point: &[T], radius: T) -> Vec<usize> {
+        if let Some(root) = self.root.as_ref() {
+            search_neighborhood(root, &Point::with_coords(point.to_vec()), radius)
         } else {
             Vec::new()
         }

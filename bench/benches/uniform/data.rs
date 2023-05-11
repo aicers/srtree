@@ -19,7 +19,7 @@ pub fn uniform_dataset<const D: usize>(n: usize) -> Vec<[f64; D]> {
     for _ in 0..n {
         let mut point = [0.; D];
         for item in point.iter_mut().take(D) {
-            *item = rng.gen::<f64>() * 1_000_000.;
+            *item = rng.gen::<f64>() * 1000.;
         }
         pts.push(point);
     }
