@@ -96,11 +96,11 @@ where
         InsertionResult::Success
     }
 
-    pub fn query(&self, point: &[T], k: usize) -> Vec<usize> {
+    pub fn query(&self, point: &[T], k: usize) -> (Vec<usize>, Vec<T>) {
         if let Some(root) = self.root.as_ref() {
             search_neighbors(root, &Point::with_coords(point.to_vec()), k)
         } else {
-            Vec::new()
+            (Vec::new(), Vec::new())
         }
     }
 
@@ -155,8 +155,8 @@ mod tests {
         let params = Params::new(3, 7, 3, true).unwrap();
         let mut tree: SRTree<f64> = SRTree::with_params(params);
         let search_point = vec![1.0, 0.0];
-        assert!(!tree.query(&search_point, 1).contains(&0)); // not inserted yet
+        assert!(!tree.query(&search_point, 1).0.contains(&0)); // not inserted yet
         tree.insert(&search_point, 0);
-        assert!(tree.query(&search_point, 1).contains(&0)); // inserted
+        assert!(tree.query(&search_point, 1).0.contains(&0)); // inserted
     }
 }

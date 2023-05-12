@@ -40,18 +40,18 @@ fn test_with_random_points() {
     for p in pts.iter() {
         // Bulk-loaded SRTree nearest neighbors
         let result_bulk = bulk_tree.query(p, k);
-        assert_eq!(result_bulk.len(), k);
+        assert_eq!(result_bulk.0.len(), k);
 
         // Sequential SRTree nearest neighbors
         let result_sequential = sequential_tree.query(p, k);
-        assert_eq!(result_sequential.len(), k);
+        assert_eq!(result_sequential.0.len(), k);
 
         // Brute-force
         points.sort_by_key(|a| OrderedFloat(euclidean_squared(a, p)));
 
         for i in 0..k {
-            assert_eq!(pts[result_bulk[i]], points[i]);
-            assert_eq!(pts[result_sequential[i]], points[i]);
+            assert_eq!(pts[result_bulk.0[i]], points[i]);
+            assert_eq!(pts[result_sequential.0[i]], points[i]);
         }
     }
 }
