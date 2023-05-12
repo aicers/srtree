@@ -63,20 +63,17 @@ where
     }
 }
 
-pub fn search_neighbors<T>(node: &Node<T>, point: &Point<T>, k: usize) -> Vec<usize>
+pub fn search_neighbors<T>(node: &Node<T>, point: &Point<T>, k: usize) -> (Vec<usize>, Vec<T>)
 where
     T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
 {
-    let mut result = Vec::new();
-    let mut neighbors = BinaryHeap::new();
+    let mut neighbors = BinaryHeap::with_capacity(k);
     search(node, point, k, &mut neighbors);
 
-    while !neighbors.is_empty() {
-        let last = neighbors.pop().unwrap();
-        result.push(last.point_index);
-    }
-    result.reverse();
-    result
+    let neighbors = neighbors.into_sorted_vec();
+    let indices = neighbors.iter().map(|n| n.point_index).collect();
+    let distances = neighbors.iter().map(|n| n.distance.into_inner()).collect();
+    (indices, distances)
 }
 
 fn search<T>(node: &Node<T>, point: &Point<T>, k: usize, neighbors: &mut BinaryHeap<Neighbor<T>>)
@@ -216,7 +213,7 @@ mod tests {
 
         let root = Node::create_parent(vec![leaf1, leaf2]);
         let neighbors = search_neighbors(&root, &Point::with_coords(vec![0.0, 0.0]), 5);
-        assert_eq!(neighbors, vec![0, 1, 2, 3, 4]);
+        assert_eq!(neighbors.0, vec![0, 1, 2, 3, 4]);
     }
 
     #[test]
