@@ -2,6 +2,7 @@
 name = "bench"
 version = "0.1.0"
 edition = "2021"
+authors = ["Kayumov A.I. <kayumovabduaziz@gmail.com>", "Park D.K. <dkpark@petabi.com>"]
 
 [dev-dependencies]
 srtree = { path = "../srtree" }

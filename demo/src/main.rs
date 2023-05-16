@@ -9,6 +9,6 @@ fn main() {
     tree.insert(&[3., 3.], 3);
     tree.insert(&[4., 4.], 4);
 
-    let neighbors = tree.query(&[8., 8.], 3);
-    println!("{neighbors:?}"); // [4, 3, 2] (sorted by distance)
+    let (indices, distances) = tree.query(&[8., 8.], 3);
+    println!("{indices:?}"); // [4, 3, 2] (sorted by distance)
 }
