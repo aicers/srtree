@@ -5,3 +5,6 @@ members = [
     "demo",
     "bench",
 ]
+
+[patch.crates-io]
+srtree = { path = "srtree" }

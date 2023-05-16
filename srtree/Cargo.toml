@@ -2,6 +2,17 @@
 name = "srtree"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.63"
+description = "Rust implementation of SR-Tree: a high-dimensional nearest neighbor search index."
+readme = "README.md"
+documentation = "https://docs.rs/srtree"
+homepage = "https://github.com/aicers/srtree"
+repository = "https://github.com/aicers/srtree"
+license = "Apache-2.0"
+keywords = ["nearest-neighbor", "knn", "srtree"]
+categories = ["algorithms", "data-structures"]
+authors = ["Kayumov A.I. <kayumovabduaziz@gmail.com>", "Park D.K. <dkpark@petabi.com>"]
+exclude = ["./github"]
 
 [dependencies]
 ordered-float = "3.4.0"
