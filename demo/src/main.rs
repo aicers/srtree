@@ -11,4 +11,5 @@ fn main() {
 
     let (indices, distances) = tree.query(&[8., 8.], 3);
     println!("{indices:?}"); // [4, 3, 2] (sorted by distance)
+    println!("{distances:?}");
 }

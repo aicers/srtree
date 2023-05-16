@@ -1,5 +1,8 @@
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/aicers/srtree/ci.yml?style=plastic)](#)
+[![crates.io](https://img.shields.io/crates/v/srtree)](https://crates.io/crates/srtree)
+
 # srtree
-Rust implementation of SR-Tree: nearest neighbor search index for high-dimensional clustered datasets.
+Rust implementation of [SR-Tree](https://dl.acm.org/doi/10.1145/253262.253347): nearest neighbor search index for high-dimensional clustered datasets.
 
 ## Example
 This example shows how to query nearest neighbors:
