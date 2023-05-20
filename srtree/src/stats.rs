@@ -66,7 +66,7 @@ pub fn inc_visited_nodes(is_leaf: bool) {
 
 pub fn print<T>(tree: &SRTree<T>)
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy,
+    T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy + Send + Sync,
 {
     if STATS_ENABLED {
         unsafe {
