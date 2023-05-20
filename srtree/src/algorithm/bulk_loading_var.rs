@@ -1,6 +1,7 @@
 use crate::{node::Node, shape::point::Point, Params};
 use num_traits::cast;
 use ordered_float::Float;
+use rayon::prelude::*;
 use std::{
     fmt::Debug,
     ops::{AddAssign, DivAssign, MulAssign, SubAssign},
@@ -8,7 +9,7 @@ use std::{
 
 pub fn bulk_load<T>(points: Vec<Point<T>>, params: &Params) -> Node<T>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign + Send + Sync,
 {
     if points.len() <= params.max_number_of_elements {
         return Node::create_leaf(points);
@@ -16,7 +17,7 @@ where
 
     let groups = create_entries(points, params);
     let children: Vec<Node<T>> = groups
-        .into_iter()
+        .into_par_iter()
         .map(|group| bulk_load(group, params))
         .collect();
     Node::create_parent(children)
