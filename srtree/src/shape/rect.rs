@@ -1,9 +1,6 @@
 use crate::shape::point::Point;
 use ordered_float::Float;
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
+use std::fmt::Debug;
 
 #[derive(Debug)]
 pub struct Rect<T> {
@@ -13,7 +10,7 @@ pub struct Rect<T> {
 
 impl<T> Rect<T>
 where
-    T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     pub fn new(low: Vec<T>, high: Vec<T>) -> Rect<T> {
         Rect { low, high }

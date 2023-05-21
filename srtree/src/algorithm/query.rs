@@ -4,12 +4,7 @@ use crate::stats::{
     inc_compared_nodes, inc_compared_points, inc_visited_nodes, inc_visited_points,
 };
 use ordered_float::{Float, OrderedFloat};
-use std::{
-    cmp::Ordering,
-    collections::BinaryHeap,
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
+use std::{cmp::Ordering, collections::BinaryHeap, fmt::Debug};
 
 struct Neighbor<T>
 where
@@ -65,7 +60,7 @@ where
 
 pub fn search_neighbors<T>(node: &Node<T>, point: &Point<T>, k: usize) -> (Vec<usize>, Vec<T>)
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     let mut neighbors = BinaryHeap::with_capacity(k);
     search(node, point, k, &mut neighbors);
@@ -78,7 +73,7 @@ where
 
 fn search<T>(node: &Node<T>, point: &Point<T>, k: usize, neighbors: &mut BinaryHeap<Neighbor<T>>)
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     inc_visited_nodes(node.is_leaf());
 
@@ -136,7 +131,7 @@ where
 
 pub fn search_neighborhood<T>(node: &Node<T>, point: &Point<T>, radius: T) -> Vec<usize>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     let mut neighbors = Vec::new();
     search_radius(node, point, OrderedFloat(radius), &mut neighbors);
@@ -149,7 +144,7 @@ fn search_radius<T>(
     radius: OrderedFloat<T>,
     neighbors: &mut Vec<usize>,
 ) where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     inc_visited_nodes(node.is_leaf());
 

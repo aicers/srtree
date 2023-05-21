@@ -1,17 +1,13 @@
 use crate::{node::Node, shape::point::Point, Params};
 use num_traits::cast;
 use ordered_float::Float;
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
+use std::fmt::Debug;
 
 // Overlap Minimizing Top-Down (OMT) Bulk-loading Algorithm for R-trees
 // Read more here: https://ceur-ws.org/Vol-74/files/FORUM_18.pdf
-
 pub fn bulk_load<T>(points: Vec<Point<T>>, params: &Params) -> Node<T>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     if points.len() <= params.max_number_of_elements {
         return Node::create_leaf(points);
@@ -38,7 +34,7 @@ fn partition_points<T>(
     params: &Params,
 ) -> Vec<Vec<Point<T>>>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     if split_dim == params.dimension || points.len() <= params.max_number_of_elements {
         return vec![points];
@@ -68,7 +64,7 @@ fn partition_groups<T>(
     params: &Params,
 ) -> Vec<Node<T>>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     if groups.len() <= params.max_number_of_elements {
         return groups;

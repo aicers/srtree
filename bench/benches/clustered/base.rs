@@ -5,6 +5,7 @@ use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 use srtree::SRTree;
 use std::collections::BinaryHeap;
 
+use super::data::covtype54d_dataset;
 #[allow(unused)]
 use super::data::{
     audio_dataset, darpa_audio_dataset, dns_dataset, glove100d_dataset, glove50d_dataset,
@@ -14,7 +15,7 @@ use super::data::{
 const K: usize = 15; // number of nearest neighbors
 
 fn benchmark_dataset() -> Vec<Vec<f64>> {
-    let pts = dns_dataset();
+    let pts = covtype54d_dataset();
     let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
     pts
 }
@@ -62,7 +63,7 @@ fn query(criterion: &mut Criterion) {
     group.sample_size(10);
 
     // query points
-    let query_points = query_dataset(usize::MAX);
+    let query_points = query_dataset(1000);
 
     // benchmark query performance of sequantially-built tree
     let pts = benchmark_dataset();

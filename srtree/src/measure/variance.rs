@@ -1,14 +1,11 @@
 use super::mean;
 use crate::node::Node;
 use ordered_float::Float;
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
+use std::fmt::Debug;
 
 pub fn calculate<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     if node.immed_children() == 0 || node.immed_children() < end || from >= end {
         return Vec::new();
@@ -24,18 +21,18 @@ where
         let child_number_of_entries =
             T::from(node.child_immed_children(child_index)).unwrap_or_else(T::one);
         for axis_index in 0..variance.len() {
-            variance[axis_index] +=
-                (node.child_centroid(child_index).coords[axis_index] - mean[axis_index]).powi(2)
+            variance[axis_index] = variance[axis_index]
+                + (node.child_centroid(child_index).coords[axis_index] - mean[axis_index]).powi(2)
                     * child_number_of_entries;
             if !node.is_leaf() {
-                variance[axis_index] +=
-                    child_number_of_entries * node.child_variance(child_index)[axis_index];
+                variance[axis_index] = variance[axis_index]
+                    + child_number_of_entries * node.child_variance(child_index)[axis_index];
             }
         }
-        number_of_entries += child_number_of_entries;
+        number_of_entries = number_of_entries + child_number_of_entries;
     }
     for var in &mut variance {
-        *var /= number_of_entries;
+        *var = *var / number_of_entries;
     }
     variance
 }
