@@ -1,6 +1,7 @@
 use crate::algorithm::bulk_loading_var::bulk_load;
 use crate::algorithm::insertion::{insert_data, insert_node};
-use crate::algorithm::query::{search_neighborhood, search_neighbors};
+use crate::algorithm::query::search_neighbors;
+use crate::algorithm::query_radius::search_neighborhood;
 use crate::algorithm::split::split;
 use crate::node::Node;
 use crate::params::Params;

@@ -4,4 +4,5 @@ pub mod bulk_loading_var;
 mod choose_subtree;
 pub mod insertion;
 pub mod query;
+pub mod query_radius;
 pub mod split;
