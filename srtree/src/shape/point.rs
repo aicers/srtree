@@ -1,10 +1,6 @@
-use ordered_float::Float;
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
-
 use crate::measure::distance::{euclidean, euclidean_squared};
+use ordered_float::Float;
+use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
 pub struct Point<T> {
@@ -15,7 +11,7 @@ pub struct Point<T> {
 
 impl<T> Point<T>
 where
-    T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     pub fn new(coords: Vec<T>, index: usize) -> Point<T> {
         Point {

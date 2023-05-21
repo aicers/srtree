@@ -1,28 +1,25 @@
-use ordered_float::Float;
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
-
 use crate::shape::point::Point;
+use ordered_float::Float;
+use std::fmt::Debug;
 
 pub fn euclidean<T>(point1: &Point<T>, point2: &Point<T>) -> T
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     euclidean_squared(point1, point2).sqrt()
 }
 
 pub fn euclidean_squared<T>(point1: &Point<T>, point2: &Point<T>) -> T
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     if point1.dimension() != point2.dimension() {
         return T::infinity();
     }
     let mut distance = T::zero();
+
     for i in 0..point1.dimension() {
-        distance += (point1.coords[i] - point2.coords[i]).powi(2);
+        distance = distance + (point1.coords[i] - point2.coords[i]).powi(2);
     }
     distance
 }

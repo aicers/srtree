@@ -1,13 +1,10 @@
 use crate::node::Node;
 use ordered_float::Float;
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
+use std::fmt::Debug;
 
 pub fn calculate<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     let mut number_of_entries = T::zero();
     let mut mean = vec![T::zero(); node.dimension()];
@@ -15,12 +12,12 @@ where
         let child_number_of_entries =
             T::from(node.child_immed_children(child_index)).unwrap_or_else(T::one);
         for (axis_index, m) in mean.iter_mut().enumerate() {
-            *m += node.child_centroid(child_index).coords[axis_index] * child_number_of_entries;
+            *m = *m + node.child_centroid(child_index).coords[axis_index] * child_number_of_entries;
         }
-        number_of_entries += child_number_of_entries;
+        number_of_entries = number_of_entries + child_number_of_entries;
     }
     for m in &mut mean {
-        *m /= number_of_entries;
+        *m = *m / number_of_entries;
     }
     mean
 }

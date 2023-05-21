@@ -1,10 +1,6 @@
-use num_traits::Float;
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
-
 use crate::SRTree;
+use num_traits::Float;
+use std::fmt::Debug;
 
 static mut NUM_VISITED_POINTS: usize = 0;
 static mut NUM_COMPARED_POINTS: usize = 0;
@@ -66,7 +62,7 @@ pub fn inc_visited_nodes(is_leaf: bool) {
 
 pub fn print<T>(tree: &SRTree<T>)
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy + Send + Sync,
+    T: Debug + Copy + Float + Send + Sync,
 {
     if STATS_ENABLED {
         unsafe {

@@ -2,14 +2,11 @@ use crate::{node::Node, shape::point::Point, Params};
 use num_traits::cast;
 use ordered_float::Float;
 use rayon::prelude::*;
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
+use std::fmt::Debug;
 
 pub fn bulk_load<T>(points: Vec<Point<T>>, params: &Params) -> Node<T>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign + Send + Sync,
+    T: Debug + Copy + Float + Send + Sync,
 {
     if points.len() <= params.max_number_of_elements {
         return Node::create_leaf(points);
@@ -25,7 +22,7 @@ where
 
 pub fn create_entries<T>(points: Vec<Point<T>>, params: &Params) -> Vec<Vec<Point<T>>>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     let variances = calculate_variance(&points);
     let split_dim = variances
@@ -43,7 +40,7 @@ fn partition_points<T>(
     params: &Params,
 ) -> Vec<Vec<Point<T>>>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     if points.len() <= params.max_number_of_elements {
         return vec![points];
@@ -70,14 +67,14 @@ where
 
 fn calculate_dimension_variance<T>(points: &[Point<T>], dim: usize) -> T
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy,
+    T: Debug + Copy + Float + Send + Sync,
 {
     let mut sum = T::zero();
     let mut sum_sq = T::zero();
     for point in points {
         let coord = point.coords[dim];
-        sum += coord;
-        sum_sq += coord * coord;
+        sum = sum + coord;
+        sum_sq = sum_sq + coord * coord;
     }
     let n = T::from(points.len()).unwrap();
     let mean = sum / n;
@@ -87,7 +84,7 @@ where
 
 fn calculate_variance<T>(points: &[Point<T>]) -> Vec<T>
 where
-    T: Float + AddAssign + SubAssign + MulAssign + DivAssign + Debug + Copy,
+    T: Debug + Copy + Float + Send + Sync,
 {
     let mut variances = Vec::new();
     for dim in 0..points[0].dimension() {

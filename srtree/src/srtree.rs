@@ -7,8 +7,6 @@ use crate::params::Params;
 use crate::shape::point::Point;
 use ordered_float::Float;
 use std::fmt::Debug;
-use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
-use std::usize;
 
 pub enum InsertionResult {
     Success,
@@ -22,7 +20,7 @@ pub struct SRTree<T> {
 
 impl<T> SRTree<T>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign + Send + Sync,
+    T: Debug + Copy + Float + Send + Sync,
 {
     #[must_use]
     pub fn with_params(params: Params) -> SRTree<T> {
@@ -139,7 +137,7 @@ where
 
 impl<T> Default for SRTree<T>
 where
-    T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign + Send + Sync,
+    T: Debug + Copy + Float + Send + Sync,
 {
     fn default() -> Self {
         Self::new()

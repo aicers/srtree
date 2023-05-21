@@ -2,14 +2,11 @@ use super::{point::Point, rect::Rect, sphere::Sphere};
 use crate::measure::mean;
 use crate::node::Node;
 use ordered_float::{Float, OrderedFloat};
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
+use std::fmt::Debug;
 
 pub fn reshape<T>(node: &mut Node<T>)
 where
-    T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     let centroid = Point::with_coords(mean::calculate(node, 0, node.immed_children()));
     let mut max_distance = T::zero();

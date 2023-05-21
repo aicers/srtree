@@ -8,7 +8,7 @@ pub fn world_cities_dataset() -> Vec<[f64; 2]> {
 }
 
 pub fn dns_dataset() -> Vec<[f64; 24]> {
-    clustered_dataset("benches/clustered/datasets/dns.csv", false, false)
+    clustered_dataset("benches/clustered/datasets/dns.csv", false)
 }
 
 pub fn home_dataset() -> Vec<[f64; 64]> {
@@ -16,19 +16,23 @@ pub fn home_dataset() -> Vec<[f64; 64]> {
 }
 
 pub fn audio_dataset() -> Vec<[f64; 40]> {
-    clustered_dataset("benches/clustered/datasets/drone_audio.csv", false, false)
+    clustered_dataset("benches/clustered/datasets/drone_audio.csv", false)
 }
 
 pub fn glove50d_dataset() -> Vec<[f64; 50]> {
-    clustered_dataset("benches/clustered/datasets/glove50D.csv", true, true)
+    clustered_dataset("benches/clustered/datasets/glove50D.csv", true)
+}
+
+pub fn covtype54d_dataset() -> Vec<[f64; 54]> {
+    clustered_dataset("benches/clustered/datasets/covtype.csv", false)
 }
 
 pub fn glove100d_dataset() -> Vec<[f64; 100]> {
-    clustered_dataset("benches/clustered/datasets/glove100D.csv", true, true)
+    clustered_dataset("benches/clustered/datasets/glove100D.csv", true)
 }
 
 pub fn darpa_audio_dataset() -> Vec<[f64; 192]> {
-    clustered_dataset("benches/clustered/datasets/darpa_audio.csv", true, true)
+    clustered_dataset("benches/clustered/datasets/darpa_audio.csv", true)
 }
 
 fn world_cities() -> Vec<[f64; 2]> {
@@ -107,11 +111,7 @@ fn home_electricity_usage<const D: usize>() -> Vec<[f64; D]> {
     pts
 }
 
-fn clustered_dataset<const D: usize>(
-    filename: &str,
-    mut skip_header: bool,
-    mut skip_row: bool,
-) -> Vec<[f64; D]> {
+fn clustered_dataset<const D: usize>(filename: &str, mut skip_header: bool) -> Vec<[f64; D]> {
     let mut pts = Vec::new();
     let file = File::open(filename);
     if file.is_err() {
@@ -128,9 +128,8 @@ fn clustered_dataset<const D: usize>(
             let mut point = [f64::INFINITY; D];
             let line = line.as_ref().unwrap();
             for (i, val) in line.split(",").enumerate() {
-                if skip_row {
-                    skip_row = false;
-                    continue;
+                if i >= D {
+                    break;
                 }
                 let chars = val.chars();
                 let val = chars.as_str();

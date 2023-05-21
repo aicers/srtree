@@ -1,9 +1,6 @@
 use crate::shape::{point::Point, rect::Rect, reshape::reshape, sphere::Sphere};
 use ordered_float::{Float, OrderedFloat};
-use std::{
-    fmt::Debug,
-    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
-};
+use std::fmt::Debug;
 
 pub enum Data<T> {
     Points(Vec<Point<T>>),
@@ -20,7 +17,7 @@ pub struct Node<T> {
 
 impl<T> Node<T>
 where
-    T: Debug + Copy + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    T: Debug + Copy + Float + Send + Sync,
 {
     pub fn new(
         rect: Rect<T>,
@@ -193,7 +190,7 @@ where
 
     pub fn min_distance(&self, point: &Point<T>) -> T
     where
-        T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+        T: Debug + Copy + Float + Send + Sync,
     {
         let ds = self.sphere.min_distance(point);
         let dr = self.rect.min_distance(point);
@@ -202,7 +199,7 @@ where
 
     pub fn max_distance(&self, point: &Point<T>) -> T
     where
-        T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+        T: Debug + Copy + Float + Send + Sync,
     {
         let ds = self.sphere.max_distance(point);
         let dr = self.rect.max_distance(point);
