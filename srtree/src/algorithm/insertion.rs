@@ -95,10 +95,9 @@ where
         if node.immed_children() <= params.max_number_of_elements {
             OverflowTreatment::NotRequired
         } else {
-            let mut nodes_to_reinsert = node.pop_last(params.reinsert_count);
-            if params.prefer_close_reinsert {
-                nodes_to_reinsert.reverse();
-            }
+            let mut nodes_to_reinsert = node.pop_farthest(params.reinsert_count);
+            reshape(node);
+            nodes_to_reinsert.reverse();
             OverflowTreatment::Reinsert(nodes_to_reinsert)
         }
     } else {
@@ -167,7 +166,7 @@ mod tests {
     #[test]
     pub fn test_leaf_insertion() {
         let point = Point::with_coords(vec![0., 0.]);
-        let params = Params::new(4, 9, 4, true).unwrap();
+        let params = Params::new(4, 9, 4).unwrap();
         let mut leaf_node = Node::new_leaf(&point, params.max_number_of_elements);
         insert_data(&mut leaf_node, &point, &params);
         assert_eq!(leaf_node.points()[0].coords, point.coords);
@@ -175,7 +174,7 @@ mod tests {
 
     #[test]
     pub fn test_insert_now() {
-        let params = Params::new(1, 10, 4, true).unwrap();
+        let params = Params::new(1, 10, 4).unwrap();
 
         // first leaf
         let point = Point::with_coords(vec![0., 0.]);
@@ -211,7 +210,7 @@ mod tests {
 
     #[test]
     pub fn test_insert_overflow_treatment() {
-        let params = Params::new(1, 4, 2, true).unwrap();
+        let params = Params::new(1, 4, 2).unwrap();
 
         // first leaf
         let point = Point::with_coords(vec![0., 0.]);
@@ -248,7 +247,7 @@ mod tests {
 
     #[test]
     pub fn test_insert_dynamic_reorganization() {
-        let params = Params::new(1, 4, 2, true).unwrap();
+        let params = Params::new(1, 4, 2).unwrap();
 
         // The first leaf
         let first_leaf_points = vec![vec![1., 1.], vec![3., 1.], vec![1., 3.], vec![3., 3.]];
