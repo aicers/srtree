@@ -4,7 +4,7 @@ use crate::stats::{
     inc_compared_nodes, inc_compared_points, inc_visited_nodes, inc_visited_points,
 };
 use ordered_float::{Float, OrderedFloat};
-use std::{cmp::Ordering, collections::BinaryHeap, fmt::Debug};
+use std::{cmp::Ordering, collections::BinaryHeap};
 
 struct Neighbor<T>
 where
@@ -60,7 +60,7 @@ where
 
 pub fn search_neighbors<T>(node: &Node<T>, point: &Point<T>, k: usize) -> (Vec<usize>, Vec<T>)
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     let mut neighbors = BinaryHeap::with_capacity(k);
     search(node, point, k, &mut neighbors);
@@ -73,7 +73,7 @@ where
 
 fn search<T>(node: &Node<T>, point: &Point<T>, k: usize, neighbors: &mut BinaryHeap<Neighbor<T>>)
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     inc_visited_nodes(node.is_leaf());
 

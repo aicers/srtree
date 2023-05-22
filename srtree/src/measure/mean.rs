@@ -1,10 +1,9 @@
 use crate::node::Node;
 use ordered_float::Float;
-use std::fmt::Debug;
 
 pub fn calculate<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     let mut number_of_entries = T::zero();
     let mut mean = vec![T::zero(); node.dimension()];

@@ -1,10 +1,9 @@
 use crate::node::Node;
 use ordered_float::Float;
-use std::fmt::Debug;
 
 pub fn choose_closest_node_index<T>(node: &Node<T>, search_node: &Node<T>) -> usize
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     assert!(!node.is_leaf(), "Trying to choose from a leaf node");
 
@@ -23,7 +22,7 @@ where
 #[allow(dead_code)]
 pub fn choose_subtree<'a, T>(node: &'a Node<T>, search_node: &Node<T>) -> &'a Node<T>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     if node.is_leaf() || node.get_height() == search_node.get_height() + 1 {
         return node;

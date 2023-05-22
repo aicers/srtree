@@ -1,8 +1,6 @@
 use super::point::Point;
 use ordered_float::Float;
-use std::fmt::Debug;
 
-#[derive(Debug)]
 pub struct Sphere<T> {
     pub center: Point<T>,
     pub radius: T,
@@ -10,7 +8,7 @@ pub struct Sphere<T> {
 
 impl<T> Sphere<T>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     pub fn new(center: Point<T>, radius: T) -> Sphere<T> {
         Sphere { center, radius }

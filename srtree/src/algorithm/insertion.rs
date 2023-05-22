@@ -5,7 +5,6 @@ use crate::params::Params;
 use crate::shape::point::Point;
 use crate::shape::reshape::reshape;
 use ordered_float::Float;
-use std::fmt::Debug;
 
 enum OverflowTreatment<T> {
     NotRequired,
@@ -15,21 +14,21 @@ enum OverflowTreatment<T> {
 
 pub fn insert_data<T>(node: &mut Node<T>, point: &Point<T>, params: &Params)
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     insert(node, Node::new_point(point), params);
 }
 
 pub fn insert_node<T>(root: &mut Node<T>, node: Node<T>, params: &Params)
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     insert(root, node, params);
 }
 
 fn insert<T>(root: &mut Node<T>, insert_node: Node<T>, params: &Params)
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     let mut reinsert_height = insert_node.get_height();
     let mut reinsert_list: Vec<Node<T>> = vec![insert_node];
@@ -56,7 +55,7 @@ fn overflow_treatment<T>(
     reinsert_height: usize,
 ) -> OverflowTreatment<T>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     if reinsert_height == insert_node.get_height() {
         insert_or_reinsert(root, insert_node, params)
@@ -77,7 +76,7 @@ fn insert_or_reinsert<T>(
     params: &Params,
 ) -> OverflowTreatment<T>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     let target_height = insert_node.get_height() + 1;
     assert!(
@@ -119,7 +118,7 @@ fn insert_or_split<T>(
     tree_height: usize,
 ) -> OverflowTreatment<T>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     let target_height = insert_node.get_height() + 1;
     assert!(

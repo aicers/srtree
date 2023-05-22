@@ -1,11 +1,10 @@
 use crate::node::Node;
 use crate::shape::point::Point;
 use ordered_float::Float;
-use std::fmt::Debug;
 
 pub fn search_neighborhood<T>(node: &Node<T>, point: &Point<T>, radius: T) -> Vec<usize>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     let mut neighbors = Vec::new();
     search_radius(node, point, radius, &mut neighbors);
@@ -14,7 +13,7 @@ where
 
 fn search_radius<T>(node: &Node<T>, point: &Point<T>, radius: T, neighbors: &mut Vec<usize>)
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     if node.is_leaf() {
         let distance_to_center = point.distance(&node.sphere.center);

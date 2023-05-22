@@ -1,17 +1,16 @@
 use crate::shape::point::Point;
 use ordered_float::Float;
-use std::fmt::Debug;
 
 pub fn euclidean<T>(point1: &Point<T>, point2: &Point<T>) -> T
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     euclidean_squared(point1, point2).sqrt()
 }
 
 pub fn euclidean_squared<T>(point1: &Point<T>, point2: &Point<T>) -> T
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     if point1.dimension() != point2.dimension() {
         return T::infinity();
