@@ -166,7 +166,7 @@ where
         self.height
     }
 
-    pub fn pop_last(&mut self, n: usize) -> Vec<Node<T>> {
+    pub fn pop_farthest(&mut self, n: usize) -> Vec<Node<T>> {
         let center = self.sphere.center.clone();
         let number_of_immediate_children = self.immed_children();
         if self.is_leaf() {
@@ -227,7 +227,7 @@ mod tests {
     use crate::shape::reshape::reshape;
 
     #[test]
-    pub fn test_pop_last() {
+    pub fn test_pop_farthest_children() {
         let origin = Point::with_coords(vec![0., 0.]);
         let mut leaf_node = Node::new_leaf(&origin, 10);
         leaf_node.points_mut().push(origin);
@@ -238,7 +238,7 @@ mod tests {
         }
         reshape(&mut leaf_node);
         assert_eq!(leaf_node.sphere.center.coords, vec![0., 4.5]);
-        let last = leaf_node.pop_last(2);
+        let last = leaf_node.pop_farthest(2);
         assert_eq!(last[0].sphere.center.coords, vec![0., 0.]);
         assert_eq!(last[1].sphere.center.coords, vec![0., 9.]);
     }

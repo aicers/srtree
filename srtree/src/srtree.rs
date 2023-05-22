@@ -59,7 +59,7 @@ where
         if self.params.dimension == 0 {
             self.params.dimension = point_coords.len();
         }
-        if self.params.dimension != point_coords.len() {
+        if self.params.dimension != point_coords.len() || point_coords.is_empty() {
             eprintln!("Problem inserting a point: different dimensions");
             return InsertionResult::Failure;
         }
@@ -150,7 +150,7 @@ mod tests {
 
     #[test]
     pub fn test_insertion_query() {
-        let params = Params::new(3, 7, 3, true).unwrap();
+        let params = Params::new(3, 7, 3).unwrap();
         let mut tree: SRTree<f64> = SRTree::with_params(params);
         let search_point = vec![1.0, 0.0];
         assert!(!tree.query(&search_point, 1).0.contains(&0)); // not inserted yet

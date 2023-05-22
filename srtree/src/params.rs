@@ -3,7 +3,6 @@ pub struct Params {
     pub min_number_of_elements: usize,
     pub max_number_of_elements: usize,
     pub reinsert_count: usize,
-    pub prefer_close_reinsert: bool,
     pub dimension: usize,
 }
 
@@ -13,7 +12,6 @@ impl Params {
         min_number_of_elements: usize,
         max_number_of_elements: usize,
         reinsert_count: usize,
-        prefer_close_reinsert: bool,
     ) -> Option<Params> {
         if min_number_of_elements > (max_number_of_elements + 1) / 2
             || reinsert_count >= max_number_of_elements - min_number_of_elements
@@ -24,7 +22,6 @@ impl Params {
             min_number_of_elements,
             max_number_of_elements,
             reinsert_count,
-            prefer_close_reinsert,
             dimension: 0,
         })
     }
@@ -35,7 +32,6 @@ impl Params {
             min_number_of_elements: 8,
             max_number_of_elements: 20,
             reinsert_count: 6,
-            prefer_close_reinsert: true,
             dimension: 0,
         }
     }
@@ -54,7 +50,6 @@ mod tests {
             min_num_of_elements_per_node,
             max_num_of_elements_per_node,
             reinsert_count,
-            true,
         );
         assert!(params.is_none())
     }
@@ -68,7 +63,6 @@ mod tests {
             min_num_of_elements_per_node,
             max_num_of_elements_per_node,
             reinsert_count,
-            true,
         );
         assert!(params.is_none())
     }
@@ -82,7 +76,6 @@ mod tests {
             min_num_of_elements_per_node,
             max_num_of_elements_per_node,
             reinsert_count,
-            true,
         );
         assert!(params.is_some())
     }

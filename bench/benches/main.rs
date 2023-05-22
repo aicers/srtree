@@ -7,5 +7,5 @@ mod uniform;
 use uniform::{srtree_uniform_benchmark, uniform_benchmark, uniform_benchmark_query_radius};
 mod utils;
 
-criterion_group!(benches, uniform_benchmark_query_radius);
+criterion_group!(benches, srtree_uniform_benchmark);
 criterion_main!(benches);
