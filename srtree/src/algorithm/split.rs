@@ -4,11 +4,10 @@ use crate::shape::point::Point;
 use crate::shape::reshape::reshape;
 use crate::{measure::variance::calculate, params::Params};
 use ordered_float::{Float, OrderedFloat};
-use std::fmt::Debug;
 
 fn choose_split_axis<T>(node: &mut Node<T>) -> usize
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     // 1. Calculate variance for each axis:
     let variance = calculate(node, 0, node.immed_children());
@@ -27,7 +26,7 @@ where
 
 fn choose_split_index<T>(node: &Node<T>, params: &Params) -> usize
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     assert!(
         node.immed_children() >= 2 * params.min_number_of_elements,
@@ -71,7 +70,7 @@ where
 
 pub fn split<T>(node: &mut Node<T>, parent_centroid: &Point<T>, params: &Params) -> Node<T>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     assert!(
         node.immed_children() >= 2 * params.min_number_of_elements,

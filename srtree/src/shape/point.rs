@@ -1,8 +1,7 @@
 use crate::measure::distance::{euclidean, euclidean_squared};
 use ordered_float::Float;
-use std::fmt::Debug;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Point<T> {
     pub coords: Vec<T>,
     pub radius: T,
@@ -11,7 +10,7 @@ pub struct Point<T> {
 
 impl<T> Point<T>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     pub fn new(coords: Vec<T>, index: usize) -> Point<T> {
         Point {

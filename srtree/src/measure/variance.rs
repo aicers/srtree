@@ -1,11 +1,10 @@
 use super::mean;
 use crate::node::Node;
 use ordered_float::Float;
-use std::fmt::Debug;
 
 pub fn calculate<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
 where
-    T: Debug + Copy + Float + Send + Sync,
+    T: Float + Send + Sync,
 {
     if node.immed_children() == 0 || node.immed_children() < end || from >= end {
         return Vec::new();
