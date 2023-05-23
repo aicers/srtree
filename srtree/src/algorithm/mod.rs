@@ -1,6 +1,4 @@
-#[allow(dead_code)]
-pub mod bulk_loading_omt;
-pub mod bulk_loading_var;
+pub mod bulk_loading;
 mod choose_subtree;
 pub mod insertion;
 pub mod query;
