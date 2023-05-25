@@ -12,24 +12,12 @@ fn build(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("build");
     group.sample_size(10);
 
-    // benchmark build performance of sequential building
-    group.bench_function("sequential", |bencher| {
-        bencher.iter(|| {
-            let pts: Vec<[f64; D]> = uniform_dataset(N);
-            let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            let mut srtree = SRTree::new();
-            for (i, point) in pts.iter().enumerate() {
-                srtree.insert(point, i);
-            }
-        });
-    });
-
     // benchmark build performance of bulk-loading
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
             let pts: Vec<[f64; D]> = uniform_dataset(N);
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            SRTree::bulk_load(&pts)
+            SRTree::new(&pts)
         });
     });
 }
@@ -38,25 +26,10 @@ fn query(criterion: &mut Criterion) {
     let mut group = criterion.benchmark_group("query");
     group.sample_size(10);
 
-    // benchmark query performance of sequantially-built tree
-    let pts: Vec<[f64; D]> = uniform_dataset(N);
-    let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-    let mut srtree = SRTree::new();
-    for (i, point) in pts.iter().enumerate() {
-        srtree.insert(point, i);
-    }
-    group.bench_function("sequential", |bencher| {
-        bencher.iter(|| {
-            for point in &pts {
-                srtree.query(point, K);
-            }
-        });
-    });
-
     // benchmark query performance of bulk-loaded tree
     let pts: Vec<[f64; D]> = uniform_dataset(N);
     let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-    let srtree = SRTree::bulk_load(&pts);
+    let srtree = SRTree::new(&pts);
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
             for point in &pts {

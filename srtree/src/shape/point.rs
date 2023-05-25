@@ -6,6 +6,7 @@ pub struct Point<T> {
     pub coords: Vec<T>,
     pub radius: T,
     pub index: usize,
+    pub parent_index: usize,
 }
 
 impl<T> Point<T>
@@ -17,20 +18,8 @@ where
             coords,
             radius: T::zero(),
             index,
+            parent_index: usize::MAX,
         }
-    }
-
-    #[allow(dead_code)]
-    pub fn with_coords(coords: Vec<T>) -> Point<T> {
-        Point {
-            coords,
-            radius: T::zero(),
-            index: 0,
-        }
-    }
-
-    pub fn dimension(&self) -> usize {
-        self.coords.len()
     }
 
     pub fn distance_squared(&self, other: &Point<T>) -> T {
@@ -39,5 +28,9 @@ where
 
     pub fn distance(&self, other: &Point<T>) -> T {
         euclidean(self, other)
+    }
+
+    pub fn dimension(&self) -> usize {
+        self.coords.len()
     }
 }

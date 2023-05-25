@@ -1,82 +1,74 @@
-use super::mean;
-use crate::node::Node;
+use crate::SRTree;
 use ordered_float::Float;
+use std::{
+    fmt::Debug,
+    ops::{AddAssign, DivAssign, MulAssign, SubAssign},
+};
 
-pub fn calculate<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
+impl<T> SRTree<T>
 where
     T: Float + Send + Sync,
 {
-    if node.immed_children() == 0 || node.immed_children() < end || from >= end {
-        return Vec::new();
+    #[must_use]
+    pub fn calculate_variance(&self, node_index: usize) -> Vec<T>
+    where
+        T: Debug + Float + AddAssign + SubAssign + MulAssign + DivAssign,
+    {
+        if self.nodes[node_index].is_leaf() {
+            self.calculate_leaf_variance(node_index)
+        } else {
+            self.calculate_node_variance(node_index)
+        }
     }
 
-    // 1. Calculate mean (mean of entries)
-    let mean = mean::calculate(node, from, end);
+    fn calculate_leaf_variance(&self, leaf_index: usize) -> Vec<T> {
+        let leaf = &self.nodes[leaf_index];
 
-    // 2. Calculate variance w.r.t. the mean
-    let mut number_of_entries = T::zero();
-    let mut variance = vec![T::zero(); mean.len()];
-    for child_index in from..end {
-        let child_number_of_entries =
-            T::from(node.child_immed_children(child_index)).unwrap_or_else(T::one);
-        for axis_index in 0..variance.len() {
-            variance[axis_index] = variance[axis_index]
-                + (node.child_centroid(child_index).coords[axis_index] - mean[axis_index]).powi(2)
-                    * child_number_of_entries;
-            if !node.is_leaf() {
-                variance[axis_index] = variance[axis_index]
-                    + child_number_of_entries * node.child_variance(child_index)[axis_index];
+        // 1. Calculate mean (mean of entries)
+        let mean = self.calculate_mean(leaf_index);
+
+        // 2. Calculate variance w.r.t. the mean
+        let mut variance = vec![T::zero(); self.dimension];
+        for i in 0..leaf.immed_children() {
+            let point_index = leaf.points()[i];
+            let point = &self.points[point_index];
+            for axis_index in 0..variance.len() {
+                variance[axis_index] =
+                    variance[axis_index] + (point.coords[axis_index] - mean[axis_index]).powi(2);
             }
         }
-        number_of_entries = number_of_entries + child_number_of_entries;
-    }
-    for var in &mut variance {
-        *var = *var / number_of_entries;
-    }
-    variance
-}
 
-#[cfg(test)]
-mod tests {
-    use crate::shape::point::Point;
-
-    use super::*;
-
-    pub fn get_test_points() -> Vec<Vec<f64>> {
-        let mut points = Vec::new();
-        points.push(vec![0., 0.]);
-        points.push(vec![0., 1.]);
-        points.push(vec![0., 2.]);
-        points.push(vec![0., 8.]);
-        points.push(vec![0., 9.]);
-        points
+        let number_of_points = T::from(leaf.immed_children()).unwrap();
+        for var in &mut variance {
+            *var = *var / number_of_points;
+        }
+        variance
     }
 
-    #[test]
-    pub fn test_variance_calculation() {
-        let origin = Point::with_coords(vec![0., 0.]);
-        let mut node = Node::new_leaf(&origin, 5);
-        get_test_points().iter().for_each(|point_coords| {
-            node.points_mut()
-                .push(Point::with_coords(point_coords.to_owned()));
-        });
+    fn calculate_node_variance(&self, node_index: usize) -> Vec<T> {
+        let node = &self.nodes[node_index];
 
-        let variance = calculate(&node, 0, node.immed_children());
-        assert_eq!(variance[0], 0.);
-        assert_eq!(variance[1], 14.);
-    }
+        // 1. Calculate mean (mean of entries)
+        let mean = self.calculate_mean(node_index);
 
-    #[test]
-    pub fn test_range_variance_calculation() {
-        let origin = Point::with_coords(vec![0., 0.]);
-        let mut node = Node::new_leaf(&origin, 5);
-        get_test_points().iter().for_each(|point_coords| {
-            node.points_mut()
-                .push(Point::with_coords(point_coords.to_owned()));
-        });
-
-        let variance = calculate(&node, 0, 2);
-        assert_eq!(variance[0], 0.);
-        assert_eq!(variance[1], 0.25);
+        // 2. Calculate variance w.r.t. the mean
+        let mut number_of_entries = T::zero();
+        let mut variance = vec![T::zero(); self.dimension];
+        for i in 0..node.immed_children() {
+            let child_index = node.nodes()[i];
+            let child = &self.nodes[child_index];
+            let child_number_of_entries = T::from(child.immed_children()).unwrap();
+            for axis_index in 0..variance.len() {
+                variance[axis_index] = variance[axis_index]
+                    + (child.sphere.center.coords[axis_index] - mean[axis_index]).powi(2)
+                        * child_number_of_entries;
+                if !node.is_leaf() {
+                    variance[axis_index] =
+                        variance[axis_index] + child_number_of_entries * child.variance[axis_index];
+                }
+            }
+            number_of_entries = number_of_entries + child_number_of_entries;
+        }
+        variance
     }
 }

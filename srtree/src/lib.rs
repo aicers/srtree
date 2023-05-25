@@ -7,5 +7,4 @@ mod srtree;
 #[allow(dead_code)]
 mod stats;
 pub use crate::params::Params;
-pub use crate::srtree::InsertionResult;
 pub use crate::srtree::SRTree;
