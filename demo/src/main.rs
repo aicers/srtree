@@ -8,7 +8,7 @@ fn main() {
         vec![3., 3.],
         vec![4., 4.],
     ];
-    let tree: SRTree<f64> = SRTree::bulk_load(&points);
+    let tree: SRTree<f64> = SRTree::new(&points);
 
     let (indices, distances) = tree.query(&[8., 8.], 3);
     println!("{indices:?}"); // [4, 3, 2] (sorted by distance)

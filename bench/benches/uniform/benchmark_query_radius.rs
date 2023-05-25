@@ -18,22 +18,7 @@ pub fn build_and_query(criterion: &mut Criterion) {
         bencher.iter(|| {
             let pts: Vec<[f64; D]> = uniform_dataset(N);
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            let srtree = SRTree::bulk_load(&pts);
-            for point in &pts {
-                srtree.query_radius(point, R);
-            }
-        });
-    });
-
-    // Sequentially built SR-tree
-    group.bench_function("srtree-seq", |bencher| {
-        bencher.iter(|| {
-            let pts: Vec<[f64; D]> = uniform_dataset(N);
-            let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            let mut srtree = SRTree::new();
-            for (i, point) in pts.iter().enumerate() {
-                srtree.insert(point, i);
-            }
+            let srtree = SRTree::new(&pts);
             for point in &pts {
                 srtree.query_radius(point, R);
             }

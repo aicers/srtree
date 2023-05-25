@@ -1,67 +1,75 @@
-use crate::{node::Node, shape::point::Point, Params};
+use crate::{node::Node, shape::point::Point, SRTree};
 use num_traits::cast;
 use ordered_float::Float;
-use rayon::prelude::*;
 
-pub fn bulk_load<T>(points: Vec<Point<T>>, params: &Params) -> Node<T>
+impl<T> SRTree<T>
 where
     T: Float + Send + Sync,
 {
-    if points.len() <= params.max_number_of_elements {
-        return Node::create_leaf(points);
+    pub fn bulk_load(&mut self, input: Vec<Point<T>>) -> usize {
+        if input.len() <= self.params.max_number_of_elements {
+            let point_indices: Vec<usize> = input.iter().map(|p| p.index).collect();
+            let leaf = Node::new_leaf(point_indices);
+            let leaf_index = self.add_node(leaf);
+            self.reshape(leaf_index);
+            return leaf_index;
+        }
+
+        let groups = self.create_entries(input);
+        let children: Vec<usize> = groups
+            .into_iter()
+            .map(|group| self.bulk_load(group))
+            .collect();
+
+        let height = 1 + children
+            .iter()
+            .map(|child_index| self.nodes[*child_index].height)
+            .max()
+            .unwrap_or(0);
+
+        let root = Node::new_node(children.clone(), height);
+        let root_index = self.add_node(root);
+        self.reshape(root_index);
+
+        for child_index in children {
+            self.nodes[child_index].parent_index = root_index;
+        }
+        root_index
     }
 
-    let groups = create_entries(points, params);
-    let children: Vec<Node<T>> = groups
-        .into_par_iter()
-        .map(|group| bulk_load(group, params))
-        .collect();
-    Node::create_parent(children)
-}
-
-pub fn create_entries<T>(points: Vec<Point<T>>, params: &Params) -> Vec<Vec<Point<T>>>
-where
-    T: Float + Send + Sync,
-{
-    let variances = calculate_variance(&points);
-    let split_dim = variances
-        .iter()
-        .enumerate()
-        .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-        .map(|(i, _)| i)
-        .unwrap();
-    partition_points(points, split_dim, params)
-}
-
-fn partition_points<T>(
-    mut points: Vec<Point<T>>,
-    split_dim: usize,
-    params: &Params,
-) -> Vec<Vec<Point<T>>>
-where
-    T: Float + Send + Sync,
-{
-    if points.len() <= params.max_number_of_elements {
-        return vec![points];
+    fn create_entries(&self, points: Vec<Point<T>>) -> Vec<Vec<Point<T>>> {
+        let variances = calculate_points_variance(&points);
+        let split_dim = variances
+            .iter()
+            .enumerate()
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .map(|(i, _)| i)
+            .unwrap();
+        self.partition_points(points, split_dim)
     }
-    let split_dim = split_dim % params.dimension;
-    let partition_size = calculate_internal_node_size(
-        points.len(),
-        params.max_number_of_elements,
-        params.min_number_of_elements,
-    );
-    let mut entries = Vec::new();
-    while !points.is_empty() {
-        let left = points.len().saturating_sub(partition_size);
-        points.select_nth_unstable_by(left, |a, b| {
-            a.coords[split_dim]
-                .partial_cmp(&b.coords[split_dim])
-                .unwrap()
-        });
-        let slice = points.split_off(left);
-        entries.push(slice);
+
+    fn partition_points(&self, mut points: Vec<Point<T>>, split_dim: usize) -> Vec<Vec<Point<T>>> {
+        if points.len() <= self.params.max_number_of_elements {
+            return vec![points];
+        }
+        let partition_size = calculate_internal_node_size(
+            points.len(),
+            self.params.max_number_of_elements,
+            self.params.min_number_of_elements,
+        );
+        let mut entries = Vec::new();
+        while !points.is_empty() {
+            let left = points.len().saturating_sub(partition_size);
+            points.select_nth_unstable_by(left, |a, b| {
+                a.coords[split_dim]
+                    .partial_cmp(&b.coords[split_dim])
+                    .unwrap()
+            });
+            let slice = points.split_off(left);
+            entries.push(slice);
+        }
+        entries
     }
-    entries
 }
 
 fn calculate_dimension_variance<T>(points: &[Point<T>], dim: usize) -> T
@@ -81,19 +89,19 @@ where
     sum_sq / n - mean_sq
 }
 
-fn calculate_variance<T>(points: &[Point<T>]) -> Vec<T>
+fn calculate_points_variance<T>(points: &[Point<T>]) -> Vec<T>
 where
     T: Float + Send + Sync,
 {
+    let dimension = points[0].coords.len();
     let mut variances = Vec::new();
-    for dim in 0..points[0].dimension() {
+    for dim in 0..dimension {
         let variance = calculate_dimension_variance(points, dim);
         variances.push(variance);
     }
     variances
 }
 
-// VAMSplit R-tree Equation 2: Calculate the internal node size
 fn calculate_internal_node_size(n: usize, leaf_size: usize, internal_node_fanout: usize) -> usize {
     if n <= leaf_size {
         return n;
@@ -115,17 +123,6 @@ fn calculate_internal_node_size(n: usize, leaf_size: usize, internal_node_fanout
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    pub fn test_calculate_variance() {
-        let points = vec![
-            Point::with_coords(vec![1.0, 2.0, 3.0]),
-            Point::with_coords(vec![2.0, 3.0, 4.0]),
-            Point::with_coords(vec![3.0, 4.0, 5.0]),
-        ];
-        let variance = calculate_dimension_variance(&points, 0);
-        assert!((variance - 2.0 / 3.0).abs() <= 0.00001);
-    }
 
     #[test]
     pub fn test_internal_node_size() {

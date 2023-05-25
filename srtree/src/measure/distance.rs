@@ -12,12 +12,8 @@ pub fn euclidean_squared<T>(point1: &Point<T>, point2: &Point<T>) -> T
 where
     T: Float + Send + Sync,
 {
-    if point1.dimension() != point2.dimension() {
-        return T::infinity();
-    }
     let mut distance = T::zero();
-
-    for i in 0..point1.dimension() {
+    for i in 0..point1.coords.len() {
         distance = distance + (point1.coords[i] - point2.coords[i]).powi(2);
     }
     distance
@@ -26,19 +22,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::vec;
 
     #[test]
     pub fn test_distance() {
-        let point1 = Point::with_coords(vec![1., 0., 0.]);
-        let point2 = Point::with_coords(vec![2., 0., 0.]);
+        let point1 = Point::new(vec![1., 0., 0.], 0);
+        let point2 = Point::new(vec![2., 0., 0.], 0);
         assert_eq!(euclidean(&point1, &point2), 1.);
-    }
-
-    #[test]
-    pub fn test_distance_different_dimensions() {
-        let point1 = Point::with_coords(vec![1., 2.]);
-        let point2 = Point::with_coords(vec![1., 2., 3.]);
-        assert_eq!(euclidean(&point1, &point2), Float::infinity());
     }
 }

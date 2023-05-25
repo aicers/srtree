@@ -30,21 +30,12 @@ fn test_with_random_points() {
         pts.push(point_coords);
     }
 
-    let mut sequential_tree = SRTree::new();
-    for (index, point) in pts.iter().enumerate() {
-        sequential_tree.insert(point, index);
-    }
-
-    let bulk_tree = SRTree::bulk_load(&pts);
+    let bulk_tree = SRTree::new(&pts);
     let mut points = pts.clone();
     for p in pts.iter() {
         // Bulk-loaded SRTree nearest neighbors
         let (bulk_indices, bulk_distances) = bulk_tree.query(p, k);
         assert_eq!(bulk_indices.len(), k);
-
-        // Sequential SRTree nearest neighbors
-        let (seq_indices, seq_distances) = sequential_tree.query(p, k);
-        assert_eq!(seq_indices.len(), k);
 
         // Brute-force
         points.sort_by_key(|a| OrderedFloat(euclidean_squared(a, p)));
@@ -52,7 +43,6 @@ fn test_with_random_points() {
         for i in 0..k {
             let distance_brute_force = euclidean_squared(&points[i], p).sqrt();
             assert_eq!(bulk_distances[i], distance_brute_force);
-            assert_eq!(seq_distances[i], distance_brute_force);
         }
     }
 }

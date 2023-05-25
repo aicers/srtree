@@ -29,21 +29,12 @@ fn test_with_random_points() {
         pts.push(point_coords);
     }
 
-    let mut sequential_tree = SRTree::new();
-    for (index, point) in pts.iter().enumerate() {
-        sequential_tree.insert(point, index);
-    }
-
-    let bulk_tree = SRTree::bulk_load(&pts);
+    let bulk_tree = SRTree::new(&pts);
     let points = pts.clone();
     for p in pts.iter() {
         // Bulk-loaded SRTree nearest neighbors
-        let mut result_bulk = bulk_tree.query_radius(p, radius);
-        result_bulk.sort();
-
-        // Sequential SRTree nearest neighbors
-        let mut result_sequential = sequential_tree.query_radius(p, radius);
-        result_sequential.sort();
+        let mut result = bulk_tree.query_radius(p, radius);
+        result.sort();
 
         // Brute-force
         let mut brute_force_result = Vec::new();
@@ -53,12 +44,10 @@ fn test_with_random_points() {
             }
         }
 
-        assert_eq!(result_sequential.len(), result_bulk.len());
-        assert_eq!(result_sequential.len(), brute_force_result.len());
+        assert_eq!(result.len(), brute_force_result.len());
 
-        for i in 0..result_bulk.len() {
-            assert_eq!(result_bulk[i], result_sequential[i]);
-            assert_eq!(result_bulk[i], brute_force_result[i]);
+        for i in 0..result.len() {
+            assert_eq!(result[i], brute_force_result[i]);
         }
     }
 }

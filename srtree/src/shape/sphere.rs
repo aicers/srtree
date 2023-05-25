@@ -35,8 +35,8 @@ mod tests {
 
     #[test]
     pub fn test_sphere_min_distance() {
-        let sphere1 = Sphere::new(Point::with_coords(vec![0., 0.]), 10.);
-        let point1 = Point::with_coords(vec![15., 0.]);
+        let sphere1 = Sphere::new(Point::new(vec![0., 0.], 0), 10.);
+        let point1 = Point::new(vec![15., 0.], 0);
         assert_eq!(sphere1.min_distance(&point1), 5.);
     }
 }

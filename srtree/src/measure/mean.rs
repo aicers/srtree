@@ -1,56 +1,52 @@
-use crate::node::Node;
+use crate::SRTree;
 use ordered_float::Float;
 
-pub fn calculate<T>(node: &Node<T>, from: usize, end: usize) -> Vec<T>
+impl<T> SRTree<T>
 where
     T: Float + Send + Sync,
 {
-    let mut number_of_entries = T::zero();
-    let mut mean = vec![T::zero(); node.dimension()];
-    for child_index in from..end {
-        let child_number_of_entries =
-            T::from(node.child_immed_children(child_index)).unwrap_or_else(T::one);
-        for (axis_index, m) in mean.iter_mut().enumerate() {
-            *m = *m + node.child_centroid(child_index).coords[axis_index] * child_number_of_entries;
+    #[must_use]
+    pub fn calculate_mean(&self, node_index: usize) -> Vec<T> {
+        if self.nodes[node_index].is_leaf() {
+            self.calculate_leaf_mean(node_index)
+        } else {
+            self.calculate_node_mean(node_index)
         }
-        number_of_entries = number_of_entries + child_number_of_entries;
-    }
-    for m in &mut mean {
-        *m = *m / number_of_entries;
-    }
-    mean
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::shape::point::Point;
-
-    use super::*;
-
-    #[test]
-    pub fn test_leaf_mean_calculation() {
-        let mut leaf = Node::new_leaf(&Point::with_coords(vec![0., 0.]), 5);
-        leaf.points_mut().push(Point::with_coords(vec![1., 0.]));
-        leaf.points_mut().push(Point::with_coords(vec![0., 1.]));
-        let mean = calculate(&leaf, 0, leaf.immed_children());
-        assert_eq!(mean, vec![0.5, 0.5]);
     }
 
-    #[test]
-    pub fn test_node_mean_calculation() {
-        let mut leaf1 = Node::new_leaf(&Point::with_coords(vec![0., 1.]), 5);
-        leaf1.points_mut().push(Point::with_coords(vec![0., 0.]));
-        leaf1.points_mut().push(Point::with_coords(vec![0., 1.]));
-        leaf1.points_mut().push(Point::with_coords(vec![0., 2.]));
-        let mut leaf2 = Node::new_leaf(&Point::with_coords(vec![0., 4.]), 5);
-        leaf2.points_mut().push(Point::with_coords(vec![0., 3.]));
-        leaf2.points_mut().push(Point::with_coords(vec![0., 5.]));
+    fn calculate_leaf_mean(&self, leaf_index: usize) -> Vec<T> {
+        let leaf = &self.nodes[leaf_index];
+        let mut mean = vec![T::zero(); self.dimension];
+        for point_index in leaf.points() {
+            let point = &self.points[*point_index];
+            for (axis_index, m) in mean.iter_mut().enumerate() {
+                *m = *m + point.coords[axis_index];
+            }
+        }
+        let number_of_points = T::from(leaf.immed_children()).unwrap();
+        for m in &mut mean {
+            *m = *m / number_of_points;
+        }
+        mean
+    }
 
-        let mut node = Node::new_node(&Point::with_coords(vec![0., 0.]), 5, 1);
-        node.nodes_mut().push(leaf1);
-        node.nodes_mut().push(leaf2);
+    fn calculate_node_mean(&self, node_index: usize) -> Vec<T> {
+        let root = &self.nodes[node_index];
+        let mut number_of_entries = T::zero();
+        let mut mean = vec![T::zero(); self.dimension];
+        for i in 0..root.immed_children() {
+            let child_index = root.nodes()[i];
+            let child = &self.nodes[child_index];
+            let child_number_of_entries = T::from(child.immed_children()).unwrap();
 
-        let mean = calculate(&node, 0, node.immed_children());
-        assert_eq!(mean, vec![0., 2.2]);
+            for (axis_index, m) in mean.iter_mut().enumerate() {
+                *m = *m + child.sphere.center.coords[axis_index] * child_number_of_entries;
+            }
+            number_of_entries = number_of_entries + child_number_of_entries;
+        }
+        for m in &mut mean {
+            *m = *m / number_of_entries;
+        }
+        mean
     }
 }
