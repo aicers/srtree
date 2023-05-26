@@ -1,4 +1,4 @@
-use crate::{node::Node, shape::point::Point, SRTree};
+use crate::{node::Node, SRTree};
 use num_traits::cast;
 use ordered_float::Float;
 
@@ -6,16 +6,15 @@ impl<T> SRTree<T>
 where
     T: Float + Send + Sync,
 {
-    pub fn bulk_load(&mut self, input: Vec<Point<T>>) -> usize {
-        if input.len() <= self.params.max_number_of_elements {
-            let point_indices: Vec<usize> = input.iter().map(|p| p.index).collect();
+    pub fn bulk_load(&mut self, point_indices: Vec<usize>) -> usize {
+        if point_indices.len() <= self.params.max_number_of_elements {
             let leaf = Node::new_leaf(point_indices);
             let leaf_index = self.add_node(leaf);
             self.reshape(leaf_index);
             return leaf_index;
         }
 
-        let groups = self.create_entries(input);
+        let groups = self.create_entries(point_indices);
         let children: Vec<usize> = groups
             .into_iter()
             .map(|group| self.bulk_load(group))
@@ -37,69 +36,64 @@ where
         root_index
     }
 
-    fn create_entries(&self, points: Vec<Point<T>>) -> Vec<Vec<Point<T>>> {
-        let variances = calculate_points_variance(&points);
+    fn create_entries(&self, point_indices: Vec<usize>) -> Vec<Vec<usize>> {
+        let variances = self.calculate_points_variance(&point_indices);
         let split_dim = variances
             .iter()
             .enumerate()
             .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
             .map(|(i, _)| i)
             .unwrap();
-        self.partition_points(points, split_dim)
+        self.partition_points(point_indices, split_dim)
     }
 
-    fn partition_points(&self, mut points: Vec<Point<T>>, split_dim: usize) -> Vec<Vec<Point<T>>> {
-        if points.len() <= self.params.max_number_of_elements {
-            return vec![points];
+    fn partition_points(&self, mut point_indices: Vec<usize>, split_dim: usize) -> Vec<Vec<usize>> {
+        if point_indices.len() <= self.params.max_number_of_elements {
+            return vec![point_indices];
         }
         let partition_size = calculate_internal_node_size(
-            points.len(),
+            point_indices.len(),
             self.params.max_number_of_elements,
             self.params.min_number_of_elements,
         );
         let mut entries = Vec::new();
-        while !points.is_empty() {
-            let left = points.len().saturating_sub(partition_size);
-            points.select_nth_unstable_by(left, |a, b| {
+        while !point_indices.is_empty() {
+            let left = point_indices.len().saturating_sub(partition_size);
+            point_indices.select_nth_unstable_by(left, |a, b| {
+                let (a, b) = (&self.points[*a], &self.points[*b]);
                 a.coords[split_dim]
                     .partial_cmp(&b.coords[split_dim])
                     .unwrap()
             });
-            let slice = points.split_off(left);
+            let slice = point_indices.split_off(left);
             entries.push(slice);
         }
         entries
     }
-}
 
-fn calculate_dimension_variance<T>(points: &[Point<T>], dim: usize) -> T
-where
-    T: Float + Send + Sync,
-{
-    let mut sum = T::zero();
-    let mut sum_sq = T::zero();
-    for point in points {
-        let coord = point.coords[dim];
-        sum = sum + coord;
-        sum_sq = sum_sq + coord * coord;
+    fn calculate_points_variance(&self, point_indices: &[usize]) -> Vec<T> {
+        let dimension = self.params.dimension;
+        let mut variances = Vec::new();
+        for dim in 0..dimension {
+            let variance = self.calculate_dimension_variance(point_indices, dim);
+            variances.push(variance);
+        }
+        variances
     }
-    let n = T::from(points.len()).unwrap();
-    let mean = sum / n;
-    let mean_sq = mean * mean;
-    sum_sq / n - mean_sq
-}
 
-fn calculate_points_variance<T>(points: &[Point<T>]) -> Vec<T>
-where
-    T: Float + Send + Sync,
-{
-    let dimension = points[0].coords.len();
-    let mut variances = Vec::new();
-    for dim in 0..dimension {
-        let variance = calculate_dimension_variance(points, dim);
-        variances.push(variance);
+    fn calculate_dimension_variance(&self, point_indices: &[usize], dim: usize) -> T {
+        let mut sum = T::zero();
+        let mut sum_sq = T::zero();
+        for point_index in point_indices {
+            let coord = self.points[*point_index].coords[dim];
+            sum = sum + coord;
+            sum_sq = sum_sq + coord * coord;
+        }
+        let n = T::from(point_indices.len()).unwrap();
+        let mean = sum / n;
+        let mean_sq = mean * mean;
+        sum_sq / n - mean_sq
     }
-    variances
 }
 
 fn calculate_internal_node_size(n: usize, leaf_size: usize, internal_node_fanout: usize) -> usize {
