@@ -28,7 +28,7 @@ where
         let mean = self.calculate_mean(leaf_index);
 
         // 2. Calculate variance w.r.t. the mean
-        let mut variance = vec![T::zero(); self.dimension];
+        let mut variance = vec![T::zero(); self.params.dimension];
         for i in 0..leaf.immed_children() {
             let point_index = leaf.points()[i];
             let point = &self.points[point_index];
@@ -53,7 +53,7 @@ where
 
         // 2. Calculate variance w.r.t. the mean
         let mut number_of_entries = T::zero();
-        let mut variance = vec![T::zero(); self.dimension];
+        let mut variance = vec![T::zero(); self.params.dimension];
         for i in 0..node.immed_children() {
             let child_index = node.nodes()[i];
             let child = &self.nodes[child_index];

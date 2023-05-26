@@ -8,7 +8,6 @@ pub struct SRTree<T> {
     pub points: Vec<Point<T>>,
     pub nodes: Vec<Node<T>>,
     pub params: Params,
-    pub dimension: usize,
 }
 
 impl<T> SRTree<T>
@@ -16,22 +15,21 @@ where
     T: Float + Send + Sync,
 {
     #[must_use]
-    pub fn new_with_params(pts: &[Vec<T>], params: Params) -> SRTree<T> {
-        let mut tree = SRTree {
-            root_index: usize::MAX,
-            points: Vec::new(),
-            nodes: Vec::new(),
-            params,
-            dimension: pts[0].len(),
-        };
-
+    pub fn new_with_params(pts: &[Vec<T>], mut params: Params) -> SRTree<T> {
+        params.dimension = pts[0].len();
         let points: Vec<Point<T>> = pts
             .iter()
             .enumerate()
             .map(|(i, p)| Point::new(p.clone(), i))
             .collect();
-        tree.points = points.clone();
-        tree.root_index = tree.bulk_load(points);
+        let point_indices = (0..points.len()).collect();
+        let mut tree = SRTree {
+            root_index: usize::MAX,
+            points,
+            nodes: Vec::new(),
+            params,
+        };
+        tree.root_index = tree.bulk_load(point_indices);
         tree
     }
 

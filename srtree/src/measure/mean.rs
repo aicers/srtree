@@ -16,7 +16,7 @@ where
 
     fn calculate_leaf_mean(&self, leaf_index: usize) -> Vec<T> {
         let leaf = &self.nodes[leaf_index];
-        let mut mean = vec![T::zero(); self.dimension];
+        let mut mean = vec![T::zero(); self.params.dimension];
         for point_index in leaf.points() {
             let point = &self.points[*point_index];
             for (axis_index, m) in mean.iter_mut().enumerate() {
@@ -33,7 +33,7 @@ where
     fn calculate_node_mean(&self, node_index: usize) -> Vec<T> {
         let root = &self.nodes[node_index];
         let mut number_of_entries = T::zero();
-        let mut mean = vec![T::zero(); self.dimension];
+        let mut mean = vec![T::zero(); self.params.dimension];
         for i in 0..root.immed_children() {
             let child_index = root.nodes()[i];
             let child = &self.nodes[child_index];

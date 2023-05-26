@@ -37,7 +37,7 @@ where
         } else {
             node.nodes().iter().for_each(|child_index| {
                 let child = &self.nodes[*child_index];
-                for i in 0..self.dimension {
+                for i in 0..self.params.dimension {
                     low[i] = low[i].min(child.rect.low[i]);
                     high[i] = high[i].max(child.rect.high[i]);
                 }
