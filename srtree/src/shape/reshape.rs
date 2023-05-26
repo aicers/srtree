@@ -51,3 +51,26 @@ where
         node.sphere = Sphere::new(centroid, max_distance);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use num_traits::Float;
+
+    use crate::SRTree;
+
+    #[test]
+    pub fn test_reshape() {
+        let pts = vec![
+            vec![1.0, 1.0],
+            vec![2.0, 2.0],
+            vec![3.0, 3.0],
+            vec![4.0, 4.0],
+            vec![5.0, 5.0],
+        ];
+        let tree = SRTree::new(&pts);
+        assert_eq!(tree.nodes[0].rect.low, vec![1., 1.]);
+        assert_eq!(tree.nodes[0].rect.high, vec![5., 5.]);
+        assert_eq!(tree.nodes[0].sphere.center.coords, vec![3., 3.]);
+        assert_eq!(tree.nodes[0].sphere.radius, (4. + 4.).sqrt());
+    }
+}

@@ -16,7 +16,7 @@ where
 {
     #[must_use]
     pub fn new_with_params(pts: &[Vec<T>], mut params: Params) -> SRTree<T> {
-        params.dimension = pts[0].len();
+        params.dimension = pts.first().map(|p| p.len()).unwrap_or(0);
         let points: Vec<Point<T>> = pts
             .iter()
             .enumerate()

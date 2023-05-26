@@ -39,4 +39,11 @@ mod tests {
         let point1 = Point::new(vec![15., 0.], 0);
         assert_eq!(sphere1.min_distance(&point1), 5.);
     }
+
+    #[test]
+    pub fn test_sphere_max_distance() {
+        let sphere1 = Sphere::new(Point::new(vec![0., 0.], 0), 10.);
+        let point1 = Point::new(vec![15., 0.], 0);
+        assert_eq!(sphere1.max_distance(&point1), 25.);
+    }
 }
