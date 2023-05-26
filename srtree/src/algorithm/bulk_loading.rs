@@ -7,6 +7,10 @@ where
     T: Float + Send + Sync,
 {
     pub fn bulk_load(&mut self, point_indices: Vec<usize>) -> usize {
+        if point_indices.len() == 0 {
+            return usize::MAX;
+        }
+    
         if point_indices.len() <= self.params.max_number_of_elements {
             let leaf = Node::new_leaf(point_indices);
             let leaf_index = self.add_node(leaf);
@@ -70,30 +74,6 @@ where
         }
         entries
     }
-
-    fn calculate_points_variance(&self, point_indices: &[usize]) -> Vec<T> {
-        let dimension = self.params.dimension;
-        let mut variances = Vec::new();
-        for dim in 0..dimension {
-            let variance = self.calculate_dimension_variance(point_indices, dim);
-            variances.push(variance);
-        }
-        variances
-    }
-
-    fn calculate_dimension_variance(&self, point_indices: &[usize], dim: usize) -> T {
-        let mut sum = T::zero();
-        let mut sum_sq = T::zero();
-        for point_index in point_indices {
-            let coord = self.points[*point_index].coords[dim];
-            sum = sum + coord;
-            sum_sq = sum_sq + coord * coord;
-        }
-        let n = T::from(point_indices.len()).unwrap();
-        let mean = sum / n;
-        let mean_sq = mean * mean;
-        sum_sq / n - mean_sq
-    }
 }
 
 fn calculate_internal_node_size(n: usize, leaf_size: usize, internal_node_fanout: usize) -> usize {
@@ -116,6 +96,8 @@ fn calculate_internal_node_size(n: usize, leaf_size: usize, internal_node_fanout
 
 #[cfg(test)]
 mod tests {
+    use crate::Params;
+
     use super::*;
 
     #[test]
@@ -125,5 +107,30 @@ mod tests {
         let internal_node_fanout = 9;
         let internal_node_size = calculate_internal_node_size(n, leaf_size, internal_node_fanout);
         assert_eq!(internal_node_size, 1701);
+    }
+
+    #[test]
+    pub fn test_bulk_load() {
+        let points = vec![
+            vec![0., 0.],
+            vec![1., 1.],
+            vec![2., 2.],
+            vec![3., 3.],
+            vec![4., 4.],
+            vec![5., 5.],
+            vec![6., 6.],
+            vec![7., 7.],
+            vec![8., 8.],
+            vec![9., 9.],
+        ];
+        let tree = SRTree::new_with_params(&points, Params::new(2, 5, 2).unwrap());
+        assert_eq!(tree.nodes.len(), 3);
+        assert_eq!(tree.nodes[2].nodes(), &vec![0, 1]);
+        assert_eq!(tree.nodes[2].rect.low, vec![0., 0.]);
+        assert_eq!(tree.nodes[2].rect.high, vec![9., 9.]);
+        assert_eq!(tree.nodes[1].rect.low, vec![0., 0.]);
+        assert_eq!(tree.nodes[1].rect.high, vec![4., 4.]);
+        assert_eq!(tree.nodes[0].rect.low, vec![5., 5.]);
+        assert_eq!(tree.nodes[0].rect.high, vec![9., 9.]);
     }
 }
