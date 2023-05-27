@@ -7,10 +7,10 @@ where
     T: Float + Send + Sync,
 {
     pub fn bulk_load(&mut self, point_indices: Vec<usize>) -> usize {
-        if point_indices.len() == 0 {
+        if point_indices.is_empty() {
             return usize::MAX;
         }
-    
+
         if point_indices.len() <= self.params.max_number_of_elements {
             let leaf = Node::new_leaf(point_indices);
             let leaf_index = self.add_node(leaf);
@@ -123,7 +123,8 @@ mod tests {
             vec![8., 8.],
             vec![9., 9.],
         ];
-        let tree = SRTree::new_with_params(&points, Params::new(2, 5, 2).unwrap());
+        let tree = SRTree::new_with_params(&points, Params::new(2, 5, 2).unwrap())
+            .expect("Failed to build SRTree");
         assert_eq!(tree.nodes.len(), 3);
         assert_eq!(tree.nodes[2].nodes(), &vec![0, 1]);
         assert_eq!(tree.nodes[2].rect.low, vec![0., 0.]);

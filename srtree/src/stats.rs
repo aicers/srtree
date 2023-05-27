@@ -110,7 +110,7 @@ mod tests {
         const D: usize = 8; // dimension
         const N: usize = 2000; // number of points
         let pts = generate_uniform_dataset(N, D);
-        let tree = SRTree::new(&pts);
+        let tree = SRTree::new(&pts).expect("Failed to build tree");
 
         reset();
         tree.query(&pts[0], 15);

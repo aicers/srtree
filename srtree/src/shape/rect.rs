@@ -88,8 +88,14 @@ mod tests {
     #[test]
     pub fn test_max_distance() {
         let rec = Rect::new(vec![0., 0.], vec![5., 5.]);
-        assert_eq!(rec.max_distance(&Point::new(vec![6., 0.], 0)), (36. + 25.).sqrt());
-        assert_eq!(rec.max_distance(&Point::new(vec![7., 7.], 0)), (49. + 49.).sqrt());
+        assert_eq!(
+            rec.max_distance(&Point::new(vec![6., 0.], 0)),
+            (36. + 25.).sqrt()
+        );
+        assert_eq!(
+            rec.max_distance(&Point::new(vec![7., 7.], 0)),
+            (49. + 49.).sqrt()
+        );
     }
 
     #[test]

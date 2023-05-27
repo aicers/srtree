@@ -29,7 +29,7 @@ fn test_with_random_points() {
         pts.push(point_coords);
     }
 
-    let bulk_tree = SRTree::new(&pts);
+    let bulk_tree = SRTree::new(&pts).expect("Failed to build SRTree");
     let points = pts.clone();
     for p in pts.iter() {
         // Bulk-loaded SRTree nearest neighbors

@@ -39,7 +39,7 @@ pub fn build_and_query(criterion: &mut Criterion) {
         bencher.iter(|| {
             let pts = benchmark_dataset();
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            let srtree = SRTree::new(&pts);
+            let srtree = SRTree::new(&pts).expect("Failed to build SRTree");
             for point in &query_pts {
                 srtree.query(point, K);
             }
