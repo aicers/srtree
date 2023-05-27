@@ -1,10 +1,12 @@
+use crate::measure::distance::Metric;
 use crate::shape::point::Point;
 use crate::SRTree;
 use ordered_float::Float;
 
-impl<T> SRTree<T>
+impl<T, M> SRTree<T, M>
 where
     T: Float + Send + Sync,
+    M: Metric<T>,
 {
     pub fn query_radius(&self, point_coords: &[T], radius: T) -> Vec<usize> {
         let mut neighbors = Vec::new();
@@ -26,7 +28,7 @@ where
     ) {
         let node = &self.nodes[node_index];
         if node.is_leaf() {
-            let distance_to_center = point.distance(&node.sphere.center);
+            let distance_to_center = self.distance(point, &node.sphere.center);
             for candidate_index in node.points() {
                 let candidate = &self.points[*candidate_index];
 
@@ -36,7 +38,7 @@ where
                     break;
                 }
 
-                let neighbor_distance = point.distance(candidate);
+                let neighbor_distance = self.distance(point, candidate);
                 if neighbor_distance <= radius {
                     neighbors.push(candidate.index);
                 }
@@ -46,7 +48,7 @@ where
                 .iter()
                 .filter(|child| {
                     let child = &self.nodes[**child];
-                    child.min_distance(point) <= radius
+                    self.point_to_node_min_distance(point, child) <= radius
                 })
                 .for_each(|child_index| {
                     self.search_radius(*child_index, point, radius, neighbors);
@@ -73,7 +75,7 @@ mod tests {
             vec![8.0, 8.0],
             vec![9.0, 9.0],
         ];
-        let tree = SRTree::new_with_params(&points, Params::new(2, 5).unwrap())
+        let tree = SRTree::euclidean_with_params(&points, Params::new(2, 5).unwrap())
             .expect("Failed to build SRTree");
         let mut indices = tree.query_radius(&[0.0, 0.0], 8_f64.sqrt());
         indices.sort();

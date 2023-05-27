@@ -1,9 +1,12 @@
 use crate::SRTree;
 use ordered_float::Float;
 
-impl<T> SRTree<T>
+use super::distance::Metric;
+
+impl<T, M> SRTree<T, M>
 where
     T: Float + Send + Sync,
+    M: Metric<T>,
 {
     #[must_use]
     pub fn calculate_points_variance(&self, point_indices: &[usize]) -> Vec<T> {
@@ -44,7 +47,7 @@ mod tests {
             vec![3.0, 3.0],
             vec![4.0, 4.0],
         ];
-        let tree = SRTree::new(&points).expect("Failed to build SRTree");
+        let tree = SRTree::euclidean(&points).expect("Failed to build SRTree");
         let variances = tree.calculate_points_variance(&[0, 1, 2, 3, 4]);
         assert_eq!(variances, vec![2.0, 2.0]);
     }

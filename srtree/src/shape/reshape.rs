@@ -1,10 +1,11 @@
 use super::{point::Point, rect::Rect, sphere::Sphere};
-use crate::SRTree;
+use crate::{measure::distance::Metric, SRTree};
 use ordered_float::{Float, OrderedFloat};
 
-impl<T> SRTree<T>
+impl<T, M> SRTree<T, M>
 where
     T: Float + Send + Sync,
+    M: Metric<T>,
 {
     pub fn reshape(&mut self, node_index: usize) {
         let centroid = Point::new(self.calculate_mean(node_index), node_index);
@@ -21,7 +22,7 @@ where
                     low[i] = low[i].min(point.coords[i]);
                     high[i] = high[i].max(point.coords[i]);
                 }
-                let distance_to_point = centroid.distance(point);
+                let distance_to_point = self.distance(&centroid, point);
                 max_distance = max_distance.max(distance_to_point);
                 points.push((distance_to_point, *point_index));
             }
@@ -41,7 +42,7 @@ where
                     low[i] = low[i].min(child.rect.low[i]);
                     high[i] = high[i].max(child.rect.high[i]);
                 }
-                let distance = child.max_distance(&centroid);
+                let distance = self.point_to_node_max_distance(&centroid, child);
                 max_distance = max_distance.max(distance);
             });
         }
@@ -67,7 +68,7 @@ mod tests {
             vec![4.0, 4.0],
             vec![5.0, 5.0],
         ];
-        let tree = SRTree::new(&pts).unwrap();
+        let tree = SRTree::euclidean(&pts).unwrap();
         assert_eq!(tree.nodes[0].rect.low, vec![1., 1.]);
         assert_eq!(tree.nodes[0].rect.high, vec![5., 5.]);
         assert_eq!(tree.nodes[0].sphere.center.coords, vec![3., 3.]);
