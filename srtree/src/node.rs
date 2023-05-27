@@ -10,7 +10,6 @@ pub struct Node<T> {
     pub rect: Rect<T>,
     pub sphere: Sphere<T>,
     data: Data,
-    pub variance: Vec<T>,
     pub height: usize,
     pub parent_index: usize,
 }
@@ -24,7 +23,6 @@ where
             rect,
             sphere,
             data,
-            variance: Vec::new(),
             height,
             parent_index: usize::MAX,
         }
