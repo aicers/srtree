@@ -18,7 +18,7 @@ pub fn build_and_query(criterion: &mut Criterion) {
         bencher.iter(|| {
             let pts: Vec<[f64; D]> = uniform_dataset(N);
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            let srtree = SRTree::new(&pts).expect("Failed to build SRTree");
+            let srtree = SRTree::euclidean(&pts).expect("Failed to build SRTree");
             for point in &pts {
                 srtree.query_radius(point, R);
             }

@@ -1,4 +1,4 @@
-use crate::SRTree;
+use crate::{measure::distance::Euclidean, SRTree};
 use num_traits::Float;
 
 static mut NUM_VISITED_POINTS: usize = 0;
@@ -59,7 +59,7 @@ pub fn inc_visited_nodes(is_leaf: bool) {
     }
 }
 
-pub fn print<T>(tree: &SRTree<T>)
+pub fn print<T>(tree: &SRTree<T, Euclidean>)
 where
     T: Float + Send + Sync,
 {
@@ -110,7 +110,7 @@ mod tests {
         const D: usize = 8; // dimension
         const N: usize = 2000; // number of points
         let pts = generate_uniform_dataset(N, D);
-        let tree = SRTree::new(&pts).expect("Failed to build tree");
+        let tree = SRTree::euclidean(&pts).expect("Failed to build tree");
 
         reset();
         tree.query(&pts[0], 15);

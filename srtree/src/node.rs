@@ -85,16 +85,4 @@ where
             Data::Nodes(children) => children.len(),
         }
     }
-
-    pub fn min_distance(&self, point: &Point<T>) -> T {
-        let ds = self.sphere.min_distance(point);
-        let dr = self.rect.min_distance(point);
-        ds.max(dr)
-    }
-
-    pub fn max_distance(&self, point: &Point<T>) -> T {
-        let ds = self.sphere.max_distance(point);
-        let dr = self.rect.max_distance(point);
-        ds.min(dr)
-    }
 }

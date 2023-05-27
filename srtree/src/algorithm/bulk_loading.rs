@@ -1,10 +1,11 @@
-use crate::{node::Node, SRTree};
+use crate::{measure::distance::Metric, node::Node, SRTree};
 use num_traits::cast;
 use ordered_float::Float;
 
-impl<T> SRTree<T>
+impl<T, M> SRTree<T, M>
 where
     T: Float + Send + Sync,
+    M: Metric<T>,
 {
     pub fn bulk_load(&mut self, point_indices: Vec<usize>) -> usize {
         if point_indices.is_empty() {
@@ -123,7 +124,7 @@ mod tests {
             vec![8., 8.],
             vec![9., 9.],
         ];
-        let tree = SRTree::new_with_params(&points, Params::new(2, 5).unwrap())
+        let tree = SRTree::euclidean_with_params(&points, Params::new(2, 5).unwrap())
             .expect("Failed to build SRTree");
         assert_eq!(tree.nodes.len(), 3);
         assert_eq!(tree.nodes[2].nodes(), &vec![0, 1]);

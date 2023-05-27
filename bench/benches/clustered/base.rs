@@ -41,7 +41,7 @@ fn build(criterion: &mut Criterion) {
         bencher.iter(|| {
             let pts = benchmark_dataset();
             let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-            SRTree::new(&pts)
+            SRTree::euclidean(&pts)
         });
     });
 }
@@ -55,7 +55,7 @@ fn query(criterion: &mut Criterion) {
 
     // benchmark query performance of bulk-loaded tree
     let pts = benchmark_dataset();
-    let srtree = SRTree::new(&pts).expect("Failed to build SRTree");
+    let srtree = SRTree::euclidean(&pts).expect("Failed to build SRTree");
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
             for point in &query_points {

@@ -1,5 +1,5 @@
-use crate::shape::point::Point;
 use crate::SRTree;
+use crate::{measure::distance::Metric, shape::point::Point};
 use ordered_float::{Float, OrderedFloat};
 use std::{cmp::Ordering, collections::BinaryHeap};
 
@@ -55,9 +55,10 @@ where
     }
 }
 
-impl<T> SRTree<T>
+impl<T, M> SRTree<T, M>
 where
     T: Float + Send + Sync,
+    M: Metric<T>,
 {
     pub fn query(&self, point_coords: &[T], k: usize) -> (Vec<usize>, Vec<T>) {
         let mut neighbors = BinaryHeap::new();
@@ -85,7 +86,7 @@ where
 
         let mut kth_distance = OrderedFloat(T::infinity());
         if node.is_leaf() {
-            let distance_to_center = point.distance(&node.sphere.center);
+            let distance_to_center = self.distance(point, &node.sphere.center);
             for candidate_index in node.points() {
                 let candidate = &self.points[*candidate_index];
                 if neighbors.len() == k {
@@ -98,7 +99,7 @@ where
                     break;
                 }
 
-                let neighbor_distance = OrderedFloat(point.distance(candidate));
+                let neighbor_distance = OrderedFloat(self.distance(point, candidate));
                 if neighbors.len() < k {
                     neighbors.push(Neighbor::new(neighbor_distance, candidate.index));
                 } else if neighbor_distance < kth_distance {
@@ -110,7 +111,7 @@ where
             let mut to_visit = Vec::new();
             for child_index in node.nodes() {
                 let child = &self.nodes[*child_index];
-                let distance = OrderedFloat(child.min_distance(point));
+                let distance = OrderedFloat(self.point_to_node_min_distance(point, child));
                 to_visit.push((distance, *child_index));
             }
             to_visit.sort();
@@ -150,7 +151,7 @@ mod tests {
             vec![8.0, 8.0],
             vec![9.0, 9.0],
         ];
-        let tree = SRTree::new_with_params(&points, Params::new(2, 5).unwrap())
+        let tree = SRTree::euclidean_with_params(&points, Params::new(2, 5).unwrap())
             .expect("Failed to build SRTree");
         let (indices, distances) = tree.query(&[0.0, 0.0], 3);
         assert_eq!(indices, vec![0, 1, 2]);

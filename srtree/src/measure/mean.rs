@@ -1,9 +1,12 @@
 use crate::SRTree;
 use ordered_float::Float;
 
-impl<T> SRTree<T>
+use super::distance::Metric;
+
+impl<T, M> SRTree<T, M>
 where
     T: Float + Send + Sync,
+    M: Metric<T>,
 {
     #[must_use]
     pub fn calculate_mean(&self, node_index: usize) -> Vec<T> {
@@ -65,7 +68,7 @@ mod tests {
             vec![4.0, 4.0],
             vec![5.0, 5.0],
         ];
-        let tree = SRTree::new(&points).expect("Failed to build SRTree");
+        let tree = SRTree::euclidean(&points).expect("Failed to build SRTree");
         let mean = tree.calculate_mean(0);
         assert_eq!(mean, vec![2.5, 2.5]);
     }

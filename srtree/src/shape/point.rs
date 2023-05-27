@@ -1,4 +1,3 @@
-use crate::measure::distance::{euclidean, euclidean_squared};
 use ordered_float::Float;
 
 #[derive(Clone)]
@@ -20,14 +19,6 @@ where
             index,
             parent_index: usize::MAX,
         }
-    }
-
-    pub fn distance_squared(&self, other: &Point<T>) -> T {
-        euclidean_squared(self, other)
-    }
-
-    pub fn distance(&self, other: &Point<T>) -> T {
-        euclidean(self, other)
     }
 
     pub fn dimension(&self) -> usize {
