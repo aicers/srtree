@@ -29,7 +29,7 @@ fn query(criterion: &mut Criterion) {
     // benchmark query performance of bulk-loaded tree
     let pts: Vec<[f64; D]> = uniform_dataset(N);
     let pts: Vec<Vec<f64>> = pts.into_iter().map(|p| p.to_vec()).collect();
-    let srtree = SRTree::new(&pts);
+    let srtree = SRTree::new(&pts).expect("Failed to build SRTree");
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
             for point in &pts {

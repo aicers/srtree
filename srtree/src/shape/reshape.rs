@@ -67,7 +67,7 @@ mod tests {
             vec![4.0, 4.0],
             vec![5.0, 5.0],
         ];
-        let tree = SRTree::new(&pts);
+        let tree = SRTree::new(&pts).unwrap();
         assert_eq!(tree.nodes[0].rect.low, vec![1., 1.]);
         assert_eq!(tree.nodes[0].rect.high, vec![5., 5.]);
         assert_eq!(tree.nodes[0].sphere.center.coords, vec![3., 3.]);

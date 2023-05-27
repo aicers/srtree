@@ -55,7 +55,7 @@ fn query(criterion: &mut Criterion) {
 
     // benchmark query performance of bulk-loaded tree
     let pts = benchmark_dataset();
-    let srtree = SRTree::new(&pts);
+    let srtree = SRTree::new(&pts).expect("Failed to build SRTree");
     group.bench_function("bulk-loading", |bencher| {
         bencher.iter(|| {
             for point in &query_points {

@@ -53,7 +53,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::{SRTree};
+    use crate::SRTree;
 
     #[test]
     pub fn test_mean() {
@@ -65,7 +65,7 @@ mod tests {
             vec![4.0, 4.0],
             vec![5.0, 5.0],
         ];
-        let tree = SRTree::new(&points);
+        let tree = SRTree::new(&points).expect("Failed to build SRTree");
         let mean = tree.calculate_mean(0);
         assert_eq!(mean, vec![2.5, 2.5]);
     }
