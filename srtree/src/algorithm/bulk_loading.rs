@@ -123,7 +123,7 @@ mod tests {
             vec![8., 8.],
             vec![9., 9.],
         ];
-        let tree = SRTree::new_with_params(&points, Params::new(2, 5, 2).unwrap())
+        let tree = SRTree::new_with_params(&points, Params::new(2, 5).unwrap())
             .expect("Failed to build SRTree");
         assert_eq!(tree.nodes.len(), 3);
         assert_eq!(tree.nodes[2].nodes(), &vec![0, 1]);

@@ -21,7 +21,7 @@ where
     T: Float + Send + Sync,
 {
     /// Builds `SRTree` with the given points and params.
-    /// 
+    ///
     /// # Errors
     /// * `ArrayError::Empty` if the input array is empty.
     /// * `ArrayError::DimensionMismatch` if the input array contains points of different dimensions.
@@ -51,7 +51,7 @@ where
     }
 
     /// Builds `SRTree` with the given points (using default params).
-    /// 
+    ///
     /// # Errors
     /// * `ArrayError::Empty` if the input array is empty.
     /// * `ArrayError::DimensionMismatch` if the input array contains points of different dimensions.

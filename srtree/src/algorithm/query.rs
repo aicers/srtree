@@ -150,7 +150,7 @@ mod tests {
             vec![8.0, 8.0],
             vec![9.0, 9.0],
         ];
-        let tree = SRTree::new_with_params(&points, Params::new(2, 5, 2).unwrap())
+        let tree = SRTree::new_with_params(&points, Params::new(2, 5).unwrap())
             .expect("Failed to build SRTree");
         let (indices, distances) = tree.query(&[0.0, 0.0], 3);
         assert_eq!(indices, vec![0, 1, 2]);
