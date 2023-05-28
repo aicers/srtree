@@ -127,7 +127,7 @@ where
     /// * `ArrayError::Empty` if the input array is empty.
     /// * `ArrayError::DimensionMismatch` if the input array contains points of different dimensions.
     pub fn euclidean_with_params(pts: &[Vec<T>], params: Params) -> Result<Self, ArrayError> {
-        SRTree::new(pts, params, Euclidean)
+        SRTree::new(pts, params, Euclidean::default())
     }
 
     /// Builds `SRTree` with the given points (using default params) and Euclidean metric.
@@ -136,7 +136,7 @@ where
     /// * `ArrayError::Empty` if the input array is empty.
     /// * `ArrayError::DimensionMismatch` if the input array contains points of different dimensions.
     pub fn euclidean(pts: &[Vec<T>]) -> Result<Self, ArrayError> {
-        SRTree::default(pts, Euclidean)
+        SRTree::default(pts, Euclidean::default())
     }
 }
 
