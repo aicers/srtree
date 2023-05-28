@@ -30,8 +30,8 @@ where
 
     pub fn new_node(children_indices: Vec<usize>, height: usize) -> Node<T> {
         Node::new(
-            Rect::from_point(&Point::new(Vec::new(), 0)),
-            Sphere::from_point(&Point::new(Vec::new(), 0)),
+            Rect::from_point(&Point::with_coords(Vec::new())),
+            Sphere::from_point(&Point::with_coords(Vec::new())),
             Data::Nodes(children_indices),
             height,
         )
@@ -39,8 +39,8 @@ where
 
     pub fn new_leaf(points_indices: Vec<usize>) -> Node<T> {
         Node::new(
-            Rect::from_point(&Point::new(Vec::new(), 0)),
-            Sphere::from_point(&Point::new(Vec::new(), 0)),
+            Rect::from_point(&Point::with_coords(Vec::new())),
+            Sphere::from_point(&Point::with_coords(Vec::new())),
             Data::Points(points_indices),
             1,
         )

@@ -12,7 +12,7 @@ where
         let mut neighbors = Vec::new();
         self.search_radius(
             self.root_index,
-            &Point::new(point_coords.to_vec(), 0),
+            &Point::with_coords(point_coords.to_vec()),
             radius,
             &mut neighbors,
         );
