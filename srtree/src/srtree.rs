@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::measure::distance::{Euclidean, Metric};
 use crate::node::Node;
 use crate::params::Params;
@@ -69,19 +71,49 @@ where
         index
     }
 
-    #[must_use]
-    pub fn node_count(&self) -> usize {
+    pub fn num_nodes(&self) -> usize {
         self.nodes.len()
     }
 
-    #[must_use]
-    pub fn leaf_count(&self) -> usize {
+    pub fn num_points(&self) -> usize {
+        self.points.len()
+    }
+
+    pub fn num_leaves(&self) -> usize {
         self.nodes.iter().filter(|n| n.is_leaf()).count()
     }
 
-    #[must_use]
     pub fn height(&self) -> usize {
         self.nodes[self.root_index].height
+    }
+
+    pub fn children_of(&self, node_index: usize) -> Option<&[usize]> {
+        if self.nodes[node_index].is_leaf() {
+            return None;
+        }
+        Some(self.nodes[node_index].nodes())
+    }
+
+    pub fn points_of(&self, node_index: usize) -> &[usize] {
+        self.nodes[node_index].points()
+    }
+
+    pub fn node_distance_lower_bound(&self, node_index: usize, other_node_index: usize) -> T {
+        let node = &self.nodes[node_index];
+        let other_node = &self.nodes[other_node_index];
+        let distance = self
+            .metric
+            .distance(&node.sphere.center.coords, &other_node.sphere.center.coords);
+        (distance - node.sphere.radius - other_node.sphere.radius).max(T::zero())
+    }
+
+    pub fn radius_of(&self, node_index: usize) -> T {
+        self.nodes[node_index].sphere.radius
+    }
+
+    pub fn compare_nodes(&self, node_index: usize, other_node_index: usize) -> Option<Ordering> {
+        self.radius_of(node_index)
+            .partial_cmp(&self.radius_of(other_node_index))
     }
 }
 

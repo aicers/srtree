@@ -21,6 +21,15 @@ where
         }
     }
 
+    pub fn with_coords(coords: Vec<T>) -> Point<T> {
+        Point {
+            coords,
+            radius: T::zero(),
+            index: usize::MAX,
+            parent_index: usize::MAX,
+        }
+    }
+
     pub fn dimension(&self) -> usize {
         self.coords.len()
     }

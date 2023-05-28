@@ -63,7 +63,7 @@ where
     pub fn query(&self, point_coords: &[T], k: usize) -> (Vec<usize>, Vec<T>) {
         let mut neighbors = BinaryHeap::new();
         self.search(
-            &Point::new(point_coords.to_vec(), 0),
+            &Point::with_coords(point_coords.to_vec()),
             self.root_index,
             k,
             &mut neighbors,

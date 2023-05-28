@@ -72,8 +72,8 @@ where
             println!("Compared leaves: {NUM_COMPARED_LEAVES}");
             println!("Visited nodes:   {NUM_VISITED_NODES}");
             println!("Compared nodes:  {}", NUM_COMPARED_NODES + 1);
-            println!("Total leaves:    {}", tree.leaf_count());
-            println!("Total nodes:     {}", tree.node_count() - tree.leaf_count());
+            println!("Total leaves:    {}", tree.num_leaves());
+            println!("Total nodes:     {}", tree.num_nodes() - tree.num_leaves());
             println!("Tree height:     {}", tree.height());
             println!("----------------------");
         }
