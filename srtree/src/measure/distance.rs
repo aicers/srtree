@@ -10,7 +10,9 @@ pub trait Metric<T> {
     fn distance_squared(&self, point1: &[T], point2: &[T]) -> T;
 }
 
-pub struct Euclidean;
+#[derive(Default, Clone)]
+pub struct Euclidean {}
+
 impl<T> Metric<T> for Euclidean
 where
     T: Float + Send + Sync,
@@ -86,7 +88,7 @@ mod tests {
         let point1 = vec![1., 0., 0.];
         let point2 = vec![2., 0.];
 
-        let euclidean = Euclidean;
+        let euclidean = Euclidean::default();
         assert_eq!(euclidean.distance(&point1, &point2), f32::INFINITY);
     }
 
@@ -95,7 +97,7 @@ mod tests {
         let point1 = vec![1., 0., 0.];
         let point2 = vec![2., 0., 0.];
 
-        let euclidean = Euclidean;
+        let euclidean = Euclidean::default();
         assert_eq!(euclidean.distance(&point1, &point2), 1.);
     }
 }
