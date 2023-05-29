@@ -109,7 +109,7 @@ where
             }
         } else {
             let mut to_visit = Vec::new();
-            for child_index in node.nodes() {
+            for child_index in node.children() {
                 let child = &self.nodes[*child_index];
                 let distance = OrderedFloat(self.point_to_node_min_distance(point, child));
                 to_visit.push((distance, *child_index));

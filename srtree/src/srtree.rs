@@ -91,7 +91,7 @@ where
         if self.nodes[node_index].is_leaf() {
             return None;
         }
-        Some(self.nodes[node_index].nodes())
+        Some(self.nodes[node_index].children())
     }
 
     pub fn points_of(&self, node_index: usize) -> &[usize] {

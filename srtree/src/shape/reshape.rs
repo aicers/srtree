@@ -36,7 +36,7 @@ where
             let points: Vec<usize> = points.into_iter().map(|(_, index)| index).collect();
             self.nodes[node_index].set_points(points);
         } else {
-            node.nodes().iter().for_each(|child_index| {
+            node.children().iter().for_each(|child_index| {
                 let child = &self.nodes[*child_index];
                 for i in 0..self.params.dimension {
                     low[i] = low[i].min(child.rect.low[i]);

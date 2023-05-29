@@ -50,7 +50,7 @@ where
         matches!(self.data, Data::Points(_))
     }
 
-    pub fn nodes(&self) -> &Vec<usize> {
+    pub fn children(&self) -> &Vec<usize> {
         match &self.data {
             Data::Nodes(nodes) => nodes,
             Data::Points(_) => panic!("not a node"),
