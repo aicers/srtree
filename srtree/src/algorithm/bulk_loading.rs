@@ -127,7 +127,7 @@ mod tests {
         let tree = SRTree::euclidean_with_params(&points, Params::new(2, 5).unwrap())
             .expect("Failed to build SRTree");
         assert_eq!(tree.nodes.len(), 3);
-        assert_eq!(tree.nodes[2].nodes(), &vec![0, 1]);
+        assert_eq!(tree.nodes[2].children(), &vec![0, 1]);
         assert_eq!(tree.nodes[2].rect.low, vec![0., 0.]);
         assert_eq!(tree.nodes[2].rect.high, vec![9., 9.]);
         assert_eq!(tree.nodes[1].rect.low, vec![0., 0.]);

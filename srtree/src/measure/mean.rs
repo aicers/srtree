@@ -38,7 +38,7 @@ where
         let mut number_of_entries = T::zero();
         let mut mean = vec![T::zero(); self.params.dimension];
         for i in 0..root.immed_children() {
-            let child_index = root.nodes()[i];
+            let child_index = root.children()[i];
             let child = &self.nodes[child_index];
             let child_number_of_entries = T::from(child.immed_children()).unwrap();
 

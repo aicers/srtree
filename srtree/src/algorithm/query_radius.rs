@@ -44,7 +44,7 @@ where
                 }
             }
         } else {
-            node.nodes()
+            node.children()
                 .iter()
                 .filter(|child| {
                     let child = &self.nodes[**child];
