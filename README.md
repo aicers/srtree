@@ -2,7 +2,7 @@
 [![crates.io](https://img.shields.io/crates/v/srtree)](https://crates.io/crates/srtree)
 
 # srtree
-Rust implementation of [SR-Tree](https://dl.acm.org/doi/10.1145/253262.253347): nearest neighbor search index for high-dimensional clustered datasets.
+Rust implementation of [SR-Tree](https://dl.acm.org/doi/10.1145/253262.253347): nearest neighbor search index for high-dimensional clustered datasets, modified to support variance-based bulk-loading. This crate applies fundamental concepts presented in the paper, and the original C++ version can be found [here](http://www.dbl.nii.ac.jp/~katayama/homepage/research/srtree/).
 
 ## Example
 This example shows how to query nearest neighbors:
