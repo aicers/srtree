@@ -75,7 +75,7 @@ where
     pub fn point_to_node_max_distance(&self, point: &Point<T>, node: &Node<T>) -> T {
         let ds = self.point_to_sphere_max_distance(point, &node.sphere);
         let dr = self.point_to_rect_max_distance(point, &node.rect);
-        ds.max(dr)
+        ds.min(dr)
     }
 }
 
